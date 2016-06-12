@@ -1,7 +1,12 @@
 ---
 title: 安全杂记
 date: 2016-06-12 16:49:24
-tags: sercurity
+
+categories:
+- security
+
+tags: 
+- security
 ---
 
 # 安全目的
