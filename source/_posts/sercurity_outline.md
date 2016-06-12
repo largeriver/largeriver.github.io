@@ -1,11 +1,11 @@
 ---
 title: 安全杂记
-date: 2016-06-12 16:49:24
+date: 2016-05-27 16:49:24
 
 categories:
 - security
 
-tags: 
+tags:
 - security
 ---
 
@@ -29,9 +29,9 @@ tags:
 ## CIA原则
 任何类型的安全控制共有的三个主要的**网路安全原则**被称为 CIA原则, 保密性 完整性 和可用性:
 
-1. 保密性 confidentiality: 指的是若未经授权访问 则信息不向用户 流程或设备公开 
-2. 完整性 integrity: 指的是信息没有受到未经授权的 修改或损坏 
-3. 可用性 accountability: 指的是能够被访问 
+1. 保密性 confidentiality: 指的是若未经授权访问 则信息不向用户 流程或设备公开
+2. 完整性 integrity: 指的是信息没有受到未经授权的 修改或损坏
+3. 可用性 accountability: 指的是能够被访问
 
 
 ## 软件安全框架的设计原则：
@@ -51,11 +51,11 @@ tags:
 
 ## 访问控制
 
-访问控制的一些基本概念包括: 
+访问控制的一些基本概念包括:
 
-1. 身份信息: 用户提供的身份验证信息 例如用户名 
-2. 验证: 身份信息通过例如密码等机制得以确认 
-3. 授权: 通过特定的指标来确定某一用户是否有权执行某些操作 
+1. 身份信息: 用户提供的身份验证信息 例如用户名
+2. 验证: 身份信息通过例如密码等机制得以确认
+3. 授权: 通过特定的指标来确定某一用户是否有权执行某些操作
 3. 可追究性: 监控和记录某一用户的操作过程
 
 ## 密码学
@@ -209,7 +209,7 @@ dynamic transition + setcurrent	:zygote
 ## android中如何隔离不同的账户：
 * DAC： uid =  userid * AID_USER + appid
 * seapp_contexts:  	isOwner, affect the label of process domain and app_data
-* seapp_contexts:	levelFrom, affect the multiple category of a process 
+* seapp_contexts:	levelFrom, affect the multiple category of a process
 
 ---------------
 # 移动操作系统
@@ -245,7 +245,7 @@ BYOD的三个领域：
 	* 手机安全
 	* 移动应用
 	* 成本
-	
+
 * MCM：移动内容管理。
 	* 企业内容使用的便利性与安全性
 	* 个人隐私与企业内容的隔离
@@ -256,4 +256,3 @@ BYOD的三个领域：
 1.[信息安全管理介绍](http://leanote.com/blog/post/56f212fde575d50b90000000)
 2.[dm-crypt 简介](http://dragon.leanote.com/post/dm-crypt)
 3.[BYOD终极指南](http://dragon.leanote.com/post/Guide-to-BYOD)
-
