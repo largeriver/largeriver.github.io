@@ -7,15 +7,13 @@
   <title>[摘]Android 图形系统 （Android 4.3） | 牧云人</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="前言本文摘自 《深入理解Android设计思想》
-在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508
-OpenGL ES与EGLSur">
+在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[摘]Android 图形系统 （Android 4.3）">
 <meta property="og:url" content="http://blog.andjoin.com/2015/07/01/android_graphic_system/index.html">
 <meta property="og:site_name" content="牧云人">
 <meta property="og:description" content="前言本文摘自 《深入理解Android设计思想》
-在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508
-OpenGL ES与EGLSur">
+在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508">
 <meta property="og:image" content="http://blog.andjoin.com/img/android_graphic_system_01.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/android_graphic_system_02.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/android_graphic_system_03.png">
@@ -34,12 +32,11 @@ OpenGL ES与EGLSur">
 <meta property="og:image" content="http://blog.andjoin.com/img/android_graphic_system_16.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/android_graphic_system_17.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/android_graphic_system_18.png">
-<meta property="og:updated_time" content="2016-06-13T03:43:20.606Z">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.377Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[摘]Android 图形系统 （Android 4.3）">
 <meta name="twitter:description" content="前言本文摘自 《深入理解Android设计思想》
-在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508
-OpenGL ES与EGLSur">
+在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508">
 <meta name="twitter:image" content="http://blog.andjoin.com/img/android_graphic_system_01.png">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
@@ -120,7 +117,7 @@ OpenGL ES与EGLSur">
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文摘自 《深入理解Android设计思想》</p>
-<p>在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。<br>参考链接：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954508" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954508</a></p>
+<p>在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。<br>参考链接：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954508" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954508</a><br><a id="more"></a></p>
 <h1 id="OpenGL-ES与EGL"><a href="#OpenGL-ES与EGL" class="headerlink" title="OpenGL ES与EGL"></a>OpenGL ES与EGL</h1><p><strong>SurfaceFlinger</strong>虽然是GUI的核心，但相对于OpenGL ES来讲，它其实<strong>只是一个“应用”</strong>。</p>
 <p><img src="/img/android_graphic_system_01.png" alt=""><br>我们根据上面这个图，由底层往上层来逐步分析整个架构：</p>
 <ol>
@@ -415,11 +412,7 @@ gralloc.[ro.arch].so
       <ul>
         
           <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
@@ -427,11 +420,15 @@ gralloc.[ro.arch].so
           </li>
         
           <li>
-            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>

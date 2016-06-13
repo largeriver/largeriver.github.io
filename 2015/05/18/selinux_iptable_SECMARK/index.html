@@ -6,20 +6,17 @@
   
   <title>SELinux: 利用iptable 的 SECMARK 机制来为Android网络通信进行MAC访问控制 | 牧云人</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.
-SECMARKSECMARK 基于iptable 配置中的报文特征来设置数据包标签，然后执行send/recv策略检查。策略的组成是：sender">
+  <meta name="description" content="为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SELinux: 利用iptable 的 SECMARK 机制来为Android网络通信进行MAC访问控制">
 <meta property="og:url" content="http://blog.andjoin.com/2015/05/18/selinux_iptable_SECMARK/index.html">
 <meta property="og:site_name" content="牧云人">
-<meta property="og:description" content="为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.
-SECMARKSECMARK 基于iptable 配置中的报文特征来设置数据包标签，然后执行send/recv策略检查。策略的组成是：sender">
+<meta property="og:description" content="为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.">
 <meta property="og:image" content="http://blog.andjoin.com/img/selinux_iptable_SECMARK_01.png">
-<meta property="og:updated_time" content="2016-06-13T03:43:20.630Z">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.464Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SELinux: 利用iptable 的 SECMARK 机制来为Android网络通信进行MAC访问控制">
-<meta name="twitter:description" content="为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.
-SECMARKSECMARK 基于iptable 配置中的报文特征来设置数据包标签，然后执行send/recv策略检查。策略的组成是：sender">
+<meta name="twitter:description" content="为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.">
 <meta name="twitter:image" content="http://blog.andjoin.com/img/selinux_iptable_SECMARK_01.png">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
@@ -99,7 +96,7 @@ SECMARKSECMARK 基于iptable 配置中的报文特征来设置数据包标签，
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.</p>
+        <p>为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.<br><a id="more"></a></p>
 <h1 id="SECMARK"><a href="#SECMARK" class="headerlink" title="SECMARK"></a>SECMARK</h1><p>SECMARK 基于iptable 配置中的报文特征来设置数据包标签，然后执行send/recv策略检查。策略的组成是：sender 域、receiver域 以及数据包类型。为启用SECMARK机制，你需要在kernel中开启相应的支持，并且配置iptable SECMARK或者CONNSECMARK规则。这些报文标签仅存在于本机的网络协议栈，并不会传播到其他主机。</p>
 <p>SEC处理过程：<br><img src="/img/selinux_iptable_SECMARK_01.png" alt="SECMARK处理过程"></p>
 <h1 id="Labeled-XFRM-or-NetLabel"><a href="#Labeled-XFRM-or-NetLabel" class="headerlink" title="Labeled XFRM or NetLabel"></a>Labeled XFRM or NetLabel</h1><p>基于发送者来标记保温的两种机制。其报文标签可以传播到远程系统，然后在接收时执行安全检查。其安全策略包含sender 域、receiver域 以及数据包类型。</p>
@@ -208,11 +205,7 @@ allow platform_app http_packet_t:packet { recv send };
       <ul>
         
           <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
@@ -220,11 +213,15 @@ allow platform_app http_packet_t:packet { recv send };
           </li>
         
           <li>
-            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>

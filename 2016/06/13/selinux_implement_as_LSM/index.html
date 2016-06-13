@@ -7,40 +7,22 @@
   <title>SELinux 基于LSM的实现 | 牧云人</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="[TOC]
-介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。
-名词解释
-LSM(linux security modules): Linux 安全模块
-hook function：钩子函数
-security field：安全字段
-System V IPC: 系统5 进程间通讯机制
-access">
+介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SELinux 基于LSM的实现">
 <meta property="og:url" content="http://blog.andjoin.com/2016/06/13/selinux_implement_as_LSM/index.html">
 <meta property="og:site_name" content="牧云人">
 <meta property="og:description" content="[TOC]
-介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。
-名词解释
-LSM(linux security modules): Linux 安全模块
-hook function：钩子函数
-security field：安全字段
-System V IPC: 系统5 进程间通讯机制
-access">
+介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。">
 <meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_01.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_02.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_03.png">
 <meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_04.png">
-<meta property="og:updated_time" content="2016-06-13T03:43:20.582Z">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.476Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SELinux 基于LSM的实现">
 <meta name="twitter:description" content="[TOC]
-介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。
-名词解释
-LSM(linux security modules): Linux 安全模块
-hook function：钩子函数
-security field：安全字段
-System V IPC: 系统5 进程间通讯机制
-access">
+介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。">
 <meta name="twitter:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_01.png">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
@@ -97,7 +79,7 @@ access">
       <section id="main"><article id="post-selinux_implement_as_LSM" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/13/selinux_implement_as_LSM/" class="article-date">
-  <time datetime="2016-06-13T03:43:20.578Z" itemprop="datePublished">2016-06-13</time>
+  <time datetime="2016-06-13T04:49:25.470Z" itemprop="datePublished">2016-06-13</time>
 </a>
     
   <div class="article-category">
@@ -121,7 +103,7 @@ access">
     <div class="article-entry" itemprop="articleBody">
       
         <p>[TOC]</p>
-<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。<br><a id="more"></a></p>
 <h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
 <li>LSM(linux security modules): Linux 安全模块</li>
 <li>hook function：钩子函数</li>
@@ -370,19 +352,19 @@ access">
     
 <nav id="article-nav">
   
-    <a href="/2016/06/13/introduction_bigdata/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/06/13/introduction-information-security/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">下一篇</strong>
       <div class="article-nav-title">
         
-          大数据的十个技术前沿
+          信息安全管理介绍
         
       </div>
     </a>
   
   
-    <a href="/2016/06/13/introduction-information-security/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/13/introduction_bigdata/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">信息安全管理介绍</div>
+      <div class="article-nav-title">大数据的十个技术前沿</div>
     </a>
   
 </nav>
@@ -437,11 +419,7 @@ access">
       <ul>
         
           <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
@@ -449,11 +427,15 @@ access">
           </li>
         
           <li>
-            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>

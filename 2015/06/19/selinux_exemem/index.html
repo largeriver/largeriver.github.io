@@ -34,7 +34,7 @@ execstack: M">
 execmemMake executable an anonymous mapping or private file mapping that iswritable
 execheap: Make the heap executable.
 execstack: M">
-<meta property="og:updated_time" content="2016-06-13T00:52:52.478Z">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.389Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SELinux: 什么是process::execmem权限？">
 <meta name="twitter:description" content="定义class process
@@ -138,20 +138,13 @@ execstack: M">
 </code></pre><ul>
 <li><strong>execmem</strong><br>Make executable an anonymous mapping or private file mapping that is<br>writable</li>
 <li><strong>execheap</strong>: Make the heap executable.</li>
-<li><strong>execstack</strong>: Make the main process stack executable.</li>
+<li><p><strong>execstack</strong>: Make the main process stack executable.</p>
+<a id="more"></a>
+<h1 id="相关allow规则"><a href="#相关allow规则" class="headerlink" title="相关allow规则"></a>相关allow规则</h1><p>  tios_zygote.te(69):allow tios_zygote self:process execmem;<br>  tios_radio.te(58):allow tios_radio self:process execmem;<br>  tiosappdomain.te(3):allow tiosappdomain self:process execmem;<br>  tios_unconfined.te(11):allow tios_unconfined self:process execmem;</p>
+<p>  recovery.te(63):  allow recovery self:process execmem;<br>  system_server.te(10):allow system_server self:process execmem;<br>  healthd.te(36):allow healthd self:process execmem;<br>  dumpstate.te(84):allow dumpstate self:process execmem;<br>  mediaserver.te(17):allow mediaserver self:process execmem;<br>  app.te(10):allow appdomain self:process execmem;</p>
+</li>
 </ul>
-<h1 id="相关allow规则"><a href="#相关allow规则" class="headerlink" title="相关allow规则"></a>相关allow规则</h1><pre><code>tios_zygote.te(69):allow tios_zygote self:process execmem;
-tios_radio.te(58):allow tios_radio self:process execmem;
-tiosappdomain.te(3):allow tiosappdomain self:process execmem;
-tios_unconfined.te(11):allow tios_unconfined self:process execmem;
-
-recovery.te(63):  allow recovery self:process execmem;
-system_server.te(10):allow system_server self:process execmem;
-healthd.te(36):allow healthd self:process execmem;
-dumpstate.te(84):allow dumpstate self:process execmem;
-mediaserver.te(17):allow mediaserver self:process execmem;
-app.te(10):allow appdomain self:process execmem;
-</code></pre><p>在android中,execmem 主要与dalvik有关：</p>
+<p>在android中,execmem 主要与dalvik有关：</p>
 <pre><code>system_server.te
 ...
 # Dalvik Compiler JIT Mapping.
@@ -254,11 +247,7 @@ allow system_server system_server_tmpfs:file execute;
       <ul>
         
           <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
@@ -266,11 +255,15 @@ allow system_server system_server_tmpfs:file execute;
           </li>
         
           <li>
-            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>

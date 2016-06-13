@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://blog.andjoin.com/2016/06/13/algorithm_name_match/index.html">
 <meta property="og:site_name" content="牧云人">
 <meta property="og:description" content="问题腾讯的现场招聘会题目：在一篇英文文章中查找指定的人名，人名使用二十六个英文字母（可以是大写或小写）、空格以及两个通配符组成（、?），通配符“”表示零个或多个任意字母，通配符“?”表示一个任意字母。如：“J Smi??” 可以匹配“John Smith” .void scan(const char pszText, const char* pszName);注：pszText为整个文章字符，ps">
-<meta property="og:updated_time" content="2016-06-13T00:52:52.402Z">
+<meta property="og:updated_time" content="2016-06-13T04:49:17.553Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="人名匹配问题">
 <meta name="twitter:description" content="问题腾讯的现场招聘会题目：在一篇英文文章中查找指定的人名，人名使用二十六个英文字母（可以是大写或小写）、空格以及两个通配符组成（、?），通配符“”表示零个或多个任意字母，通配符“?”表示一个任意字母。如：“J Smi??” 可以匹配“John Smith” .void scan(const char pszText, const char* pszName);注：pszText为整个文章字符，ps">
@@ -71,7 +71,7 @@
       <section id="main"><article id="post-algorithm_name_match" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/13/algorithm_name_match/" class="article-date">
-  <time datetime="2016-06-13T00:52:52.402Z" itemprop="datePublished">2016-06-13</time>
+  <time datetime="2016-06-13T04:49:17.546Z" itemprop="datePublished">2016-06-13</time>
 </a>
     
   </div>
@@ -90,7 +90,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>腾讯的现场招聘会题目：在一篇英文文章中查找指定的人名，人名使用二十六个英文字母（可以是大写或小写）、空格以及两个通配符组成（<em>、?），通配符“</em>”表示零个或多个任意字母，通配符“?”表示一个任意字母。如：“J<em> Smi??” 可以匹配“John Smith” .<br>void scan(const char</em> pszText, const char* pszName);<br>注：pszText为整个文章字符，pszName为要求匹配的英文名。<br>请完成函数实现输出所有匹配的英文名，除了printf外，不能用第三方的库函数等。</p>
+        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>腾讯的现场招聘会题目：在一篇英文文章中查找指定的人名，人名使用二十六个英文字母（可以是大写或小写）、空格以及两个通配符组成（<em>、?），通配符“</em>”表示零个或多个任意字母，通配符“?”表示一个任意字母。如：“J<em> Smi??” 可以匹配“John Smith” .<br>void scan(const char</em> pszText, const char* pszName);<br>注：pszText为整个文章字符，pszName为要求匹配的英文名。<br>请完成函数实现输出所有匹配的英文名，除了printf外，不能用第三方的库函数等。<br><a id="more"></a></p>
 <h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>有人是这样分析的：这 个是kmp子串搜索（匹配），稍加改造，如 abcabd<em>?abe*</em>??de这个窜，我们可以分成abcabd,?,abe,?,?,并按顺序先匹配abcabd，当匹配后，将匹配的文章中地址 及匹配的是何子串放到栈里记录下来，这样，每次匹配都入栈保存当前子串匹配信息，当一次完整的全部子串都匹配完后，就输出一个匹配结果，然后回溯一下，开 始对栈顶的子串的进行文中下一个起始位置的匹配。</p>
 <p>我的看法是这样的，有一个细节被提及的比较少：要求匹配的是人名，以空格分隔的连续字符串。<br>标准的实现其实是一种状态机的模式：</p>
 <ul>
@@ -118,19 +118,19 @@
     
 <nav id="article-nav">
   
-    <a href="/2016/06/13/introduction-information-security/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/06/13/introduction_bigdata/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">下一篇</strong>
       <div class="article-nav-title">
         
-          信息安全管理介绍
+          大数据的十个技术前沿
         
       </div>
     </a>
   
   
-    <a href="/2016/06/12/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">Hello World</div>
+      <div class="article-nav-title">SELinux: 如何为进程创建专有的数据目录？</div>
     </a>
   
 </nav>
@@ -185,11 +185,7 @@
       <ul>
         
           <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
@@ -197,11 +193,15 @@
           </li>
         
           <li>
-            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>
