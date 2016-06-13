@@ -1,6 +1,5 @@
-
 ---
-title: [摘]Android 图形系统 （Android 4.3）
+title: "[摘]Android 图形系统 （Android 4.3）"
 date: 2015-07-01 10:13:49
 categories:
 - android
