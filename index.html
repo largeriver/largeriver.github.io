@@ -69,6 +69,58 @@
     <div class="outer">
       <section id="main">
   
+    <article id="post-selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/" class="article-date">
+  <time datetime="2016-06-13T03:55:32.427Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a>
+        
+          <p class="article-more-link">
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/13/selinux_howto_create_data_dir_for_app/" data-id="cipdhm0k7000q7ljwp2nqwdfv" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
+      
+
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-introduction_bigdata" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/13/introduction_bigdata/" class="article-date">
@@ -184,7 +236,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/13/introduction_bigdata/" data-id="cipde1r3c000b8kjwiarjhjqo" class="article-share-link" data-share="baidu" data-title="大数据的十个技术前沿">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/13/introduction_bigdata/" data-id="cipdhm0j6000b7ljw26w2zojj" class="article-share-link" data-share="baidu" data-title="大数据的十个技术前沿">分享到</a>
       
 
       
@@ -461,109 +513,13 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/13/selinux_implement_as_LSM/" data-id="cipde1r4h000w8kjwj65zrtpq" class="article-share-link" data-share="baidu" data-title="SELinux 基于LSM的实现">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/13/selinux_implement_as_LSM/" data-id="cipdhm0k8000s7ljw4x2x0tbt" class="article-share-link" data-share="baidu" data-title="SELinux 基于LSM的实现">分享到</a>
       
 
       
 
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LSM/">LSM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/" class="article-date">
-  <time datetime="2016-06-13T01:04:41.834Z" itemprop="datePublished">2016-06-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
-<hr>
-<h1 id="策略1（FAILED）"><a href="#策略1（FAILED）" class="headerlink" title="策略1（FAILED）"></a>策略1（FAILED）</h1><p>先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file</p>
-<pre><code>file_contexts
-/data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
-------------------------------
-file.te:
-type eeprom_data_file, file_type, data_file_type;
-------------------------------
-cpnoui.te
-allow cpnoui eeprom_data_file:file create;
-</code></pre><p>不过，该策略并不能工作，其denied日志如下：</p>
-<pre><code>type=1400 audit(1463139871.920:5): avc: denied { create } for pid=167 comm=&quot;sh&quot; name=&quot;eeprom_data_from_sysprops.tmp&quot; scontext=u:r:cpnoui:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=0
-</code></pre><p>WHY？</p>
-<hr>
-<h1 id="策略2-just-works"><a href="#策略2-just-works" class="headerlink" title="策略2 (just works)"></a>策略2 (just works)</h1><p><strong>file_contexts是用户空间配置，其作用是：1）编译时，编译系统使用该文件标记初始文件系统镜像； 2）运行时，init/ueventd等程序使用该文件来决定其创建的文件系统、目录的安全标签。</strong></p>
-<p>内核实际上用不到file_contexts，因此无法影响运行时的文件安全标记。要做到这一点，你可以使用type_transition规则，例如：</p>
-<pre><code>type_transition cpnoui system_data_file:file eeprom_data_file;
-</code></pre><p>因此，完整的策略定义是：</p>
-<pre><code>file.te:
-type eeprom_data_file, file_type, data_file_type;
-------------------------------
-cpnoui.te
-type_transition cpnoui system_data_file:dir eeprom_data_file;
-type_transition cpnoui system_data_file:file eeprom_data_file;
-allow cpnoui system_data_file:dir {  remove_name add_name };
-allow cpnoui eeprom_data_file:dir { create_dir_perms remove_name add_name };
-allow cpnoui eeprom_data_file:file { create_file_perms };
-</code></pre><hr>
-<h1 id="策略3-（推荐）"><a href="#策略3-（推荐）" class="headerlink" title="策略3 （推荐）"></a>策略3 （推荐）</h1><p>较好的方法应该在init.<board>.rc中创建该专有目录，这种方法的好处是：</board></p>
-<ol>
-<li>init 进程将会根据file_contexts来决定该专有目录和目录下的文件的安全标记。</li>
-<li>cpnoui进程无需system_data_file:dir { write add_name } 权限</li>
-<li>当cpnoui进程在该专有目录中继续创建文件或者文件夹时，将自动继承父目录的安全标记。</li>
-</ol>
-<p>所以，最终的策略是怎样的呢？</p>
-<pre><code>file_contexts
-/data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
------------------------------
-file.te:
-type eeprom_data_file, file_type, data_file_type;
-------------------------------
-cpnoui.te
-allpw cpnoui eeprom_data_file:dir rw_dir_perms;
-allow cpnoui eeprom_data_file:file create_file_perms;
-------------------------------
-init.&lt;board&gt;.rc
-mkdir /data/eeprom_data_from_sysprops.tmp
-</code></pre><hr>
-<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://seandroid-list.tycho.nsa.narkive.com/mLU2RVyz/regarding-issue-in-defining-file-in-file-contexts" target="_blank" rel="external">http://seandroid-list.tycho.nsa.narkive.com/mLU2RVyz/regarding-issue-in-defining-file-in-file-contexts</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/06/13/selinux_howto_create_data_dir_for_app/" data-id="cipde1r4d000s8kjw2jjausgy" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
-      
-
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
 
     </footer>
   </div>
@@ -636,7 +592,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/13/introduction-information-security/" data-id="cipde1r3800098kjwtorozm9y" class="article-share-link" data-share="baidu" data-title="信息安全管理介绍">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/13/introduction-information-security/" data-id="cipdhm0j400097ljwxfxmyv6t" class="article-share-link" data-share="baidu" data-title="信息安全管理介绍">分享到</a>
       
 
       
@@ -685,7 +641,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/13/algorithm_name_match/" data-id="cipde1r2e00018kjw5hvqvz1y" class="article-share-link" data-share="baidu" data-title="人名匹配问题">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/13/algorithm_name_match/" data-id="cipdhm0i400017ljwvecj93am" class="article-share-link" data-share="baidu" data-title="人名匹配问题">分享到</a>
       
 
       
@@ -736,7 +692,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/12/hello-world/" data-id="cipde1r2w00078kjw1izmyg42" class="article-share-link" data-share="baidu" data-title="Hello World">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/12/hello-world/" data-id="cipdhm0io00077ljw0tanohoq" class="article-share-link" data-share="baidu" data-title="Hello World">分享到</a>
       
 
       
@@ -786,7 +742,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/12/introduction_dm_crypt/" data-id="cipde1r3o000f8kjwdnv75qqb" class="article-share-link" data-share="baidu" data-title="dm-crypt简介">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/12/introduction_dm_crypt/" data-id="cipdhm0ji000f7ljw9lhr8csy" class="article-share-link" data-share="baidu" data-title="dm-crypt简介">分享到</a>
       
 
       
@@ -828,7 +784,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/12/mylog1/" data-id="cipde1r44000l8kjwi1mp5cqq" class="article-share-link" data-share="baidu" data-title="mylog1">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/12/mylog1/" data-id="cipdhm0jw000l7ljwinljznu2" class="article-share-link" data-share="baidu" data-title="mylog1">分享到</a>
       
 
       
@@ -868,7 +824,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/12/mylog/" data-id="cipde1r41000i8kjwmmm6zdph" class="article-share-link" data-share="baidu" data-title="mylog">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/12/mylog/" data-id="cipdhm0jo000i7ljwlsj5nwt4" class="article-share-link" data-share="baidu" data-title="mylog">分享到</a>
       
 
       
@@ -1078,7 +1034,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/05/27/sercurity_outline/" data-id="cipde1r4q00158kjwfmnn456d" class="article-share-link" data-share="baidu" data-title="安全杂记">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/05/27/sercurity_outline/" data-id="cipdhm0ku00167ljwng1j2a08" class="article-share-link" data-share="baidu" data-title="安全杂记">分享到</a>
       
 
       
@@ -1145,15 +1101,15 @@ mkdir /data/eeprom_data_from_sysprops.tmp
       <ul>
         
           <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
             <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
           <li>

@@ -6,25 +6,16 @@
   
   <title>SELinux: 如何为进程创建专有的数据目录？ | 牧云人</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？
-
-策略1（FAILED）先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file
-file_con">
+  <meta name="description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SELinux: 如何为进程创建专有的数据目录？">
 <meta property="og:url" content="http://blog.andjoin.com/2016/06/13/selinux_howto_create_data_dir_for_app/index.html">
 <meta property="og:site_name" content="牧云人">
-<meta property="og:description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？
-
-策略1（FAILED）先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file
-file_con">
-<meta property="og:updated_time" content="2016-06-13T01:04:41.830Z">
+<meta property="og:description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？">
+<meta property="og:updated_time" content="2016-06-13T03:55:32.430Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SELinux: 如何为进程创建专有的数据目录？">
-<meta name="twitter:description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？
-
-策略1（FAILED）先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file
-file_con">
+<meta name="twitter:description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
   
@@ -80,7 +71,7 @@ file_con">
       <section id="main"><article id="post-selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/" class="article-date">
-  <time datetime="2016-06-13T01:04:41.834Z" itemprop="datePublished">2016-06-13</time>
+  <time datetime="2016-06-13T03:55:32.427Z" itemprop="datePublished">2016-06-13</time>
 </a>
     
   <div class="article-category">
@@ -104,8 +95,7 @@ file_con">
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
-<hr>
-<h1 id="策略1（FAILED）"><a href="#策略1（FAILED）" class="headerlink" title="策略1（FAILED）"></a>策略1（FAILED）</h1><p>先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a><a id="more"></a></h2><h1 id="策略1（FAILED）"><a href="#策略1（FAILED）" class="headerlink" title="策略1（FAILED）"></a>策略1（FAILED）</h1><p>先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file</p>
 <pre><code>file_contexts
 /data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
 ------------------------------
@@ -158,7 +148,7 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/13/selinux_howto_create_data_dir_for_app/" data-id="cipde1r4d000s8kjw2jjausgy" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/13/selinux_howto_create_data_dir_for_app/" data-id="cipdhm0k7000q7ljwp2nqwdfv" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
       
 
       
@@ -172,19 +162,10 @@ mkdir /data/eeprom_data_from_sysprops.tmp
     
 <nav id="article-nav">
   
-    <a href="/2016/06/13/selinux_implement_as_LSM/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">下一篇</strong>
-      <div class="article-nav-title">
-        
-          SELinux 基于LSM的实现
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/06/13/introduction-information-security/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/13/introduction_bigdata/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">信息安全管理介绍</div>
+      <div class="article-nav-title">大数据的十个技术前沿</div>
     </a>
   
 </nav>
@@ -239,15 +220,15 @@ mkdir /data/eeprom_data_from_sysprops.tmp
       <ul>
         
           <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
             <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
             <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
           <li>
