@@ -18,7 +18,7 @@ tags:
 * 重新插拔USB线
 * adb remount
 * adb root
-
+<!-- more -->
 # 解决过程
 
 1. 确保adbd 进程被杀掉，然后重新插上USB线。看看能不能启动adbd

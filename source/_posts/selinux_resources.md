@@ -7,7 +7,8 @@ categories:
 tags:
 - SELinux
 ---
-
+本文列出了SEAndroid的常用资源。
+<!-- more -->
 # 网站
 
 * [Android 官方文档](https://source.android.com/devices/tech/security/se-linux.html)

@@ -13,7 +13,7 @@ tags:
 ## 注意
 
 原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。
-
+<!-- more -->
 ## 名词解释
 
 * LSM(linux security modules): Linux 安全模块

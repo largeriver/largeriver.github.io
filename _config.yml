@@ -73,3 +73,9 @@ deploy:
   type: git
   repo: https://github.com/largeriver/largeriver.github.io.git
   branch: master
+
+# Duoshuo
+duoshuo_shortname: largeriver
+
+# Baidu share
+baidushare: true

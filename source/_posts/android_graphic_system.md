@@ -14,7 +14,7 @@ tags:
 
 在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。
 参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508
-
+<!-- more -->
 # OpenGL ES与EGL
 **SurfaceFlinger**虽然是GUI的核心，但相对于OpenGL ES来讲，它其实**只是一个“应用”**。
 

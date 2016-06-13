@@ -15,7 +15,7 @@ tags:
 本课程定义了信息的价值的来源，提出信息安全管理是一个过程，如何通过该过程对一个组织的每项信息进行价值评估和持续保护。
 
 ISMS：an information security management system
-
+<!-- more -->
 
 # 2 Information, information security and information security management
 

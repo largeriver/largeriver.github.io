@@ -25,7 +25,7 @@ Make executable an anonymous mapping or private file mapping that is
 writable
 - **execheap**: Make the heap executable.
 - **execstack**: Make the main process stack executable.
-
+<!-- more -->
 # 相关allow规则
 
 	tios_zygote.te(69):allow tios_zygote self:process execmem;

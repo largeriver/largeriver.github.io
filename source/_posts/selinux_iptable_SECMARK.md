@@ -12,7 +12,7 @@ tags:
 
 
 为对AF_INET socket实施访问控制，你需要使用某种方法对数据包添加标签，并且通过网络栈在数据包中传递这些标签。这种做法并不常用，当SELinux出现时，主流Linux甚至不支持该方式。不过现在，SELinux中已经整合了两种数据包标记方式.
-
+<!-- more -->
 # SECMARK
 SECMARK 基于iptable 配置中的报文特征来设置数据包标签，然后执行send/recv策略检查。策略的组成是：sender 域、receiver域 以及数据包类型。为启用SECMARK机制，你需要在kernel中开启相应的支持，并且配置iptable SECMARK或者CONNSECMARK规则。这些报文标签仅存在于本机的网络协议栈，并不会传播到其他主机。
 
