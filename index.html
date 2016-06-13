@@ -69,10 +69,140 @@
     <div class="outer">
       <section id="main">
   
+    <article id="post-introduction_bigdata" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/introduction_bigdata/" class="article-date">
+  <time datetime="2016-06-13T03:39:36.915Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/OpenCourse/">OpenCourse</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>艾莫拉法则，就是人们往往会高估技术的短期影响力，而低估技术的长期影响力。对技术的长期影响力事实上是代表着技术的一种积累效应，你在很短的一段时间内，你发现这个技术不过如此，但是经过了几个时间段以后，它这种积累效应就爆发了。<br>指数时代：指数效应或者说指数的颠覆性效应它是一种新的常态。<br>摩尔定律它是我们指数社会的基因：CPU，氧化铁存储器，主干网带宽，CMOS像素数/美元。<br>大数据是指数社会的蛋白质。</p>
+<p>f（数据量，t）  </p>
+<p>大数据技术解决下面四个问题：</p>
+<pre><code>1. 全集 &gt; 采样 数据产生时，价值最大；随着时间的推移，价值衰变。
+2. 实施和全时
+3. 见微知著
+4. 人与工具，降低数据价值提取门槛
+</code></pre><h1 id="膨胀宇宙："><a href="#膨胀宇宙：" class="headerlink" title="膨胀宇宙："></a>膨胀宇宙：</h1><p><img src="/_images/1458384207977_2.png" alt=""><br><img src="/_images/1464364652552_3.png" alt=""><br>TB=&gt;PB=&gt;EB=&gt;ZB=&gt;YB</p>
+<p>对于数据库：</p>
+<ul>
+<li>MPP(多路并行处理)处理搞到PB级数据，叫Massive Parallel Processing</li>
+<li>NoSql是无模式的，放弃了原子性，放弃了对精确事务特性的需求，放弃了transaction，使其扩展性提升到PB</li>
+<li>DFS 分布式文件系统 对非结构化数据有更好的存储能力，处理比NoSql更大的数据量。某些NOSQL基于DFS。</li>
+<li>NewSQL 既能处理大量数据，也能满足事务特性。</li>
+<li>Globally-Distributed DB:跨数千个数据中心，GPS全局时间同步，支持事务性。那么Google的spanner事实上就是一个典型的Globally-Distributed DB。</li>
+<li>Array DBMS：最主流的这样一种array database叫SciDB</li>
+</ul>
+<p>它就是针对科学计算针对线性代数的database。</p>
+<p>对于文件系统：</p>
+<ul>
+<li>Cache，in memory FS：比如说最著名的distributed file system HDFS它就有了这样一种内存缓存的这样一种扩展。同时呢也出现了in-memory file system它把文件系统放到大的内存里面。</li>
+<li>Erasure Coding：编码方式，早期应于通讯领域，利用编码机制，使得数据在传输上的容错。</li>
+</ul>
+<p>存储介质：</p>
+<ul>
+<li>Flash Storage：新的数据存储介质。</li>
+<li>DRAM Storage：内存中高速存储。</li>
+<li>NVRAM：性能与DRAM类似，但非易失。不用文件了，因为存储状态和使用状态一致了，不用序列化反序列化了。</li>
+<li>RDMA：高性能计算中的高扩展性的介质间传输。</li>
+<li>Heterogeneous Storage：自动根据数据的访问特性，自动选择存储位置。google的%1 的数据放在flash中，接受了%28的访问</li>
+<li>Tape System。高密度数据备份系统。</li>
+</ul>
+<h1 id="巴别之难"><a href="#巴别之难" class="headerlink" title="巴别之难"></a>巴别之难</h1><p>数据它并不是在同一个地方，说同一种语言。<br>我用的词就是：数据它能够相互说话，但是它们用不同的语言，它们格式可能是不一样的，它们的语意是不一样的，它们的度量衡是不一样的。<br>导致了一个问题：就是没办法利用更多的数据来产生更好的价值。<br>那为了实现这个一定要做一件事情，叫Data Curation，可以说是数据的治理，数据质量的提升。<br>Data Curation里面我认为现在最有研究价值的叫做Data Wrangle：Data Wrangling它就是希望能够把格式的这样一种差异能够打破，<br>能够发现数据跟数据之间的关系。从半结构甚至无结构的数据中提取信息。</p>
+<p>那么什么是Data Wrangling呢？我这边主要用一个问题来跟大家说，这个问题叫做DB-hard；大家知道我们计算机历史上有很多hard的问题：比如说NP-hard这是一类，还有叫AI-hard，人工智能也很难实现；还有叫DB-hard，DB-hard；一个简单的一个体现就是：比如说你在这个地方你输入的地址是这么写的，而你在另外一个地方输入同一个地址的时候，你的写法不一样，那么你用简单的计算机匹配，是匹配不上的。但事实上它们代表是同样的一个东西。<br>Data Wrangling它就是希望：能够把格式能够格式的这样一种差异能够打破，能够发现数据跟数据之间的</p>
+<p>它里面的一个重要的一个概念或者是反映我们的一个描述对象的属性的一个单位就是entity，我怎么能够resolve这些entity，怎么来做数据跟数据之间的transformation，而这一切是希望能够通过自动化的learning来完成的，而且希望能够从半结构化或者是多结构化的数据，进一步能够推展到Unstructured完全非结构化的数据，</p>
+<h1 id="数据有价"><a href="#数据有价" class="headerlink" title="数据有价"></a>数据有价</h1><h2 id="数据权利的定义："><a href="#数据权利的定义：" class="headerlink" title="数据权利的定义："></a>数据权利的定义：</h2><ul>
+<li>数据拥有权。独占但可能变更</li>
+<li>数据隐私权。什么数据不能给你</li>
+<li>数据许可权。什么数据可以给你，但是可撤销可转移</li>
+<li>数据审计权。保证客户按照我许可的方式来使用数据。</li>
+<li>数据分红权。</li>
+</ul>
+<h2 id="系统的安全："><a href="#系统的安全：" class="headerlink" title="系统的安全："></a>系统的安全：</h2><p>数据高度分布，去中心化场景下的安全：分布式安全架构。</p>
+<p>安全：系统安全，数据的安全，数据使用的安全</p>
+<h2 id="数据的安全"><a href="#数据的安全" class="headerlink" title="数据的安全"></a>数据的安全</h2><ul>
+<li>静态数据安全<ul>
+<li>机密</li>
+<li>访问控制：NSA使用的accumulo是一种label base的。</li>
+</ul>
+</li>
+<li>动态数据安全<ul>
+<li>动态审计能力：数据泄露防护</li>
+</ul>
+</li>
+<li>个人对数据的控制<ul>
+<li>Do Not Track，MAC地址混淆，个人数据清洗</li>
+<li>OpenPDS（personal data store）</li>
+</ul>
+</li>
+<li>数据脱敏、匿名化</li>
+<li>数据使用的安全<ul>
+<li>可用不可见，相交不相识<ul>
+<li>同步加密数据库技术</li>
+<li>基于加密协议的多方安全计算</li>
+<li>基于可信计算的多方计算安全</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="审计和定价"><a href="#审计和定价" class="headerlink" title="审计和定价"></a>审计和定价</h2><ul>
+<li>对数据安全和隐私条款形式化</li>
+<li>根据形式化的规范，对数据的使用进行审计</li>
+<li>定价：效用和稀缺性</li>
+</ul>
+<h1 id="软硬兼施"><a href="#软硬兼施" class="headerlink" title="软硬兼施"></a>软硬兼施</h1><h2 id="选择更好的硬件架构-计算"><a href="#选择更好的硬件架构-计算" class="headerlink" title="选择更好的硬件架构-计算"></a>选择更好的硬件架构-计算</h2><p>大小核<br>异构计算<br>内存和处理器更加靠近</p>
+<h2 id="选择更好的硬件架构-存储和互联"><a href="#选择更好的硬件架构-存储和互联" class="headerlink" title="选择更好的硬件架构-存储和互联"></a>选择更好的硬件架构-存储和互联</h2><ul>
+<li>大内存服务器。小于100G的内存的服务器基本上没法用。</li>
+<li>SSD-&gt;PCIe SSD -&gt;Flash storage</li>
+<li>NVRAM</li>
+<li>互联:节点间的互联，RDMA：remote data memory-access</li>
+</ul>
+<h2 id="软件和硬件架构协同优化"><a href="#软件和硬件架构协同优化" class="headerlink" title="软件和硬件架构协同优化"></a>软件和硬件架构协同优化</h2><p>针对硬件特点对软件站优化。<br>硬件可重构<br>Big Learning System：帮助机器学习算法和底层硬件更好的结合。</p>
+<h1 id="多快好省"><a href="#多快好省" class="headerlink" title="多快好省"></a>多快好省</h1><p>处理的数据量多，处理的快，结果要好。</p>
+<h2 id="降低空间、时间复杂度"><a href="#降低空间、时间复杂度" class="headerlink" title="降低空间、时间复杂度"></a>降低空间、时间复杂度</h2><h1 id="天下三分分久必合"><a href="#天下三分分久必合" class="headerlink" title="天下三分分久必合"></a>天下三分分久必合</h1>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/13/introduction_bigdata/" data-id="cipde1r3c000b8kjwiarjhjqo" class="article-share-link" data-share="baidu" data-title="大数据的十个技术前沿">分享到</a>
+      
+
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/BigData/">BigData</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-selinux_implement_as_LSM" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/13/selinux_implement_as_LSM/" class="article-date">
-  <time datetime="2016-06-13T03:06:54.561Z" itemprop="datePublished">2016-06-13</time>
+  <time datetime="2016-06-13T03:39:36.883Z" itemprop="datePublished">2016-06-13</time>
 </a>
     
   <div class="article-category">
@@ -262,7 +392,7 @@
 <li>task_has_security 检查task是否有权限使用某个selinuxfs API。其target SID = Security</li>
 </ul>
 <p>除了task_has_perm，这些检查函数都基于一个task，所有target SID没有必要。</p>
-<p><img src="images/selinux_implement_as_LSM_01.png" alt=""></p>
+<p><img src="/_images/selinux_implement_as_LSM_01.png" alt=""></p>
 <p>从后面的源码可以看出，这些帮助函数最终调用了<strong>avc_has_perm</strong>系列的函数。</p>
 <h4 id="task-has-perm"><a href="#task-has-perm" class="headerlink" title="task_has_perm"></a>task_has_perm</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">security/selinux/hooks.c</span><br><span class="line"><span class="comment">/*</span><br><span class="line"> * Check permission between a pair of tasks, e.g. signal checks,</span><br><span class="line"> * fork check, ptrace check, etc.</span><br><span class="line"> * tsk1 is the actor and tsk2 is the target</span><br><span class="line"> * - this uses the default subjective creds of tsk1</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_perm</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> task_struct * tsk1,</span><br><span class="line">			 <span class="keyword">const</span> <span class="keyword">struct</span> task_struct * tsk2,</span><br><span class="line">			 u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">struct</span> task_security_struct *__tsec1, *__tsec2;</span><br><span class="line">	u32 sid1, sid2;</span><br><span class="line"></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	__tsec1 = __task_cred(tsk1)-&gt;security;	sid1 = __tsec1-&gt;sid;</span><br><span class="line">	__tsec2 = __task_cred(tsk2)-&gt;security;	sid2 = __tsec2-&gt;sid;</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid1, sid2, SECCLASS_PROCESS, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h4 id="task-has-capability-cred-has-capability"><a href="#task-has-capability-cred-has-capability" class="headerlink" title="task_has_capability(cred_has_capability)"></a>task_has_capability(cred_has_capability)</h4><p>在kernel 3.4中，task_has_capability被cred_has_capability 取代。</p>
@@ -271,7 +401,7 @@
 <h4 id="task-has-system"><a href="#task-has-system" class="headerlink" title="task_has_system"></a>task_has_system</h4><p>security/selinux/hooks.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a system operation. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_system</span><span class="params">(<span class="keyword">struct</span> task_struct *tsk,</span><br><span class="line">			   u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	u32 sid = task_sid(tsk);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid, SECINITSID_KERNEL,</span><br><span class="line">			    SECCLASS_SYSTEM, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h4 id="task-has-security"><a href="#task-has-security" class="headerlink" title="task_has_security"></a>task_has_security</h4><p>security/selinux/selinuxfs.c<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a security operation. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_security</span><span class="params">(<span class="keyword">struct</span> task_struct *tsk,</span><br><span class="line">			     u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">struct</span> task_security_struct *tsec;</span><br><span class="line">	u32 sid = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	tsec = __task_cred(tsk)-&gt;security;</span><br><span class="line">	<span class="keyword">if</span> (tsec)</span><br><span class="line">		sid = tsec-&gt;sid;</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	<span class="keyword">if</span> (!tsec)</span><br><span class="line">		<span class="keyword">return</span> -EACCES;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid, SECINITSID_SECURITY,</span><br><span class="line">			    SECCLASS_SECURITY, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h3 id="11-2-2-Hook-Functions-for-Controlling-Task-Operations"><a href="#11-2-2-Hook-Functions-for-Controlling-Task-Operations" class="headerlink" title="11.2.2. Hook Functions for Controlling Task Operations"></a>11.2.2. Hook Functions for Controlling Task Operations</h3><p><img src="images/selinux_implement_as_LSM_02.png" alt=""><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_setpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p, <span class="keyword">pid_t</span> pgid)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__SETPGID);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_getpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__GETPGID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="11-2-2-Hook-Functions-for-Controlling-Task-Operations"><a href="#11-2-2-Hook-Functions-for-Controlling-Task-Operations" class="headerlink" title="11.2.2. Hook Functions for Controlling Task Operations"></a>11.2.2. Hook Functions for Controlling Task Operations</h3><p><img src="/_images/selinux_implement_as_LSM_02.png" alt=""><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_setpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p, <span class="keyword">pid_t</span> pgid)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__SETPGID);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_getpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__GETPGID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>这些钩子函数中，只有3个需要进一步解释:</p>
 <ul>
 <li>selinux_task_kill 钩子函数检查 当前task是否有权限向目标task发送指定的信号。</li>
@@ -303,7 +433,7 @@
 <p>当任务的SID改变时，可能发生两个额外的权限检查。如果task由clone创建，并且共享了状态，那么需要检查新旧SID间是否有share 权限。如果task正在被跟踪，那么需要检查跟踪者的task SID（保存当前任务的security structure中的 ptrace_sid字段）和新的SID之间的ptrace权限。</p>
 <ul>
 <li>任何一个权限检查的失败，都会导致SID不会改变，并且unsafe标识被设置为真，供随后的selinux_bprm_post_apply_creds使用，然后钩子函数立即返回。</li>
-<li>如果所有的权限都被授予了，钩子函数将当前SID改为新的SID，然后返回。<br><img src="images/selinux_implement_as_LSM_03.png" alt=""></li>
+<li>如果所有的权限都被授予了，钩子函数将当前SID改为新的SID，然后返回。<br><img src="/_images/selinux_implement_as_LSM_03.png" alt=""></li>
 </ul>
 <h3 id="12-1-5-selinux-bprm-post-apply-creds"><a href="#12-1-5-selinux-bprm-post-apply-creds" class="headerlink" title="12.1.5. selinux_bprm_post_apply_creds"></a>12.1.5. selinux_bprm_post_apply_creds</h3><p>该钩子函数在selinux_bprm_apply_creds之后被调用。它首先检查bprm安全结构中的unsafe标识，如果为真，强制向任务发送SIFKILL并立即退出。然后，它将检查task SID是否改变，如果没有，立即返回。</p>
 <p>否则，如果任务不再被容许访问关联的tty，它将继续调用副主函数flush_unauthorized_files  来撤销对控制tty的访问，并关闭任何不再访问的fd。<br><strong> 然后，它将在每个打开的文件上调用file_has_perm，检查是否任务在新SID中是否还具有相对应的访问权限（即 fd use permission），如果没有，关闭fd。</strong> file_has_perm描述在15.2.1节。为了避免那些期望某些描述符被打开的应用中引入错误，该辅助函数将重打开那些引用null device 节点的描述符，null device节点 在初始化时在selinuxfs中设置。</p>
@@ -321,7 +451,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task can use an open file descriptor to</span><br><span class="line">   access an inode in a given way.  Check access to the</span><br><span class="line">   descriptor itself, and then use dentry_has_perm to</span><br><span class="line">   check a particular permission to the file.</span><br><span class="line">   Access to the descriptor is implicitly granted if it</span><br><span class="line">   has the same SID as the process.  If av is zero, then</span><br><span class="line">   access to the file is not checked, e.g. for cases</span><br><span class="line">   where only the descriptor is affected like seek. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">file_has_perm</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred * cred,</span><br><span class="line">			 <span class="keyword">struct</span> file * file,</span><br><span class="line">			 u32 av)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> file_security_struct * fsec = file-&gt;f_security;</span><br><span class="line">	<span class="keyword">struct</span> inode * inode = file_inode(file);</span><br><span class="line">	<span class="keyword">struct</span> common_audit_data ad;</span><br><span class="line">	u32 sid = cred_sid(cred);</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	ad.type = LSM_AUDIT_DATA_PATH;</span><br><span class="line">	ad.u.path = file-&gt;f_path;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (sid != fsec-&gt;sid) &#123;</span><br><span class="line">		rc = avc_has_perm(sid, fsec-&gt;sid,</span><br><span class="line">				  SECCLASS_FD,</span><br><span class="line">				  FD__USE,</span><br><span class="line">				  &amp;ad);</span><br><span class="line">		<span class="keyword">if</span> (rc)</span><br><span class="line">			<span class="keyword">goto</span> out;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* av is zero if only checking access to the descriptor. * /</span><br><span class="line">	rc = 0;</span><br><span class="line">	if (av)</span><br><span class="line">		rc = inode_has_perm(cred, inode, av, &amp;ad, 0);</span><br><span class="line"></span><br><span class="line">out:</span><br><span class="line">	return rc;</span><br><span class="line">&#125;</span></span><br></pre></td></tr></table></figure>
 <h1 id="16-hook-functions：SystemV-IPC"><a href="#16-hook-functions：SystemV-IPC" class="headerlink" title="16 hook functions：SystemV IPC"></a>16 hook functions：SystemV IPC</h1><h1 id="17-hook-functions：socket"><a href="#17-hook-functions：socket" class="headerlink" title="17 hook functions：socket"></a>17 hook functions：socket</h1><h2 id="17-1-Managing-Socket-Security-Fields"><a href="#17-1-Managing-Socket-Security-Fields" class="headerlink" title="17.1. Managing Socket Security Fields"></a>17.1. Managing Socket Security Fields</h2><h2 id="17-1-1-Socket-Security-Structure"><a href="#17-1-1-Socket-Security-Structure" class="headerlink" title="17.1.1. Socket Security Structure"></a>17.1.1. Socket Security Structure</h2><p>每个用户空间socket都有一个关联的inode，因此inode 安全结构 也被扩展用于socket对象。请参考14.1节查看inode 安全结构和相关函数的讨论。在网络层socket structure（struct socket）中也存在一个安全字段，但是 <strong>这个字段只能被安全的用于local/unix 域套接字。</strong> TCP 代码的一个修改将要求确保在新创建的server socket时对此字段的正确处理，相应的修改也包含在LSM 内核patch中，但是没能进入内核主线。</p>
 <p>对于unix/local域套接字，该<strong>sk_security_struct</strong>用于存储连接建立阶段时对端的安全信息，此时连接中的用户socket还没有分配好。</p>
-<p><img src="images/selinux_implement_as_LSM_04.png" alt=""></p>
+<p><img src="/_images/selinux_implement_as_LSM_04.png" alt=""></p>
 <h3 id="17-1-2-sk-alloc-security-and-sk-free-security"><a href="#17-1-2-sk-alloc-security-and-sk-free-security" class="headerlink" title="17.1.2. sk_alloc_security and sk_free_security"></a>17.1.2. sk_alloc_security and sk_free_security</h3><h3 id="17-1-3-selinux-socket-getpeersec"><a href="#17-1-3-selinux-socket-getpeersec" class="headerlink" title="17.1.3. selinux_socket_getpeersec"></a>17.1.3. selinux_socket_getpeersec</h3><p>This hook function is called to handle the SO_PEERSEC getsockopt option.</p>
 <h1 id="18-hook-functions：IP-网络"><a href="#18-hook-functions：IP-网络" class="headerlink" title="18 hook functions：IP 网络"></a>18 hook functions：IP 网络</h1><h1 id="19-hook-functions：-其他"><a href="#19-hook-functions：-其他" class="headerlink" title="19 hook functions： 其他"></a>19 hook functions： 其他</h1><h1 id="20-kernel-3-4"><a href="#20-kernel-3-4" class="headerlink" title="20 kernel 3.4"></a>20 kernel 3.4</h1><h2 id="task-security-struct"><a href="#task-security-struct" class="headerlink" title="task_security_struct"></a>task_security_struct</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//old</span></span><br><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> task_struct * task;</span><br><span class="line">	u32 osid;</span><br><span class="line">	u32 sid;</span><br><span class="line">	u32 exec_sid;</span><br><span class="line">	u32 create_sid;</span><br><span class="line">	u32 ptrace_sid;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//new kernel3.4</span></span><br><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	u32 osid;		<span class="comment">/* SID prior to last execve * /</span><br><span class="line">	u32 sid;		/* current SID * /</span><br><span class="line">	u32 exec_sid;		/* exec SID *  /</span><br><span class="line">	u32 create_sid;		/* fscreate SID * /</span><br><span class="line"> 	u32 keycreate_sid;	/* keycreate SID * /</span><br><span class="line">	u32 sockcreate_sid;	/* fscreate SID * /</span><br><span class="line">&#125;;</span></span><br></pre></td></tr></table></figure>
 <h2 id="selinux-capable"><a href="#selinux-capable" class="headerlink" title="selinux_capable"></a>selinux_capable</h2><p>kernel3.4  security/selinux/hooks.c</p>
@@ -434,136 +564,6 @@ mkdir /data/eeprom_data_from_sysprops.tmp
 
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-introduction_bigdata" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/13/introduction_bigdata/" class="article-date">
-  <time datetime="2016-06-13T00:52:52.474Z" itemprop="datePublished">2016-06-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/OpenCourse/">OpenCourse</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>艾莫拉法则，就是人们往往会高估技术的短期影响力，而低估技术的长期影响力。对技术的长期影响力事实上是代表着技术的一种积累效应，你在很短的一段时间内，你发现这个技术不过如此，但是经过了几个时间段以后，它这种积累效应就爆发了。<br>指数时代：指数效应或者说指数的颠覆性效应它是一种新的常态。<br>摩尔定律它是我们指数社会的基因：CPU，氧化铁存储器，主干网带宽，CMOS像素数/美元。<br>大数据是指数社会的蛋白质。</p>
-<p>f（数据量，t）  </p>
-<p>大数据技术解决下面四个问题：</p>
-<pre><code>1. 全集 &gt; 采样 数据产生时，价值最大；随着时间的推移，价值衰变。
-2. 实施和全时
-3. 见微知著
-4. 人与工具，降低数据价值提取门槛
-</code></pre><h1 id="膨胀宇宙："><a href="#膨胀宇宙：" class="headerlink" title="膨胀宇宙："></a>膨胀宇宙：</h1><p><img src="images/1458384207977_2.png" alt=""><br><img src="images/1464364652552_3.png" alt=""><br>TB=&gt;PB=&gt;EB=&gt;ZB=&gt;YB</p>
-<p>对于数据库：</p>
-<ul>
-<li>MPP(多路并行处理)处理搞到PB级数据，叫Massive Parallel Processing</li>
-<li>NoSql是无模式的，放弃了原子性，放弃了对精确事务特性的需求，放弃了transaction，使其扩展性提升到PB</li>
-<li>DFS 分布式文件系统 对非结构化数据有更好的存储能力，处理比NoSql更大的数据量。某些NOSQL基于DFS。</li>
-<li>NewSQL 既能处理大量数据，也能满足事务特性。</li>
-<li>Globally-Distributed DB:跨数千个数据中心，GPS全局时间同步，支持事务性。那么Google的spanner事实上就是一个典型的Globally-Distributed DB。</li>
-<li>Array DBMS：最主流的这样一种array database叫SciDB</li>
-</ul>
-<p>它就是针对科学计算针对线性代数的database。</p>
-<p>对于文件系统：</p>
-<ul>
-<li>Cache，in memory FS：比如说最著名的distributed file system HDFS它就有了这样一种内存缓存的这样一种扩展。同时呢也出现了in-memory file system它把文件系统放到大的内存里面。</li>
-<li>Erasure Coding：编码方式，早期应于通讯领域，利用编码机制，使得数据在传输上的容错。</li>
-</ul>
-<p>存储介质：</p>
-<ul>
-<li>Flash Storage：新的数据存储介质。</li>
-<li>DRAM Storage：内存中高速存储。</li>
-<li>NVRAM：性能与DRAM类似，但非易失。不用文件了，因为存储状态和使用状态一致了，不用序列化反序列化了。</li>
-<li>RDMA：高性能计算中的高扩展性的介质间传输。</li>
-<li>Heterogeneous Storage：自动根据数据的访问特性，自动选择存储位置。google的%1 的数据放在flash中，接受了%28的访问</li>
-<li>Tape System。高密度数据备份系统。</li>
-</ul>
-<h1 id="巴别之难"><a href="#巴别之难" class="headerlink" title="巴别之难"></a>巴别之难</h1><p>数据它并不是在同一个地方，说同一种语言。<br>我用的词就是：数据它能够相互说话，但是它们用不同的语言，它们格式可能是不一样的，它们的语意是不一样的，它们的度量衡是不一样的。<br>导致了一个问题：就是没办法利用更多的数据来产生更好的价值。<br>那为了实现这个一定要做一件事情，叫Data Curation，可以说是数据的治理，数据质量的提升。<br>Data Curation里面我认为现在最有研究价值的叫做Data Wrangle：Data Wrangling它就是希望能够把格式的这样一种差异能够打破，<br>能够发现数据跟数据之间的关系。从半结构甚至无结构的数据中提取信息。</p>
-<p>那么什么是Data Wrangling呢？我这边主要用一个问题来跟大家说，这个问题叫做DB-hard；大家知道我们计算机历史上有很多hard的问题：比如说NP-hard这是一类，还有叫AI-hard，人工智能也很难实现；还有叫DB-hard，DB-hard；一个简单的一个体现就是：比如说你在这个地方你输入的地址是这么写的，而你在另外一个地方输入同一个地址的时候，你的写法不一样，那么你用简单的计算机匹配，是匹配不上的。但事实上它们代表是同样的一个东西。<br>Data Wrangling它就是希望：能够把格式能够格式的这样一种差异能够打破，能够发现数据跟数据之间的</p>
-<p>它里面的一个重要的一个概念或者是反映我们的一个描述对象的属性的一个单位就是entity，我怎么能够resolve这些entity，怎么来做数据跟数据之间的transformation，而这一切是希望能够通过自动化的learning来完成的，而且希望能够从半结构化或者是多结构化的数据，进一步能够推展到Unstructured完全非结构化的数据，</p>
-<h1 id="数据有价"><a href="#数据有价" class="headerlink" title="数据有价"></a>数据有价</h1><h2 id="数据权利的定义："><a href="#数据权利的定义：" class="headerlink" title="数据权利的定义："></a>数据权利的定义：</h2><ul>
-<li>数据拥有权。独占但可能变更</li>
-<li>数据隐私权。什么数据不能给你</li>
-<li>数据许可权。什么数据可以给你，但是可撤销可转移</li>
-<li>数据审计权。保证客户按照我许可的方式来使用数据。</li>
-<li>数据分红权。</li>
-</ul>
-<h2 id="系统的安全："><a href="#系统的安全：" class="headerlink" title="系统的安全："></a>系统的安全：</h2><p>数据高度分布，去中心化场景下的安全：分布式安全架构。</p>
-<p>安全：系统安全，数据的安全，数据使用的安全</p>
-<h2 id="数据的安全"><a href="#数据的安全" class="headerlink" title="数据的安全"></a>数据的安全</h2><ul>
-<li>静态数据安全<ul>
-<li>机密</li>
-<li>访问控制：NSA使用的accumulo是一种label base的。</li>
-</ul>
-</li>
-<li>动态数据安全<ul>
-<li>动态审计能力：数据泄露防护</li>
-</ul>
-</li>
-<li>个人对数据的控制<ul>
-<li>Do Not Track，MAC地址混淆，个人数据清洗</li>
-<li>OpenPDS（personal data store）</li>
-</ul>
-</li>
-<li>数据脱敏、匿名化</li>
-<li>数据使用的安全<ul>
-<li>可用不可见，相交不相识<ul>
-<li>同步加密数据库技术</li>
-<li>基于加密协议的多方安全计算</li>
-<li>基于可信计算的多方计算安全</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="审计和定价"><a href="#审计和定价" class="headerlink" title="审计和定价"></a>审计和定价</h2><ul>
-<li>对数据安全和隐私条款形式化</li>
-<li>根据形式化的规范，对数据的使用进行审计</li>
-<li>定价：效用和稀缺性</li>
-</ul>
-<h1 id="软硬兼施"><a href="#软硬兼施" class="headerlink" title="软硬兼施"></a>软硬兼施</h1><h2 id="选择更好的硬件架构-计算"><a href="#选择更好的硬件架构-计算" class="headerlink" title="选择更好的硬件架构-计算"></a>选择更好的硬件架构-计算</h2><p>大小核<br>异构计算<br>内存和处理器更加靠近</p>
-<h2 id="选择更好的硬件架构-存储和互联"><a href="#选择更好的硬件架构-存储和互联" class="headerlink" title="选择更好的硬件架构-存储和互联"></a>选择更好的硬件架构-存储和互联</h2><ul>
-<li>大内存服务器。小于100G的内存的服务器基本上没法用。</li>
-<li>SSD-&gt;PCIe SSD -&gt;Flash storage</li>
-<li>NVRAM</li>
-<li>互联:节点间的互联，RDMA：remote data memory-access</li>
-</ul>
-<h2 id="软件和硬件架构协同优化"><a href="#软件和硬件架构协同优化" class="headerlink" title="软件和硬件架构协同优化"></a>软件和硬件架构协同优化</h2><p>针对硬件特点对软件站优化。<br>硬件可重构<br>Big Learning System：帮助机器学习算法和底层硬件更好的结合。</p>
-<h1 id="多快好省"><a href="#多快好省" class="headerlink" title="多快好省"></a>多快好省</h1><p>处理的数据量多，处理的快，结果要好。</p>
-<h2 id="降低空间、时间复杂度"><a href="#降低空间、时间复杂度" class="headerlink" title="降低空间、时间复杂度"></a>降低空间、时间复杂度</h2><h1 id="天下三分分久必合"><a href="#天下三分分久必合" class="headerlink" title="天下三分分久必合"></a>天下三分分久必合</h1>
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/06/13/introduction_bigdata/" data-id="cipde1r3c000b8kjwiarjhjqo" class="article-share-link" data-share="baidu" data-title="大数据的十个技术前沿">分享到</a>
-      
-
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/BigData/">BigData</a></li></ul>
 
     </footer>
   </div>
@@ -1145,15 +1145,15 @@ mkdir /data/eeprom_data_from_sysprops.tmp
       <ul>
         
           <li>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
             <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
           </li>
         
           <li>
             <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>

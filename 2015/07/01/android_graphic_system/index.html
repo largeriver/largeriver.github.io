@@ -16,31 +16,31 @@ OpenGL ES与EGLSur">
 <meta property="og:description" content="前言本文摘自 《深入理解Android设计思想》
 在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508
 OpenGL ES与EGLSur">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_01.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_02.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_03.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_04.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_05.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_06.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_07.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_08.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_09.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_10.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_11.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_12.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_13.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_14.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_15.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_16.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_17.png">
-<meta property="og:image" content="http://blog.andjoin.com/images/android_graphic_system_18.png">
-<meta property="og:updated_time" content="2016-06-13T01:05:17.878Z">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_01.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_02.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_03.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_04.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_05.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_06.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_07.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_08.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_09.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_10.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_11.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_12.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_13.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_14.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_15.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_16.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_17.png">
+<meta property="og:image" content="http://blog.andjoin.com/_images/android_graphic_system_18.png">
+<meta property="og:updated_time" content="2016-06-13T03:39:36.911Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[摘]Android 图形系统 （Android 4.3）">
 <meta name="twitter:description" content="前言本文摘自 《深入理解Android设计思想》
 在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。参考链接：http://blog.csdn.net/xuesen_lin/article/details/8954508
 OpenGL ES与EGLSur">
-<meta name="twitter:image" content="http://blog.andjoin.com/images/android_graphic_system_01.png">
+<meta name="twitter:image" content="http://blog.andjoin.com/_images/android_graphic_system_01.png">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
   
@@ -122,7 +122,7 @@ OpenGL ES与EGLSur">
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文摘自 《深入理解Android设计思想》</p>
 <p>在Android4.3之前的版本中，最终的显示工作是要交给FrameBuffer的，而从4.3开始，合成工作由SurfaceFlinger交给硬件合成器来完成，显示工作将由硬件合成器HAL来完成。<br>参考链接：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954508" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954508</a></p>
 <h1 id="OpenGL-ES与EGL"><a href="#OpenGL-ES与EGL" class="headerlink" title="OpenGL ES与EGL"></a>OpenGL ES与EGL</h1><p><strong>SurfaceFlinger</strong>虽然是GUI的核心，但相对于OpenGL ES来讲，它其实<strong>只是一个“应用”</strong>。</p>
-<p><img src="images/android_graphic_system_01.png" alt=""><br>我们根据上面这个图，由底层往上层来逐步分析整个架构：</p>
+<p><img src="/_images/android_graphic_system_01.png" alt=""><br>我们根据上面这个图，由底层往上层来逐步分析整个架构：</p>
 <ol>
 <li>Linux内核提供了统一的framebuffer显示驱动，设备节点/dev/graphics/fb<em>或者/dev/fb</em>，以fb0表示第一个Monitor，当前实现中只用到了一个显示屏</li>
 <li><p>Android的HAL层提供了Gralloc，分为fb和gralloc两个设备。</p>
@@ -166,7 +166,7 @@ gralloc.[ro.arch].so
 <h2 id="Gralloc提供的接口"><a href="#Gralloc提供的接口" class="headerlink" title="Gralloc提供的接口"></a>Gralloc提供的接口</h2><p>Gralloc实际操作了两个设备：</p>
 <ul>
 <li>fb0 就是我们前面说的主屏幕，</li>
-<li>gpu0负责图形缓冲区的分配和释放。<br><img src="images/android_graphic_system_02.png" alt=""></li>
+<li>gpu0负责图形缓冲区的分配和释放。<br><img src="/_images/android_graphic_system_02.png" alt=""></li>
 </ul>
 <h1 id="本地窗口"><a href="#本地窗口" class="headerlink" title="本地窗口"></a>本地窗口</h1><p><a href="http://blog.csdn.net/xuesen_lin/article/details/8954748" target="_blank" rel="external">原文</a></p>
 <p>在OpenGL的学习过程中，我们不断提及“本地窗口”(NativeWindow)这一概念。那么对于Android系统来说，它是如何将OpenGL ES本地化的呢，或者说，它提供了什么样的本地窗口？<br>根据整个Android系统的GUI设计理念，我们不难猜想到至少需要两种本地窗口：</p>
@@ -174,18 +174,18 @@ gralloc.[ro.arch].so
 <li>面向管理者(SurfaceFlinger) 。既然SurfaceFlinger扮演了系统中所有UI界面的管理者，那么它无可厚非地需要直接或间接地持有“本地窗口”。从前一小节我们已经知道，这个窗口就是<strong>FramebufferNativeWindow</strong>。</li>
 <li>面向应用程序。我们先给出答案，这类窗口是<strong>SurfaceTextureClient</strong></li>
 </ol>
-<h2 id="为什么需要两种窗口系统"><a href="#为什么需要两种窗口系统" class="headerlink" title="为什么需要两种窗口系统"></a>为什么需要两种窗口系统</h2><h3 id="理想的窗口系统"><a href="#理想的窗口系统" class="headerlink" title="理想的窗口系统"></a>理想的窗口系统</h3><p><img src="images/android_graphic_system_03.png" alt=""><br>理想的窗口系统</p>
+<h2 id="为什么需要两种窗口系统"><a href="#为什么需要两种窗口系统" class="headerlink" title="为什么需要两种窗口系统"></a>为什么需要两种窗口系统</h2><h3 id="理想的窗口系统"><a href="#理想的窗口系统" class="headerlink" title="理想的窗口系统"></a>理想的窗口系统</h3><p><img src="/_images/android_graphic_system_03.png" alt=""><br>理想的窗口系统</p>
 <p>假如整个系统仅有一个需要显示UI的程序，我们有理由相信它是可以胜任的。但是如果有N个UI程序的情况呢？Framebuffer显然只有一个，不可能让各个应用程序自己单独管理。</p>
-<h3 id="改进的窗口系统"><a href="#改进的窗口系统" class="headerlink" title="改进的窗口系统"></a>改进的窗口系统</h3><p><img src="images/android_graphic_system_04.png" alt=""><br>改进的窗口系统</p>
+<h3 id="改进的窗口系统"><a href="#改进的窗口系统" class="headerlink" title="改进的窗口系统"></a>改进的窗口系统</h3><p><img src="/_images/android_graphic_system_04.png" alt=""><br>改进的窗口系统</p>
 <p>在这个改进的窗口系统中，我们有了两类本地窗口，即Window-1和Window-2。</p>
 <ol>
 <li><strong>第一种窗口</strong>是能直接显示在终端屏幕上的——它<strong>使用了帧缓冲区</strong>，</li>
 <li>而<strong>后一种Window实际上是从内存缓冲区分配的空间</strong>。</li>
 </ol>
 <p>当系统中存在多个应用程序时，这能保证它们都可以获得一个“本地窗口”，并且这些窗口最终也能显示到屏幕上——SurfaceFlinger会收集所有程序的显示需求，对它们做统一的图像混合操作(有点类似于AudioFlinger)，然后输出到自己的Window-1上。<br>当然，这个改进的窗口系统有一个前提，即应用程序与SurfaceFlinger都是基于OpenGL ES来实现的。有没有其它选择呢？答案是肯定的，比如<strong>应用程序端完全可以采用Skia等第三方的图形库，只要保持它们与SurfaceFlinger间的“协议”不变就可以了</strong>，如下所示：</p>
-<p><img src="images/android_graphic_system_05.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_05.png" alt=""></p>
 <p>理论上来说，采用哪一种方式都是可行的。不过对于开发人员，特别是没有OpenGLES项目经验的人而言，前一种系统的门槛相对较高。事实上，Android系统同时提供了这两种实现来供上层选择。正常情况下我们按照SDK向导生成的apk应用，就属于后面的情况;而对于希望使用OpenGLES来完成复杂的界面渲染的应用开发者，也可以使用GLSurfaceView来达到目标。</p>
-<p><img src="images/android_graphic_system_06.png" alt=""><br>Canvas为在画布的意思。Android上层的作图几乎都通过Canvas实例来完成，其实Canvas更多是一种接口的包装。</p>
+<p><img src="/_images/android_graphic_system_06.png" alt=""><br>Canvas为在画布的意思。Android上层的作图几乎都通过Canvas实例来完成，其实Canvas更多是一种接口的包装。</p>
 <h2 id="FramebufferNativeWindow（面向SurfaceFlinger）"><a href="#FramebufferNativeWindow（面向SurfaceFlinger）" class="headerlink" title="FramebufferNativeWindow（面向SurfaceFlinger）"></a>FramebufferNativeWindow（面向SurfaceFlinger）</h2><p>EGL创建一个Window Surface的函数原型列出如下：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span>  EGLNativeWindowType  NativeWindowType;<span class="comment">//注意这两种类型其实是一样的</span></span><br><span class="line"><span class="keyword">struct</span> ANativeWindow;</span><br><span class="line">…</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> ANativeWindow*          EGLNativeWindowType;</span><br><span class="line"></span><br><span class="line"><span class="function">EGLSurface <span class="title">eglCreateWindowSurface</span><span class="params">(  EGLDisplay dpy, EGLConfig config,</span><br><span class="line">                          NativeWindowType  window, <span class="keyword">const</span> EGLint *attrib_list)</span></span>;</span><br></pre></td></tr></table></figure>
 <p>表格 11‑2 不同平台下的EGLNativeWindowType<br>|操作系统|数据类型|<br>|——|——|<br>|Win32, WinCE|HWND，即句柄|<br>|Symbian|Void<em>|<br>|Android|ANativeWindow</em>          |<br>|Unix|Window|<br>|其它|暂时不支持|</p>
@@ -212,7 +212,7 @@ gralloc.[ro.arch].so
 <li>它与SurfaceFlinger间是如何分工的?<br>显然SurfaceFlinger需要收集系统中所有应用程序绘制的图像数据，然后集中显示到物理屏幕上。在这个过程中，SurfaceTextureClient扮演了什么样的角色呢？</li>
 </ul>
 <p>SurfaceTextureClient只是一个中介，它间接调用mSurfaceTexture也就是ISurfaceTexture的服务。那么ISurfaceTexture在Server端又是由谁来完成的呢？</p>
-<p><img src="images/android_graphic_system_07.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_07.png" alt=""></p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>通过这两个小节，我们学习了显示系统中两个重要的本地窗口，即FramebufferNativewindow和SurfaceTextureClient。</p>
 <ol>
 <li>第一个窗口是专门为SurfaceFlinger服务的，它由Gralloc提供支持，相对逻辑上很好理解。</li>
@@ -233,12 +233,12 @@ gralloc.[ro.arch].so
 <li>应用程序与SurfaceFlinger如何互斥共享数据区？和在Audio系统中遇到的问题一样，我们面临的是经典的“生产者-消费者”模型。显示系统又是如何协调好这两者间的互斥访问的呢？</li>
 </ul>
 <h2 id="BufferQueue的内部原理"><a href="#BufferQueue的内部原理" class="headerlink" title="BufferQueue的内部原理"></a>BufferQueue的内部原理</h2><p>因为BufferQueue是ISurfaceTexture的本地实现，所以它必须重载接口中的各虚函数，比如queueBuffer、requestBuffer、dequeueBuffer等等。</p>
-<p><img src="images/android_graphic_system_08.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_08.png" alt=""></p>
 <p>另外，这个类的内部有一个非常重要的成员数组，即mSlots[NUM_BUFFER_SLOTS]，大家是否还记得前面SurfaceTextureClient类中也有一个一模一样的数组：</p>
 <pre><code>class SurfaceTextureClient…{
                 BufferSlot  mSlots[NUM_BUFFER_SLOTS];
 </code></pre><p>数组的成员是BufferSlot，其中包含的GraphicBuffer变量(mGraphicBuffer)用于记录这个Slot所涉及的缓冲区，另外还有一个BufferState变量mBufferState用于跟踪每个缓冲区的状态，比如：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> BufferState &#123;</span><br><span class="line">    FREE = <span class="number">0</span>, <span class="comment">/*Buffer当前可用，也就是说可以被dequeued。此时Buffer的owner</span><br><span class="line">               可认为是BufferQueue*/</span></span><br><span class="line">    DEQUEUED = <span class="number">1</span>, <span class="comment">/*Buffer已经被dequeued，还未被queued或canceld。此时</span><br><span class="line">                  Buffer的owner可认为是producer(应用程序)，这意味着server</span><br><span class="line">                  端(BufferQueue)不可以对这块缓冲区进行操作*/</span></span><br><span class="line">    QUEUED = <span class="number">2</span>, <span class="comment">/*Buffer已经被客户端queued，除特别情况外此时还不能对它进</span><br><span class="line">                  行dequeue，而可以acquired。此时的owner是BufferQueue*/</span></span><br><span class="line">    ACQUIRED = <span class="number">3</span><span class="comment">/*Buffer的owner改为consumer，可以released，</span><br><span class="line">                   然后状态又返回FREE*/</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-<p>Buffer状态迁移图如下：<br><img src="images/android_graphic_system_09.png" alt=""></p>
+<p>Buffer状态迁移图如下：<br><img src="/_images/android_graphic_system_09.png" alt=""></p>
 <p>在这样的模型下，我们怎么保证Consumer可以及时的处理buffer呢？换句话说，当一块buffer数据ready后，应该怎么告知Consumer来操作呢？<br>仔细观察的话，可以看到BufferQueue里还同时提供了一个特别的类，名称为ConsumerListener，其中的函数接口包括：</p>
 <pre><code>struct ConsumerListener :public virtual RefBase {       
     virtual void onFrameAvailable() = 0;/*当一块buffer可以被消费时，这个函数会被调用，特别注意此
@@ -278,7 +278,7 @@ gralloc.[ro.arch].so
 <p><strong>ISurfaceTexture是应用程序与BufferQueue的传输通道，而ISurfaceComposerClient则是它与SurfaceFlinger间的桥梁。</strong></p>
 <p>个人理解：ISurfaceTexture 封装对BufferQueue的访问，将绘制的内容放在缓冲区上。而ISurfaceComposerClient 负责告诉SurfaceFlinger这些缓冲区的元数据，以便SurfaceFlinger采用合适的参数对绘制缓冲（surface）做进一步的合成。</p>
 <p>这样子的设计是合理的，体现了模块化的思想——SurfaceFlinger的职责是“Flinger”，即把系统中所有应用程序的最终的“绘图结果”进行“混合”，然后统一显示到物理屏幕上。它不应该，也没有办法分出太多的精力去一一关注各个应用程序的“绘画过程”。这个光荣的任务自然而然地落在了BufferQueue的肩膀上，它是每个应用程序“一对一”的辅导老师，指导着UI程序的“画板申请”、“作画流程”等一系列细节。下面的图描述了这三者的关系：</p>
-<p><img src="images/android_graphic_system_10.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_10.png" alt=""></p>
 <p>的确是太乱了，我们有必要先来整理下目前已经出现的容易混淆的相关类的关系：</p>
 <ul>
 <li><strong>ISurfaceComposerClient</strong>: 应用程序与SurfaceFlinger间的通道，在应用进程中则被封装在SurfaceComposerClient这个类中。这是一个匿名binder server，由应用程序(具体位置在SurfaceComposerClient::onFirstRef中)调用SurfaceFlinger这个实名binder的createConnection方法来获取到，服务端的实现是SurfaceFlinger::Client。</li>
@@ -286,32 +286,32 @@ gralloc.[ro.arch].so
 <li><strong>Surface</strong>:从逻辑关系上看，它是上述<strong>ISurface</strong>的使用者。从继承关系上看，它是一个<strong>SurfaceTextureClient</strong>，也就是本地窗口。SurfaceTextureClient内部持有<strong>ISurfaceTexture</strong>，即<strong>BufferQueue</strong>的实现接口。换个角度来思考，当EGL想通过Surface这个native window完成某些功能时，后者实际上又利用ISurface和ISurfaceTexture来取得远程服务端的对应服务，以完成EGL的请求。</li>
 <li><strong>Layer</strong>：既然Layer代表了一个画面图层，那么它肯定需要有存储图层数据的地方。当应用端通过ISurfaceComposerClient::createSurface()来发起创建Surface的请求时，SurfaceFlinger服务进程这边会创建一个Layer。</li>
 </ul>
-<p>一个典型的应用程序使用SurfaceFlinger进行绘图的流程如下图所示：<br><img src="images/android_graphic_system_11.png" alt=""></p>
-<p>各个class之间的关系式这样的：<br><img src="images/android_graphic_system_12.png" alt=""></p>
+<p>一个典型的应用程序使用SurfaceFlinger进行绘图的流程如下图所示：<br><img src="/_images/android_graphic_system_11.png" alt=""></p>
+<p>各个class之间的关系式这样的：<br><img src="/_images/android_graphic_system_12.png" alt=""></p>
 <h2 id="应用程序与BufferQueue的关系"><a href="#应用程序与BufferQueue的关系" class="headerlink" title="应用程序与BufferQueue的关系"></a>应用程序与BufferQueue的关系</h2><p>原文：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954853" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954853</a></p>
 <p>应用程序与BufferQueue的关系就比较明朗了。虽然中间经历了多次跨进程通信，但对于应用程序来说最终只使用到了BufferQueue(通过ISurfaceTexture)。从本小节的内容中，我们也可以从侧面证明如下几个关键点：</p>
 <ol>
 <li>应用程序可以调用createSurface来建立多个Layer，它们是一对多的关系。理由就是createSurface中没有任何机制来限制应用程序的多次调用，相反，它会把一个应用程序多次申请而产生的Layer统一管理。为应用程序申请的layer，一方面需要告知SurfaceFlinger，另一方面也要记录到各Client内部中，这两个步骤是由addClientLayer()分别调用Client::attachLayer()和SurfaceFlinger::addLayer_l()来完成的。对于SurfaceFlinger，它需要对系统中当前所有的Layer进行Z-order排序，以决定用户所能看到的“画面”是什么样的。对于Client，它则利用内部的mLayers成员变量来一一记录新增(attachLayer)和移除(detachLayer)的图层。</li>
 <li>每个Layer对应一个BufferQueue，换句话说，一个应用程序可能对应多个BufferQueue。Layer没有直接持有BufferQueue，而是由其内部的mSurfaceTexture来管理。</li>
 </ol>
-<p><img src="images/android_graphic_system_13.png" alt=""></p>
-<p><img src="images/android_graphic_system_14.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_13.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_14.png" alt=""></p>
 <p>图 11‑19 应用程序与BufferQueue的对应关系</p>
 <hr>
 <h1 id="SurfaceFlinger"><a href="#SurfaceFlinger" class="headerlink" title="SurfaceFlinger"></a>SurfaceFlinger</h1><h2 id="Project-Butter黄油计划"><a href="#Project-Butter黄油计划" class="headerlink" title="Project Butter黄油计划"></a>Project Butter黄油计划</h2><p>原文：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954869" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954869</a></p>
 <p>CPU、GPU负责渲染帧数据，Display负责屏幕的显示。<br>FPS（Frame peer Second） 代表CPU、GPU每秒能够渲染的桢数量。<br>刷新率 代表 显示设备的刷新率。<br>VSync(垂直同步)是VerticalSynchronization的简写，它利用VBI时期出现的vertical sync pulse来保证双缓冲在最佳时间点才进行交换。</p>
-<p><img src="images/android_graphic_system_15.png" alt=""><br>图 11‑22绘图过程没有采用VSync同步的情况</p>
-<p><img src="images/android_graphic_system_16.png" alt=""><br>图 11‑25 FPS低于屏幕刷新率的情况</p>
+<p><img src="/_images/android_graphic_system_15.png" alt=""><br>图 11‑22绘图过程没有采用VSync同步的情况</p>
+<p><img src="/_images/android_graphic_system_16.png" alt=""><br>图 11‑25 FPS低于屏幕刷新率的情况</p>
 <p>当CPU/GPU的处理时间超过16ms时，第一个VSync到来时，缓冲区B中的数据还没有准备好，于是只能继续显示之前A缓冲区中的内容。而B完成后，又因为缺乏VSync pulse信号，它只能等待下一个signal的来临。于是在这一过程中，有一大段时间是被浪费的。当下一个VSync出现时，CPU/GPU马上执行操作，此时它可操作的buffer是A，相应的显示屏对应的就是B。这时看起来就是正常的。只不过由于执行时间仍然超过16ms，导致下一次应该执行的缓冲区交换又被推迟了——如此循环反复，便出现了越来越多的“Jank”。</p>
 <p>为了避免tear，当FPS &gt; 刷新率时，采用双缓冲技术。当收到VSync，CPU/GPU立即开始准备新的frame；而Display则显示之间已经准备好的frame。<br>当FPS &lt; 刷新率时，采用三缓冲技术，保证frame准备好能够尽快显示。这时候如果采用双缓冲，准备好的帧可能需要等待近一个VSync周期才能显示。</p>
 <h2 id="SurfaceFlinger的启动与工作原理"><a href="#SurfaceFlinger的启动与工作原理" class="headerlink" title="SurfaceFlinger的启动与工作原理"></a>SurfaceFlinger的启动与工作原理</h2><p>原文：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954951" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954951</a></p>
 <h2 id="SurfaceComposerClient"><a href="#SurfaceComposerClient" class="headerlink" title="SurfaceComposerClient"></a>SurfaceComposerClient</h2><p>原文：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954957" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954957</a></p>
-<p><img src="images/android_graphic_system_17.png" alt=""><br>图 11‑28 每个应用程序在SurfaceFlinger中都对应一个Client</p>
+<p><img src="/_images/android_graphic_system_17.png" alt=""><br>图 11‑28 每个应用程序在SurfaceFlinger中都对应一个Client</p>
 <p>SurfaceFlinger运行于SystemServer这一系统进程中，需要UI界面显示的应用程序则通过binder服务与它进行跨进程通信。在音频系统的学习中，每一个AudioTrack在AudioFlinger中都可以找到一个对应的Track实现。这种设计方式同样适用于显示系统，即任何有UI界面的程序都在SurfaceFlinger中有且仅有一个Client实例。</p>
 <p>应用程序与SurfaceFlinger间的接口是<strong>ISurfaceComposerClient</strong>，<strong>Client</strong>的父类是BnSurfaceComposerClient,它是这一接口的本地端实现。</p>
 <p>ISurfaceComposerClient接口中最重要的两个方法createSurface()和destroySurface()分别用于向SurfaceFlinger申请和销毁一个ISurface。<strong>那么既然有了Client，为什么还要再引出另一个binder对象呢？</strong></p>
 <p>这是因为每个SurfaceFlinger的<strong>客户程序</strong>都只会有唯一一个Client连接，但它们<strong>内部拥有的Surface数量却很可能有多个</strong>。通常情况下，同一个Activity中的UI布局共用系统分配的Surface进行绘图，但像SurfaceView这种UI组件就是特例——它独占一个Surface进行绘制。举个例子来说，如果我们制作一个带SurfaceView的视频播放器，其所在的应用程序最终就会有不止一个的Surface存在。这样设计是必须的，因为播放视频对刷新频率要求很高，采用单独的Surface既可以保证视频的流畅度，也同时能让用户的交互动作(比如触摸屏操作)及时得到响应。</p>
-<p><img src="images/android_graphic_system_18.png" alt=""></p>
+<p><img src="/_images/android_graphic_system_18.png" alt=""></p>
 <h1 id="VSync"><a href="#VSync" class="headerlink" title="VSync"></a>VSync</h1><p>原文：<a href="http://blog.csdn.net/xuesen_lin/article/details/8954986" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8954986</a></p>
 <p>Android 4.1显示系统中的新特性，其中一个就是加入了VSync同步。<br>VSync信号是如何产生的呢？<br>在Android源码surfaceflinger目录下有一个displayhardware文件夹，其中HWComposer的主要职责之一，就是用于产生VSync信号。<strong>VSync信号源 可以是硬件的，也可以是软件模拟的</strong>。<br>分析HWComposer::HWComposer（…）,假如当前系统可以成功加载HWC_HARDWARE_MODULE_ID=“hwcomposer”，并且通过这个库模块能顺利打开设备(hwc_composer_device_t)，其版本号又大于HWC_DEVICE_API_VERSION_0_3的话，我们就采用“<strong>硬件源</strong>”(此时needVSyncThread为false)，否则需要创建一个新的VSync线程来模拟产生信号。</p>
 <h2 id="VSync信号的产生和分发"><a href="#VSync信号的产生和分发" class="headerlink" title="VSync信号的产生和分发"></a>VSync信号的产生和分发</h2><h2 id="VSync信号的处理"><a href="#VSync信号的处理" class="headerlink" title="VSync信号的处理."></a>VSync信号的处理.</h2><p><a href="http://blog.csdn.net/xuesen_lin/article/details/8955012" target="_blank" rel="external">http://blog.csdn.net/xuesen_lin/article/details/8955012</a></p>
@@ -415,15 +415,15 @@ gralloc.[ro.arch].so
       <ul>
         
           <li>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
             <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
           </li>
         
           <li>
             <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
