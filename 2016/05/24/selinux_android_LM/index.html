@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>【译】AndroidL和AndroidM的SEAndroid状态与展望 | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="原文是在Linux Sercurity Submit 2015 会议中的PPTSELinux in Android Lollipop and Marshmallow。
+从Android4.4开始，SELinux被应用于保护Android的可信计算基(TCB).
+AndroidL在AndroidL中，SELinux的状态是：
+所有的系统和应用都是受约束的，包括root守护进程
+只有kernel和in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】AndroidL和AndroidM的SEAndroid状态与展望">
+<meta property="og:url" content="http://yoursite.com/2016/05/24/selinux_android_LM/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="原文是在Linux Sercurity Submit 2015 会议中的PPTSELinux in Android Lollipop and Marshmallow。
+从Android4.4开始，SELinux被应用于保护Android的可信计算基(TCB).
+AndroidL在AndroidL中，SELinux的状态是：
+所有的系统和应用都是受约束的，包括root守护进程
+只有kernel和in">
+<meta property="og:updated_time" content="2016-06-13T00:52:52.478Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【译】AndroidL和AndroidM的SEAndroid状态与展望">
+<meta name="twitter:description" content="原文是在Linux Sercurity Submit 2015 会议中的PPTSELinux in Android Lollipop and Marshmallow。
+从Android4.4开始，SELinux被应用于保护Android的可信计算基(TCB).
+AndroidL在AndroidL中，SELinux的状态是：
+所有的系统和应用都是受约束的，包括root守护进程
+只有kernel和in">
+  
+    <link rel="alternate" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-selinux_android_LM" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/24/selinux_android_LM/" class="article-date">
+  <time datetime="2016-05-24T03:21:49.000Z" itemprop="datePublished">2016-05-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/android/">android</a>►<a class="article-category-link" href="/categories/android/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      【译】AndroidL和AndroidM的SEAndroid状态与展望
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原文是在Linux Sercurity Submit 2015 会议中的PPT<a href="http://kernsec.org/files/lss2015/lss2015_selinuxinandroidlollipopandm_smalley.pdf" target="_blank" rel="external">SELinux in Android Lollipop and Marshmallow</a>。</p>
+<p>从Android4.4开始，SELinux被应用于保护Android的可信计算基(TCB).</p>
+<h1 id="AndroidL"><a href="#AndroidL" class="headerlink" title="AndroidL"></a>AndroidL</h1><h2 id="在AndroidL中，SELinux的状态是："><a href="#在AndroidL中，SELinux的状态是：" class="headerlink" title="在AndroidL中，SELinux的状态是："></a>在AndroidL中，SELinux的状态是：</h2><ul>
+<li>所有的系统和应用都是受约束的，包括root守护进程</li>
+<li>只有kernel和init进程是“未约束”的。</li>
+<li>即使这两个域也不能为所欲为。</li>
+</ul>
+<h2 id="SELinux是如何保护TCB？"><a href="#SELinux是如何保护TCB？" class="headerlink" title="SELinux是如何保护TCB？"></a>SELinux是如何保护TCB？</h2><ul>
+<li>没有进程可以map低端内存，或者访问/deb/{k}/mem</li>
+<li>只有init可以设置内核配置和策略</li>
+<li>只有recovery可以修改/和/system目录，这两个目录分别代表rootfs和system分区</li>
+<li>本地服务只能从/和/system上开始执行。</li>
+<li>只有debuggerd可以执行ptrace调用</li>
+<li>应用不能写大多数netlink 套接字</li>
+<li>应用不能写大多数service 套接字</li>
+<li>不容许读取和follow不可信的符号链接。</li>
+</ul>
+<h2 id="SElinux如何保护系统服务？"><a href="#SElinux如何保护系统服务？" class="headerlink" title="SElinux如何保护系统服务？"></a>SElinux如何保护系统服务？</h2><p>以 负责提供密钥的安全存储的Android KeyStore 为例：</p>
+<ul>
+<li>SELinux 内核增强防护：<ul>
+<li>没有进程可以ptract keystore</li>
+<li>没有其他进程可以打开/data/misc/keystore 文件</li>
+</ul>
+</li>
+<li>SELinux 用户空间访问控制：<ul>
+<li>敏感操作由selinux策略进行限制</li>
+<li>keystore 在客户请求时，检查相应的selinux 策略</li>
+</ul>
+</li>
+</ul>
+<h2 id="AndroidL-CTS-of-SELinux"><a href="#AndroidL-CTS-of-SELinux" class="headerlink" title="AndroidL CTS of SELinux"></a>AndroidL CTS of SELinux</h2><p>对于一个正常androidL及更新的版本，其必须要满足的基本原则是：</p>
+<ul>
+<li>所有的域都处于enforcing状态</li>
+<li>只有init运行在init域</li>
+<li>只有kernel 线程运行在kernel域</li>
+<li>android核心服务运行在各自独立的域中</li>
+<li>正常版本中，不应该存在进程运行在su域和recovery域</li>
+<li>不支持policy booleans</li>
+</ul>
+<h1 id="Android-6-0-Marshmallow-“M”"><a href="#Android-6-0-Marshmallow-“M”" class="headerlink" title="Android 6.0 Marshmallow (“M”)"></a>Android 6.0 Marshmallow (“M”)</h1><h2 id="SELinux-新变化"><a href="#SELinux-新变化" class="headerlink" title="SELinux 新变化"></a>SELinux 新变化</h2><ul>
+<li>ioctl 白名单支持</li>
+<li>增强的android多用户支持</li>
+<li>增强的chrome沙箱</li>
+<li>Binder 锁定</li>
+<li>策略加固</li>
+<li>CTS 强化</li>
+</ul>
+<h2 id="Android-多用户"><a href="#Android-多用户" class="headerlink" title="Android 多用户"></a>Android 多用户</h2><p>Android多用户机制，在Android4.2中引入平板中，从AndroidL中开始支持Phone。Android多用户机制是受控受限配置的基础，如Android for Work。</p>
+<h2 id="SELinux和Android-多用户"><a href="#SELinux和Android-多用户" class="headerlink" title="SELinux和Android 多用户"></a>SELinux和Android 多用户</h2><ul>
+<li>目标：加强android多用户的透明隔离 而无需复杂的策略</li>
+<li>将用户id映射为惟一的MLS级别（mls categories），指派给应用进程和文件</li>
+<li>MLS约束将防止不同级别间的通讯（binder中间层除外）</li>
+<li>不同的用户的进程自动被赋予不同的级别</li>
+<li>SElinux防止跨级别的通信：发送信号，访问/proc/pid,打开应用数据文件，本地socet</li>
+<li>无需额外的针对每个用户或者每个应用的策略配置。mls机制搞定一切</li>
+</ul>
+<h2 id="Chrome沙箱"><a href="#Chrome沙箱" class="headerlink" title="Chrome沙箱"></a>Chrome沙箱</h2><h2 id="BInder锁定-Locking-down"><a href="#BInder锁定-Locking-down" class="headerlink" title="BInder锁定(Locking down)"></a>BInder锁定(Locking down)</h2><h2 id="策略加固"><a href="#策略加固" class="headerlink" title="策略加固"></a>策略加固</h2><ul>
+<li>强制init 在exec时进行域转换，所有的服务和辅助程序都运行在独立的域之中</li>
+<li>锁定块设备的访问：防止对关键分区的直接访问；限制每个域只能访问必需的分区</li>
+<li>移除非受限域：init和kernel 也不是非受限域了。</li>
+<li>更多额度neverallow规则</li>
+</ul>
+<h2 id="CTS-增强"><a href="#CTS-增强" class="headerlink" title="CTS 增强"></a>CTS 增强</h2><h1 id="将来"><a href="#将来" class="headerlink" title="将来"></a>将来</h1><ul>
+<li>Enable apps to opt into stronger protections：Sandboxing, isolation, file protection</li>
+<li>调查新的运行时权限策略(AndroidM)</li>
+<li>改进SELinux工具</li>
+<li>未来的用户空间策略增强</li>
+<li>内核自保护</li>
+</ul>
+<p>References:</p>
+<ul>
+<li>Source code: <a href="https://bitbucket.org/seandroid" target="_blank" rel="external">https://bitbucket.org/seandroid</a></li>
+<li>Project page: <a href="http://seandroid.bitbucket.org" target="_blank" rel="external">http://seandroid.bitbucket.org</a></li>
+<li>ToDo list: <a href="https://bitbucket.org/seandroid/wiki/wiki/ToDo" target="_blank" rel="external">https://bitbucket.org/seandroid/wiki/wiki/ToDo</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/24/selinux_android_LM/" data-id="cipdbh0n7000lx7jwkjj01qrp" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/05/26/selinux_resources/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          SELinux 资源索引
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/25/byod_ultimate_guide_CN/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">【译】BYOD终极指南</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Berg<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

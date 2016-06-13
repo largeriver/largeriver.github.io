@@ -64,10 +64,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-dm-crypt简介" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/06/12/dm-crypt简介/" class="article-date">
-  <time datetime="2016-06-12T09:09:52.000Z" itemprop="datePublished">2016-06-12</time>
+    <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/" class="article-date">
+  <time datetime="2016-06-13T01:04:41.834Z" itemprop="datePublished">2016-06-13</time>
 </a>
     
   <div class="article-category">
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/12/dm-crypt简介/">dm-crypt简介</a>
+      <a class="article-title" href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
     </h1>
   
 
@@ -90,20 +90,427 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>dm-crypt是一个透明磁盘加密子系统，建立在2.6版本内核的device-mapper特性之上的,使用了内核密码应用编程接口实现了透明的加密。<br>与早期的cryptoloop不同，dm-crypt被设计为支持更高级的操作，如XTS、LRW和ESSIV，以便避免水印攻击。<br>dm-crypt 作为一个设备映射器目标(device-mapper target)来实现,可以被堆叠在其他设备映射器的顶端。因此，它可以用来加密整个磁盘、分区、raid卷、逻辑卷以及文件。</p>
-<h1 id="设备映射器-device-mapper"><a href="#设备映射器-device-mapper" class="headerlink" title="设备映射器 device-mapper"></a>设备映射器 device-mapper</h1><p>设备映射器是设计用来为在实际的块设备之上添加虚拟层提供一种通用灵活的方法, 用于将一个块设备映射到另一个块设备。除了提供加密功能，设备映射器还为LVM、软RAID提供支持，并为系统添加了一些诸如文件系统快照之类的附加特性。<br>设备映射器相当于一个过滤装置，它从它自己提供的虚拟块设备中获得数据并对它们进行处理，然后才把它们传递给另一个块设备。<br>当设备映射器被用于数据加密时，它会在/dev/mapper/目录下创建一个新的块设备。对于用户来说，这个虚拟设备和系统上的其它任何块设备在使用时没有区别。设备映射器（更确切地说是设备映射器的dm-crypt模块）使用对称加密算法，如AES，对输入该虚拟设备的所有数据进行加密。加密后的数据被传输到另一个块设备加以保存。</p>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
-<li><a href="https://en.wikipedia.org/wiki/Dm-crypt" target="_blank" rel="external">https://en.wikipedia.org/wiki/Dm-crypt</a></li>
-<li><a href="http://wiki.ubuntu.org.cn/index.php?title=EncryptedFilesystemHowto&amp;variant=zh-cn#.E5.8A.A0.E5.AF.86.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" target="_blank" rel="external">EncryptedFilesystemHowto</a></li>
-</ul>
+        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
+<hr>
+<h1 id="策略1（FAILED）"><a href="#策略1（FAILED）" class="headerlink" title="策略1（FAILED）"></a>策略1（FAILED）</h1><p>先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file</p>
+<pre><code>file_contexts
+/data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
+------------------------------
+file.te:
+type eeprom_data_file, file_type, data_file_type;
+------------------------------
+cpnoui.te
+allow cpnoui eeprom_data_file:file create;
+</code></pre><p>不过，该策略并不能工作，其denied日志如下：</p>
+<pre><code>type=1400 audit(1463139871.920:5): avc: denied { create } for pid=167 comm=&quot;sh&quot; name=&quot;eeprom_data_from_sysprops.tmp&quot; scontext=u:r:cpnoui:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=0
+</code></pre><p>WHY？</p>
+<hr>
+<h1 id="策略2-just-works"><a href="#策略2-just-works" class="headerlink" title="策略2 (just works)"></a>策略2 (just works)</h1><p><strong>file_contexts是用户空间配置，其作用是：1）编译时，编译系统使用该文件标记初始文件系统镜像； 2）运行时，init/ueventd等程序使用该文件来决定其创建的文件系统、目录的安全标签。</strong></p>
+<p>内核实际上用不到file_contexts，因此无法影响运行时的文件安全标记。要做到这一点，你可以使用type_transition规则，例如：</p>
+<pre><code>type_transition cpnoui system_data_file:file eeprom_data_file;
+</code></pre><p>因此，完整的策略定义是：</p>
+<pre><code>file.te:
+type eeprom_data_file, file_type, data_file_type;
+------------------------------
+cpnoui.te
+type_transition cpnoui system_data_file:dir eeprom_data_file;
+type_transition cpnoui system_data_file:file eeprom_data_file;
+allow cpnoui system_data_file:dir {  remove_name add_name };
+allow cpnoui eeprom_data_file:dir { create_dir_perms remove_name add_name };
+allow cpnoui eeprom_data_file:file { create_file_perms };
+</code></pre><hr>
+<h1 id="策略3-（推荐）"><a href="#策略3-（推荐）" class="headerlink" title="策略3 （推荐）"></a>策略3 （推荐）</h1><p>较好的方法应该在init.<board>.rc中创建该专有目录，这种方法的好处是：</board></p>
+<ol>
+<li>init 进程将会根据file_contexts来决定该专有目录和目录下的文件的安全标记。</li>
+<li>cpnoui进程无需system_data_file:dir { write add_name } 权限</li>
+<li>当cpnoui进程在该专有目录中继续创建文件或者文件夹时，将自动继承父目录的安全标记。</li>
+</ol>
+<p>所以，最终的策略是怎样的呢？</p>
+<pre><code>file_contexts
+/data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
+-----------------------------
+file.te:
+type eeprom_data_file, file_type, data_file_type;
+------------------------------
+cpnoui.te
+allpw cpnoui eeprom_data_file:dir rw_dir_perms;
+allow cpnoui eeprom_data_file:file create_file_perms;
+------------------------------
+init.&lt;board&gt;.rc
+mkdir /data/eeprom_data_from_sysprops.tmp
+</code></pre><hr>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://seandroid-list.tycho.nsa.narkive.com/mLU2RVyz/regarding-issue-in-defining-file-in-file-contexts" target="_blank" rel="external">http://seandroid-list.tycho.nsa.narkive.com/mLU2RVyz/regarding-issue-in-defining-file-in-file-contexts</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/dm-crypt简介/" data-id="cipcdeulw0000xpjw5pf4wsm4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/selinux_howto_create_data_dir_for_app/" data-id="cipdbhy700000y1jwbegf7de2" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crypt/">crypt</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-selinux_implement_as_LSM" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/selinux_implement_as_LSM/" class="article-date">
+  <time datetime="2016-06-13T00:52:52.478Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>[TOC]</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。</p>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
+<li>LSM(linux security modules): Linux 安全模块</li>
+<li>hook function：钩子函数</li>
+<li>security field：安全字段</li>
+<li>System V IPC: 系统5 进程间通讯机制</li>
+<li>access control：访问控制</li>
+<li>help function：辅助函数</li>
+</ul>
+<h2 id="主要文件"><a href="#主要文件" class="headerlink" title="主要文件"></a>主要文件</h2><ul>
+<li><strong>include/linux/security.h</strong>： LSM所有的钩子函数; 通用接口；详细的文档。</li>
+<li><strong>security/security.c</strong>: 通用接口的实现，主要是将钩子函数的回调封装为函数。<figure class="highlight plain"><figcaption><span>security_cred_alloc_blank(struct cred *cred, gfp_t gfp)&#123;	return security_ops->cred_alloc_blank(cred, gfp);&#125;```</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br></pre></td><td class="code"><pre><span class="line">* **security/selinux/hooks.c** LSM钩子函数的SELinux代码实现</span><br><span class="line">* **security/capability.c** capabilities 模块,也是linux的默认模块</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 3 概览</span><br><span class="line">LSM 框架提供了一种机制，让各种安全检查可以通过钩子函数挂在新的内核扩展上。LSM可以配置所需要的安全模块的名称：</span><br><span class="line"></span><br><span class="line">* 内核编译选项 CONFIG_DEFAULT_SECURITY</span><br><span class="line">* 内核命令行参数 &quot;security=...&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">LSM框架在内核数据结构中增加了security字段，在内核代码的关键点插入了对hook函数的调用，以便管理安全字段和执行访问控制。它也增加了用于注册和反注册安全模块的函数。用于新安全名字空间的扩展属性句柄（extended attribute handlers）被加入到文件系统中，以支持新的文件安全属性；在用于空间，引入了/proc/pid/attr子目录，以提供对新的进程安全属性的用户空间访问。</span><br><span class="line"></span><br><span class="line">LSM security field  仅仅是简单的void*指针。对于进程和程序执行安全信息，security fields 被加入到struct task_struct和struct linux_binprm。对于文件系统安全信息，一个security filed被加入了struct super_block。对于pipe，fifo 和socket 安全信息，security fields被计入了struct sock。为了System V IPC的安全信息，security fields被加入了struct kern_ipc_perm和 struct msg_msg。</span><br><span class="line"></span><br><span class="line">每一个LSM 都是 在全局表security_ops中的一个函数指针，该全局表定义在**include/linux/security.h**中（该文件也包含了钩子函数详尽的文档）。钩子函数基于内核目标被逻辑分组为task、file、sock等等，以及一些用于系统操作的琐碎的钩子。</span><br><span class="line"></span><br><span class="line">全局表security_ops被初始化为一个dummy 安全模块所提供的钩子函数集，该模块支持传统的superuser 逻辑。register_security 函数(security/security.c)用于容许一个安全模块将security_ops执行自己的钩子函数集，而unregister_security 则相反，用于将security_ops指向dummy安全模块。该机制用于设置主安全模块，它负责为每个钩子做出最终决策。</span><br><span class="line"></span><br><span class="line">LSM也提供了一个简单的机制，用于在主安全模块上堆叠额外的安全模块。LSM在security_operations 结构中定义了register_security和unregister_security钩子，并提供了mod_reg_security和mod_unreg_security函数来在执行了某些合理性检查后调用这些钩子。这些辅助安全模块堆叠后如何被调用，由主模块来决定。</span><br><span class="line"></span><br><span class="line">尽管LSM 钩子按照内核对象来组织，所有的钩子函数都可以分为两类：</span><br><span class="line"></span><br><span class="line">* 用于管理security field的钩子。例如用于含有security field的每个内核数据结构的alloc_security和free_security钩子</span><br><span class="line">* 用于执行访问控制的钩子。例如 inode_permission钩子，在访问inode时执行检查。</span><br><span class="line"></span><br><span class="line"># 4 基本概念</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 5 新版SELinux(基于LSM) 内核实现与 旧版SELinux内核实现的对比</span><br><span class="line"># 5.1 通用改变</span><br><span class="line"></span><br><span class="line">* 安全中间层的增加</span><br><span class="line">* 动态分配安全字段</span><br><span class="line">* 与capabilities的堆叠</span><br><span class="line">* SELinux API的重新设计</span><br><span class="line">* 利用现存的linux permission函数</span><br><span class="line"></span><br><span class="line">## 5.2 程序执行相关的改变</span><br><span class="line">### 5.2.1 Filr execute_no_trans 权限</span><br><span class="line"></span><br><span class="line">在初始SELinux内核patch中，file execute权限控制了程序发起执行的能力；process execute权限则控制从一个可执行image执行代码的能力。 这种区分是必要的，因为任何的SID可能在执行时改变。然而，当进程的SID改变时，process execute 权限与process entrypoint 权限是相同的，因此冗余了，因此其仅在SID不改变时起作用。</span><br><span class="line"></span><br><span class="line">因此，process execute权限被file execute_no_trans权限所替代了，在任务的SID不变时检查；process  entrypoint 也被移动到了file class之中，为了保持一致性。</span><br><span class="line"></span><br><span class="line">总结：</span><br><span class="line"></span><br><span class="line">* SID不变时，检查file:execute, file:excute_no_trans</span><br><span class="line">* SID改变时，检查file:execute, process:transition 和 file:entrypoint</span><br><span class="line"></span><br><span class="line">### 5.2.2 状态的继承</span><br><span class="line">当执行execv函数导致上下文切换时，继承的状态将有一些 改变。这些改变包括：文件描述符继承控制的改变，进程跟踪和状态共享的控制改变，新控制的增加。</span><br><span class="line"></span><br><span class="line">在程序执行时的文件描述符继承权限检查也基于LSM的SELinux中被修订，我们在5.3.4节中讨论。</span><br><span class="line"></span><br><span class="line">在旧版的SELinux内核补丁中，对程序跟踪和共享进程状态的检查 被插入了内核函数 compute_creds。然而该函数不能返回错误，因此当检查失败时，SELinux只能不改变SID，如同Linux在测试失败时不修改uid一样。</span><br><span class="line"></span><br><span class="line">新版SELinux中，实现了新的权限检查来控制 信号相关的状态、资源限制的继承性，这些检查描述在12.1.4节。此外，AT_SECURE标识增加到了ELF 辅助表中，这样在执行execv并发生上下文转换时，SELinux就能够通知glibc 容许该进程自己的secure mode，以便清理环境变量以及其他一些继承状态。这个行为也受到权限检查的控制，请参考12.1.6。</span><br><span class="line"></span><br><span class="line">## 5.3 文件系统的改变</span><br><span class="line"></span><br><span class="line">新版对比旧版的改变：</span><br><span class="line"></span><br><span class="line">* 使用扩展属性，而不是通过映射来保存文件的安全上下文</span><br><span class="line">* 重新实现了对伪文件系统的安全标记的支持</span><br><span class="line">* 利用现存permission函数的hook</span><br><span class="line">* 消除了class pipe</span><br><span class="line"></span><br><span class="line">## 5.4  socket ipc和网络的改变</span><br><span class="line"></span><br><span class="line">新版SELinux和旧版SELinux在socket IPC和网络方面的修改包括：</span><br><span class="line"></span><br><span class="line">* 重新设计了网络访问控制机制</span><br><span class="line">* 在socket对应的inode节点的security字段存储安全信息</span><br><span class="line">* 使用最低限度的侵入hook 来重新实现了SELinux 访问控制</span><br><span class="line">* 改变了fd传输控制</span><br><span class="line">* 省略了某些底层ioctl</span><br><span class="line">* 实现了扩展的socket调用。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 5.5 System V IPC</span><br><span class="line"></span><br><span class="line">由于在基于LSM重新实现SELinux之前，System V IPC 安全增强还没来得及从2.2移植到2.4，所以新版的SELinux模块不得不使用SELinux 安全增强的实现来适配到2.4。</span><br><span class="line">此外，新版SELinux与旧版SELinux在System V IPC上的修改还包括：</span><br><span class="line"></span><br><span class="line">* 一种更容易的存储IPC安全数据的方式</span><br><span class="line">* 利用现存的ipcperms函数中的hook</span><br><span class="line"></span><br><span class="line">## 5.6 零碎改变</span><br><span class="line"></span><br><span class="line">* 重新实现了sysctl 的控制方式</span><br><span class="line">* 对在旧版SELinux实现中某些未特别处理的系统操作增加了新的控制，例如syslog，该操作之前仅由粗粒度的capabel来控制</span><br><span class="line">* 在2.6 版本的SELinux中引入了对netlink 合适粒度的控制。请参考19章</span><br><span class="line"></span><br><span class="line"># 6 内部架构</span><br><span class="line">本章描述了SELinux安全模型的内部架构，相关代码在内核树的security/selinux 目录中。安全模型包含六个主要组件：</span><br><span class="line"></span><br><span class="line">* the Sercurity Server：安全服务</span><br><span class="line">* the access vector cache（AVC）</span><br><span class="line">* the network interface table：网络接口表</span><br><span class="line">* the netlink event notification code（用以通知策略的变更）：netlink事件通知</span><br><span class="line">* the selinuxfs pseudo filesystem：selinux 伪文件系统</span><br><span class="line">* the hook function implementations：钩子函数的实现</span><br><span class="line"></span><br><span class="line">SS提供的通用接口包括：获取策略决策，容许安全模型的其他部分独立于所使用的特定安全策略。这些接口定义在SELinux目录中的include/security.h。SS的特定实现可以被修改或者完全替换，而不要求修改模型的其他部分。例如：SELinux 复合实现了RBAC、TE和MLS。RBAC和TE是高度可配置的，能够满足多种不同的安全目标。可以在ss子目录中找到样例SS。</span><br><span class="line"></span><br><span class="line">AVC提供了从SS获取到的对访问决策的缓冲，以便最小化SELinux机制的性能开销。AVC给钩子函数提供了接口以便进行权限检查，给SS提供了接口以管理缓冲。</span><br><span class="line"></span><br><span class="line">网络接口表 提供网络设备到安全上下文的映射关系。维护一个单独的接口表是必须的，因为LSM网络设备security field 被拒绝了。在第一次通过钩子函数查找网络设备时，他们被加入这个表格；在网络设备被关闭，或者策略重载时，网络设备从该表格中移除。网络接口表提供了一个接口（定义在include/netif.h），用于钩子函数查找并获取某个网络设备相关的SID。回调函数 则被注册，用于在设备配置改变或者策略重载时得到通知。网络接口表的代码在netif.c中。</span><br><span class="line"></span><br><span class="line">netlink事件通知代码则用于： 在策略重载或者enforcing状态被改变时，SELinux模块通知各个进程。这些通知被用户空间AVC同内核保持一致。相关代码在netlink.c中。</span><br><span class="line"></span><br><span class="line">selinuxfs 伪文件系统 输出安全服务策略到进程中。初期的SELinux 内核API，作为linux2.6重设计的一部分，被分解为三组正交的组件（进程属性，文件属性，策略API）。selinuxfs提供了对策略API调用的底层支持。在新内核API中，这三个组件被封装在更高层的libselinux API中。selinuxfs.c</span><br><span class="line"></span><br><span class="line">钩子函数的实现 管理内核对象相关的安全信息，为每个内核操作执行SElinux访问控制。钩子函数调用SS和AVC来获取策略决策，使用那些决策来标记和控制内核对象。 钩子函数也调用文件系统扩展属性代码来获取和设置文件的安全上下文。这些钩子函数的代码实现位于hooks.c ,并且内核对象相关安全信息的数据结构定义在include/object.h之中。</span><br><span class="line"></span><br><span class="line">LSM钩子函数的位置，与旧版SELinux patch的插入点位置，并不总是一一对应。LSM利用了现存的NetFilter框架来支持许多网络操作上的钩子。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 7 初始化</span><br><span class="line">SELinux的初始化由**selinux_init**函数开始，在内核初始化早期被调用；SELinux的某些方面需要延迟到内核初始化后期，由普通的initcall来处理，例如：selinux_nf_ip_init,sel_netif_init和init_sel_fs。SELinux 直到初始安全策略被/sbin/init加载后才基本完成，才调用**selinux_complete_init**函数宣告结束。</span><br><span class="line"></span><br><span class="line">## 7.1 selinux_init(hook.c)</span><br><span class="line"></span><br><span class="line">selinux_init 用于处理SELinux模块额早期初始化，其主要工作包括：</span><br><span class="line"></span><br><span class="line">* 设置initial 任务的安全状态</span><br><span class="line">* 调用avc_init初始化AVC。</span><br><span class="line">* 设置次安全模块到原安全模块，通常是dummy，以支持同dummy或者capabilities模块的堆叠。在第8章详细讨论</span><br><span class="line">* 调用register_security函数，将SELinux注册为LSM的主安全模块。</span><br><span class="line"></span><br><span class="line">## 7.2 selinux_nf_ip_init(hook.c)</span><br><span class="line">处理SELinux NetFilter钩子的初始化。NetFilter钩子用于检查发送的报文。该函数调用nf_register_hook函数 来注册 SELinux post-routing 钩子函数，将这些钩子函数注册到NetFilter 框架，用于ipv4和ipv6。详情参见第18章。</span><br><span class="line"></span><br><span class="line">## 7.3 selinux_nf_init(netif.h)</span><br><span class="line"></span><br><span class="line">处理SELinux网络接口表的初始化：</span><br><span class="line"></span><br><span class="line">* 初始化SELinux 网络接口哈希表</span><br><span class="line">* 注册网络设备提醒器，以便在设备关闭时删除对应表现。</span><br><span class="line">* 注册AVC回调，以便在策略重置时清空整张表。</span><br><span class="line"></span><br><span class="line">## 7.4 selnl_init(netlink.c)</span><br><span class="line">创建一个SELinux netlink套接字，并容许非root进程接收通知。</span><br><span class="line"></span><br><span class="line">## 7.5 init_sel_fs(selinuxfs.c)</span><br><span class="line"></span><br><span class="line">初始化selinuxfs伪文件系统。它注册了selinuxfs 文件系统类型，并创建了一个私有的内核mount点，这样创建了公开的selinuxfs 文件系统，并创建了一个特殊的null device 节点。在执行execve并改变进程上下文时，该节点 被SELinux用于关闭未授权的文件。</span><br><span class="line"></span><br><span class="line">This function, located in the selinuxfs.c file, handles initialization of the selinuxfs pseudo filesystem.</span><br><span class="line">It registers the selinuxfs filesystem type and creates a private kernel mount of selinuxfs. This results in a populated selinuxfs filesystem and sets up the special null device node used by SELinux when it closes unauthorized files upon a context-changing execve.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 7.6 selinux_complete_init(hooks.c)</span><br><span class="line"></span><br><span class="line">在/sbin/init完成初始策略的加载后调用，标志着SELinux初始化的结束。</span><br><span class="line"></span><br><span class="line">* 该函数遍历先于策略加载前的超级块链表，依次调用superblock_init。</span><br><span class="line">* 该函数也调用inode_doinit函数，为任何关联到超级块的现存inode设置安全结构。</span><br><span class="line"></span><br><span class="line"># 8 堆叠</span><br><span class="line">本节描述了SELinux与其他安全模块堆叠支持。LSM仅仅提供了最小的堆叠支持，为该目的提供了钩子，但是将如何堆叠的细节留给了主安全模块。当前，SELinux 安全模块作仅能做为主安全模块，对使用dummy或者capabilities作为次安全模块提供了最小支持。dummy安全模块提供了传统的superuser逻辑。</span><br><span class="line"></span><br><span class="line">如第七章所提到的，selinux_init函数在注册SELinux安全模块之前， 初始化 次安全模块为dummy。这种方式，容许SELInux钩子函数安全的调用次钩子函数。selinux_register_security钩子函数可以设置次安全模块为另外一个模块，如capabilities。而selinux_unregister_security钩子函数 将次安全模块恢复为dummy。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 9 SELinux API</span><br><span class="line"></span><br><span class="line">基于LSM的SELinux API设计策略是减少 侵入性，通过setexecon和setfacreatecon先于普通系统调用设置上下文环境，从而避免引入大量专用的扩展系统调用。</span><br><span class="line"></span><br><span class="line"># 10 hook functions：辅助函数</span><br><span class="line"></span><br><span class="line">## 10.1 原语分配辅助函数</span><br><span class="line">对于include/objsec.h中定义的安全数据结构，SELinux模块提供了 两个原语:alloc_sercurity和free_security，例如，task_alloc_security 和 task_free_security。这些帮助函数被用于alloc_sercurity和free_security, 后者可能包含更多的额外的处理。</span><br><span class="line"></span><br><span class="line">原语alloc_security辅助函数负责分配一个合适类型的安全结构，设置back指针指向对应的内核对象数据结构，初始化安全信息，设置对象的security field以引用新的安全结构。</span><br><span class="line">原语free_security 辅助函数清除security field并释放安全结构。</span><br><span class="line"></span><br><span class="line">## 10.2 初始化辅助函数</span><br><span class="line">SELinux为某些安全结构定义了初始化辅助函数，例如 inode_doinit,superblock_doinit。这些初始化辅助函数被特定SELinux hook函数调用，后面再详细讨论。</span><br><span class="line"></span><br><span class="line">## 10.3 权限检查辅助函数</span><br><span class="line">提供了一套用于内核对象和权限检查的辅助函数：解引用security field，设置辅助审计数据，调用AVC执行权限检查。辅助函数简化了很多执行权限检查的钩子函数。例如:task_has_perm,inode_has_perm和may_create</span><br><span class="line"></span><br><span class="line">尽管这些辅助函数可能非常方便，钩子函数还是被容许自由调用AVC进行权限检查。这种情况是可能发生的，例如，某些权限检查牵扯的SID没有关联内核对象；或者某些操作要求基于相同的某些SID执行多个权限检查。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 11 hook functions：task</span><br><span class="line">## 11.1 管理task security fields</span><br><span class="line">### 11.1.1 task security structure</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    struct task_security_struct &#123;</span><br><span class="line">    	struct task_struct *task;</span><br><span class="line">    	u32 osid;</span><br><span class="line">    	u32 sid;</span><br><span class="line">    	u32 exec_sid;</span><br><span class="line">    	u32 create_sid;</span><br><span class="line">    	u32 ptrace_sid;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">|Field |Description|</span><br><span class="line">|--|--|</span><br><span class="line">|task| Back pointer to the associated task_struct structure.|</span><br><span class="line">|osid| SID prior to the last execve.|</span><br><span class="line">|sid| current SID for the task.|</span><br><span class="line">|exec_sid| SID for the task upon the next execve call.|</span><br><span class="line">|create_sid| SID for files created by the task.|</span><br><span class="line"></span><br><span class="line">### 11.1.2 task_alloc_security and task_free_security</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 11.1.3 selinux_task_reparent_to_init</span><br><span class="line">内核函数reparent_to_init调用该hook 来设置某个内核task的安全属性。该hook 首先调用次安全模块以支持capabilities，然后设置task SID为初始SID kernel。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 11.1.4. selinux_task_post_setuid</span><br><span class="line">在setuid操作成功后调用。既然SELinux模块不适用Linux identify 属性（uid、gid），因此该hook函数不执行任何SELInux处理，而是调用次安全函数来支持linux capabilities。</span><br><span class="line"></span><br><span class="line">### 11.1.5. selinux_task_to_inode</span><br><span class="line">该hook函数由procfs伪文件系统调用，以设置任务相关的/proc/pid的安全状态。该函数根据task SID来设置inode SID，并将该inode 安全结构标记为已初始化的。</span><br><span class="line"></span><br><span class="line">### 11.1.6. selinux_getprocattr</span><br><span class="line">在进程读取/proc/pid/attr下某个节点时，procfs伪文件系统调用该hook 函数从安全模块来获取该进程的安全属性。如果目标任务与当前任务不同，该hook函数将首先检查getattr权限；然后，从task安全结构中提取合适的SID。如果对应SID并没有被设置（例如：没有设置显式的exec SID，任务使用默认的策略行为）,hook将返回一个零长度的结果；否则，hook调用security_sid_to_context ,获取安全上下文，将其拷贝到内核缓冲区并返回其长度。</span><br><span class="line"></span><br><span class="line">### 11.1.7. selinux_setprocattr</span><br><span class="line"></span><br><span class="line">在某个进程试图写/proc/pid/attr下的某个节点时， procfs调用该hook以在设置该进程的安全属性值。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 11.2. Controlling Task Operations</span><br><span class="line">### 11.2.1. Helper Functions for Checking Task Permissions</span><br><span class="line">有几个辅助函数，被用以执行任务权限检查。这些函数和他们的所执行的权限检查在表2中描述。</span><br><span class="line"></span><br><span class="line">* task_has_perm 函数检查一个task是否持有另外一个task的特定权限；</span><br><span class="line">* task_has_capability 函数检查一个task是否使用特定capability的能力。注意，在sepolicy中我们已经知道，这里的主体和客体的相同的。</span><br><span class="line">* task_has_system 检查task是否具有 class system中的某项权限。其target SID = Kernel</span><br><span class="line">* task_has_security 检查task是否有权限使用某个selinuxfs API。其target SID = Security</span><br><span class="line"></span><br><span class="line">除了task_has_perm，这些检查函数都基于一个task，所有target SID没有必要。</span><br><span class="line"></span><br><span class="line">![](images/selinux_implement_as_LSM_01.png)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">从后面的源码可以看出，这些帮助函数最终调用了**avc_has_perm**系列的函数。</span><br><span class="line"></span><br><span class="line">#### task_has_perm</span><br><span class="line">```c</span><br><span class="line">security/selinux/hooks.c</span><br><span class="line">/*</span><br><span class="line"> * Check permission between a pair of tasks, e.g. signal checks,</span><br><span class="line"> * fork check, ptrace check, etc.</span><br><span class="line"> * tsk1 is the actor and tsk2 is the target</span><br><span class="line"> * - this uses the default subjective creds of tsk1</span><br><span class="line"> */</span><br><span class="line">static int task_has_perm(const struct task_struct *tsk1,</span><br><span class="line">			 const struct task_struct *tsk2,</span><br><span class="line">			 u32 perms)</span><br><span class="line">&#123;</span><br><span class="line">	const struct task_security_struct *__tsec1, *__tsec2;</span><br><span class="line">	u32 sid1, sid2;</span><br><span class="line"></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	__tsec1 = __task_cred(tsk1)-&gt;security;	sid1 = __tsec1-&gt;sid;</span><br><span class="line">	__tsec2 = __task_cred(tsk2)-&gt;security;	sid2 = __tsec2-&gt;sid;</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	return avc_has_perm(sid1, sid2, SECCLASS_PROCESS, perms, NULL);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="task-has-capability-cred-has-capability"><a href="#task-has-capability-cred-has-capability" class="headerlink" title="task_has_capability(cred_has_capability)"></a>task_has_capability(cred_has_capability)</h4><p>在kernel 3.4中，task_has_capability被cred_has_capability 取代。</p>
+<p>security/selinux/hooks.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a capability. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">cred_has_capability</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred *cred,</span><br><span class="line">			       <span class="keyword">int</span> cap, <span class="keyword">int</span> audit)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> common_audit_data ad;</span><br><span class="line">	<span class="keyword">struct</span> av_decision avd;</span><br><span class="line">	u16 sclass;</span><br><span class="line">	u32 sid = cred_sid(cred);</span><br><span class="line">	u32 av = CAP_TO_MASK(cap);</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	ad.type = LSM_AUDIT_DATA_CAP;</span><br><span class="line">	ad.u.cap = cap;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (CAP_TO_INDEX(cap)) &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">		sclass = SECCLASS_CAPABILITY;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">		sclass = SECCLASS_CAPABILITY2;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		printk(KERN_ERR</span><br><span class="line">		       <span class="string">"SELinux:  out of range capability %d\n"</span>, cap);</span><br><span class="line">		BUG();</span><br><span class="line">		<span class="keyword">return</span> -EINVAL;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	rc = avc_has_perm_noaudit(sid, sid, sclass, av, <span class="number">0</span>, &amp;avd);</span><br><span class="line">	<span class="keyword">if</span> (audit == SECURITY_CAP_AUDIT) &#123;</span><br><span class="line">		<span class="keyword">int</span> rc2 = avc_audit(sid, sid, sclass, av, &amp;avd, rc, &amp;ad, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">if</span> (rc2)</span><br><span class="line">			<span class="keyword">return</span> rc2;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="task-has-system"><a href="#task-has-system" class="headerlink" title="task_has_system"></a>task_has_system</h4><p>security/selinux/hooks.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a system operation. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_system</span><span class="params">(<span class="keyword">struct</span> task_struct *tsk,</span><br><span class="line">			   u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	u32 sid = task_sid(tsk);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid, SECINITSID_KERNEL,</span><br><span class="line">			    SECCLASS_SYSTEM, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="task-has-security"><a href="#task-has-security" class="headerlink" title="task_has_security"></a>task_has_security</h4><p>security/selinux/selinuxfs.c<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a security operation. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_security</span><span class="params">(<span class="keyword">struct</span> task_struct *tsk,</span><br><span class="line">			     u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">struct</span> task_security_struct *tsec;</span><br><span class="line">	u32 sid = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	tsec = __task_cred(tsk)-&gt;security;</span><br><span class="line">	<span class="keyword">if</span> (tsec)</span><br><span class="line">		sid = tsec-&gt;sid;</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	<span class="keyword">if</span> (!tsec)</span><br><span class="line">		<span class="keyword">return</span> -EACCES;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid, SECINITSID_SECURITY,</span><br><span class="line">			    SECCLASS_SECURITY, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="11-2-2-Hook-Functions-for-Controlling-Task-Operations"><a href="#11-2-2-Hook-Functions-for-Controlling-Task-Operations" class="headerlink" title="11.2.2. Hook Functions for Controlling Task Operations"></a>11.2.2. Hook Functions for Controlling Task Operations</h3><p><img src="images/selinux_implement_as_LSM_02.png" alt=""><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_setpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p, <span class="keyword">pid_t</span> pgid)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__SETPGID);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_getpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__GETPGID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这些钩子函数中，只有3个需要进一步解释:</p>
+<ul>
+<li>selinux_task_kill 钩子函数检查 当前task是否有权限向目标task发送指定的信号。</li>
+<li><p>selinux_task_wait 检查当前task是否有权限等待子task的exit信号，子task可能与当前task有着不同的SID。</p>
+<ul>
+<li>就这两个钩子函数而言，SIGKILL和SIGSTOP有着他们自己独立的权限，因为他们都不能被阻塞。</li>
+<li>SIGCHLD 有着单独的权限，因为其通常由子进程发送给父进程。</li>
+<li>signull权限用于检查是否信号0 被传递给kill，因为它纯粹代表了一种存在测试，而不是分发实际信号。</li>
+<li>对于所有的其他信号，则使用通用的signal权限。</li>
+</ul>
+</li>
+<li><p>selinux_task_rlimit 钩子函数在试图修改硬限制（hardlimit）时检查setrlimit权限，以便硬限制稍后可以被用于软限制（softlimit）上下文转换时的一个安全的reset点。请查看selinux_bprm_creds 关于资源限制继承控制的进一步讨论。</p>
+</li>
+</ul>
+<p>此外，检查ptrace权限时，selinux_ptrace钩子函数也在子任务的security structure中设置了tracer的SID，以便稍后由selinux_bprm_apply_creds和selinux_setprocattr使用。请移步12.1.4和11.1.7查看更多信息。</p>
+<p>有几个task钩子函数并不由SELinux安全模块使用，</p>
+<p>• selinux_task_setuid<br>• selinux_task_setgid<br>• selinux_task_setgroups<br>• selinux_task_prctl</p>
+<p>由于SELinux不依赖于Linux 身份属性，并且既然这些操作仅影响当前进程，所以目前SELinux没有控制这些操作。这些操作的特权方面也已经通过了selinux_capable钩子函数进行了控制。<strong>然而，SELinux也可能在将来控制这些钩子，以在更好的粒度上约束Linux身份更改动作。</strong></p>
+<p>#12 hook functions：程序加载<br>S ELinux binprm 钩子函数 实现了对structure linux_binprm的安全字段的管理，并执行程序加载操作的访问控制检查。</p>
+<h2 id="12-1-管理binprm安全字段"><a href="#12-1-管理binprm安全字段" class="headerlink" title="12.1 管理binprm安全字段"></a>12.1 管理binprm安全字段</h2><h3 id="12-1-1-binprm安全结构"><a href="#12-1-1-binprm安全结构" class="headerlink" title="12.1.1 binprm安全结构"></a>12.1.1 binprm安全结构</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> bprm_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> linux_binprm *	bprm;<span class="comment">//Back pointer to the associated linux_binprm structure.</span></span><br><span class="line">	u32 sid;                   <span class="comment">//SID for the transformed process.</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="built_in">set</span>;         <span class="comment">//Flag indicating whether sid has been set.</span></span><br><span class="line">	<span class="keyword">char</span> unsafe;               <span class="comment">//Flag indicating whether an unsafe transition was attempted.</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="12-1-2-selinux-bprm-alloc-security-and-selinux-bprm-free-security"><a href="#12-1-2-selinux-bprm-alloc-security-and-selinux-bprm-free-security" class="headerlink" title="12.1.2. selinux_bprm_alloc_security and selinux_bprm_free_security"></a>12.1.2. selinux_bprm_alloc_security and selinux_bprm_free_security</h3><h3 id="12-1-3-selinux-bprm-set-security"><a href="#12-1-3-selinux-bprm-set-security" class="headerlink" title="12.1.3. selinux_bprm_set_security"></a>12.1.3. selinux_bprm_set_security</h3><p>在加载新程序时，调用selinux_bprm_set_security钩子函数用以填充linux_binprm安全字段， 并条件执行权限检查。</p>
+<p>在execve脚本时，该钩子函数可能会标调用多次。该函数首先调用辅助安全模块以支持capabilities。如果bprm安全结构中的set 标志已经在先前的对本钩子函数的调用中被设置，这个钩子函数将直接返回。如果策略批准，这将容许在执行脚本时安全转换。自然，这样的转换将仅仅发上在 调用者比新域更可信的情况下，。。。因为脚本是极其可疑的。然而，SELinux容许符合策略的脚本的暗转转换。</p>
+<pre><code>This hook function may be called multiple times during a single execve, e.g. for interpreted scripts. This hook function first calls the secondary security module to support Linux capabilities. If the set flag in the bprm security structure has already been set by a prior call to this hook, this hook merely returns without further processing. This allows security transitions to occur on scripts if permitted by the policy. Naturally, such transitions should only occur when the caller is more trusted than the new domain, as script invocation is subject to an inherent race and scripts are highly susceptible to influence by their caller. However, SELinux does allow transitions on scripts subject to policy, e.g. to support shedding of permissions upon script invocation where the caller is trusted.
+</code></pre><p>该钩子默认设置bprm结构中的SID字段为当前任务的SID。它也将清除任务先前设置的任何文件创建SID，以保证新程序以干净的初始状态启动。该钩子检查当前任务的安全结构，查看是否任务已经指定了下次execve调用的exec SID。如果是，就将使用这个exec SID，执行完毕后再清除；否则，该钩子函数咨询使用security_transition_sid来咨询SS，检查安全策略是否容许转换SID。<strong>如果文件系统使用nosuid选项来加载，那么之前设置的exec SID 和 策略转换SID都将被忽略，新任务的SID 保持不变</strong>。</p>
+<p>该钩子函数然后根据SID是否改变来执行不同的权限检查。在open_exec过程中，selinux_inode_permission钩子已经检查了file execute权限，因此这里并不列出。</p>
+<p>执行程序时，如果新任务的SID不变，将检查file execute_no_trans权限。该权限保证 一个任务被容许执行并不改变其安全属性。例如，尽管登录进程可以执行一个用户shell，它总是同时修改器SID，那么这种情形就无需execute_no_trans权限。</p>
+<p>在任务的SID改变时，将检查process transition权限和file entrypoint 权限。前者检查旧的SID是否被容许转换到新SID；后者保证只能在执行指定程序时才能进入新的SID。</p>
+<h3 id="12-1-4-selinux-bprm-apply-creds"><a href="#12-1-4-selinux-bprm-apply-creds" class="headerlink" title="12.1.4. selinux_bprm_apply_creds"></a>12.1.4. selinux_bprm_apply_creds</h3><p>当执行execve时发生SID转换时，内核调用selinux_bprm_appluy_creds来设置新进程的新安全属性。该钩子函数首先调用capabilities，然后从bprm安全结构中提取新task的SID，并将当前SID拷贝到 task security structure的old SID字段，然后清除bprm security structure中的unsafe标志。如果新SID与旧SID相同，那么该钩子的工作就结束了。</p>
+<p>当任务的SID改变时，可能发生两个额外的权限检查。如果task由clone创建，并且共享了状态，那么需要检查新旧SID间是否有share 权限。如果task正在被跟踪，那么需要检查跟踪者的task SID（保存当前任务的security structure中的 ptrace_sid字段）和新的SID之间的ptrace权限。</p>
+<ul>
+<li>任何一个权限检查的失败，都会导致SID不会改变，并且unsafe标识被设置为真，供随后的selinux_bprm_post_apply_creds使用，然后钩子函数立即返回。</li>
+<li>如果所有的权限都被授予了，钩子函数将当前SID改为新的SID，然后返回。<br><img src="images/selinux_implement_as_LSM_03.png" alt=""></li>
+</ul>
+<h3 id="12-1-5-selinux-bprm-post-apply-creds"><a href="#12-1-5-selinux-bprm-post-apply-creds" class="headerlink" title="12.1.5. selinux_bprm_post_apply_creds"></a>12.1.5. selinux_bprm_post_apply_creds</h3><p>该钩子函数在selinux_bprm_apply_creds之后被调用。它首先检查bprm安全结构中的unsafe标识，如果为真，强制向任务发送SIFKILL并立即退出。然后，它将检查task SID是否改变，如果没有，立即返回。</p>
+<p>否则，如果任务不再被容许访问关联的tty，它将继续调用副主函数flush_unauthorized_files  来撤销对控制tty的访问，并关闭任何不再访问的fd。<strong>然后，它将在每个打开的文件上调用file_has_perm，检查是否任务在新SID中是否还具有相对应的访问权限（即 fd use permission），如果没有，关闭fd。</strong>file_has_perm描述在15.2.1节。为了避免那些期望某些描述符被打开的应用中引入错误，该辅助函数将重打开那些引用null device 节点的描述符，null device节点 在初始化时在selinuxfs中设置。</p>
+<p>。。。</p>
+<h3 id="12-1-6-selinux-bprm-secureexec"><a href="#12-1-6-selinux-bprm-secureexec" class="headerlink" title="12.1.6. selinux_bprm_secureexec"></a>12.1.6. selinux_bprm_secureexec</h3><p>在selinux_bprm_post_apply_creds 之后调用本钩子函数，检查ELF辅助表中AT_SECURE标识是否应该被设置，如果被设置，将使能其安全模式，这将导致libc清理执行环境和其他状态，以防止新程序被调用者以某种形式被影响。</p>
+<p>如果任务 SID已经改变，那么该钩子函数检查新旧SID间的noatsecure权限。如果noatsecure权限被拒绝，该钩子函数将设置 AT_SECURE标识；如果权限检查通过，且UID/GID/capabilities发生改变，该钩子函数继续调用辅助安全模块看是否需要设置AT_SECURE标志；否则，该标志将不设置，libc的secure模式将不被使能。</p>
+<h1 id="13-hook-functions：superblock"><a href="#13-hook-functions：superblock" class="headerlink" title="13 hook functions：superblock"></a>13 hook functions：superblock</h1><p>管理super_block structure的安全字段，执行文件系统操作的安全检查</p>
+<h2 id="13-1-Managing-Superblock-Security-Fields"><a href="#13-1-Managing-Superblock-Security-Fields" class="headerlink" title="13.1. Managing Superblock Security Fields"></a>13.1. Managing Superblock Security Fields</h2><h3 id="13-1-1-Superblock-Security-Structure"><a href="#13-1-1-Superblock-Security-Structure" class="headerlink" title="13.1.1. Superblock Security Structure"></a>13.1.1. Superblock Security Structure</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> superblock_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> super_block* sb;<span class="comment">//Back pointer to the associated superblock.</span></span><br><span class="line">	<span class="keyword">struct</span> list_head <span class="built_in">list</span>;<span class="comment">//Link into list of superblock security structures setup prior to initial policy load.</span></span><br><span class="line">	u32 sid;<span class="comment">//SID for the file system.</span></span><br><span class="line">	u32 def_sid;<span class="comment">//default SID for labeling</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> behavior;<span class="comment">//Labeling behavior to apply to inodes.</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> initialized;<span class="comment">//Flag indicating whether the security structure has been initialized.</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> proc;</span><br><span class="line">	<span class="keyword">struct</span> semaphore sem;<span class="comment">//Semaphore used to synchronize initialization</span></span><br><span class="line">	<span class="keyword">struct</span> list_head isec_head;<span class="comment">//List of inode security structures setup prior to superblock security initialization.</span></span><br><span class="line">	<span class="keyword">spinlock_t</span> isec_lock;<span class="comment">//Lock for list of inode security structures.</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>注意， superblock的安全结构是一个链表结构，why？一个文件系统的superblock将存在多个sercurity structure?</p>
+<h1 id="14-hook-functions：inode"><a href="#14-hook-functions：inode" class="headerlink" title="14 hook functions：inode"></a>14 hook functions：inode</h1><h1 id="15-hook-functions：-File"><a href="#15-hook-functions：-File" class="headerlink" title="15 hook functions： File"></a>15 hook functions： File</h1><p>file 钩子函数管理struct file的安全字段，并为文件操作执行访问控制。每个struct file包含状态信息，例如 便宜、打开标识。既然<strong>fd可以经由execve继承，并且也可能通过IPC传递</strong>，因此它们可能被不同安全属性的进程跨进程共享，因此 这值得分别标记这些结构并控制其使用。此外，也有必要为SIGIO信号在这些结构中保存任务安全信息。</p>
+<h2 id="15-1-Manager-File-Security-Fields"><a href="#15-1-Manager-File-Security-Fields" class="headerlink" title="15.1 Manager File Security Fields"></a>15.1 Manager File Security Fields</h2><h3 id="15-1-1-file-security-struct"><a href="#15-1-1-file-security-struct" class="headerlink" title="15.1.1 file_security_struct"></a>15.1.1 file_security_struct</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> file_security_struct &#123;</span><br><span class="line"><span class="keyword">struct</span> file *file;<span class="comment">//Back pointer to the associated file.</span></span><br><span class="line">u32 sid;<span class="comment">//SID of the open file descriptor</span></span><br><span class="line">u32 fown_sid;<span class="comment">//SID of the file owner; used for SIGIO events</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="15-1-2-file-alloc-security-and-file-free-security"><a href="#15-1-2-file-alloc-security-and-file-free-security" class="headerlink" title="15.1.2. file_alloc_security and file_free_security"></a>15.1.2. file_alloc_security and file_free_security</h3><p>file_alloc_security 将 sid 字段设置为分配file_securityy_struct实例的任务的SID。</p>
+<h3 id="15-1-3-selinux-file-set-fowner"><a href="#15-1-3-selinux-file-set-fowner" class="headerlink" title="15.1.3. selinux_file_set_fowner"></a>15.1.3. selinux_file_set_fowner</h3><p>例如，当执行fcntl（F_SETOWN）命令时，内核调用该钩子函数，将fown_sid字段设置为当前任务的SID。</p>
+<h2 id="15-2-Controlling-File-Operations"><a href="#15-2-Controlling-File-Operations" class="headerlink" title="15.2. Controlling File Operations"></a>15.2. Controlling File Operations</h2><h3 id="15-2-1-file-has-perm"><a href="#15-2-1-file-has-perm" class="headerlink" title="15.2.1. file_has_perm"></a>15.2.1. file_has_perm</h3><p>该辅助函数检查一个任务是否能通过fd以指定的方式访问一个文件。该函数首先设置辅助审计数据，然后调用avc检查 任务的fd use权限。如果该权限被授予，那么该函数将继续调用inode_has_perm在目标文件上检查 所请求的权限。在某些情形下，权限参数可能为空，这样就仅仅检查任务是否能够使用该fd。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task can use an open file descriptor to</span><br><span class="line">   access an inode in a given way.  Check access to the</span><br><span class="line">   descriptor itself, and then use dentry_has_perm to</span><br><span class="line">   check a particular permission to the file.</span><br><span class="line">   Access to the descriptor is implicitly granted if it</span><br><span class="line">   has the same SID as the process.  If av is zero, then</span><br><span class="line">   access to the file is not checked, e.g. for cases</span><br><span class="line">   where only the descriptor is affected like seek. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">file_has_perm</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred *cred,</span><br><span class="line">			 <span class="keyword">struct</span> file *file,</span><br><span class="line">			 u32 av)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> file_security_struct *fsec = file-&gt;f_security;</span><br><span class="line">	<span class="keyword">struct</span> inode *inode = file_inode(file);</span><br><span class="line">	<span class="keyword">struct</span> common_audit_data ad;</span><br><span class="line">	u32 sid = cred_sid(cred);</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	ad.type = LSM_AUDIT_DATA_PATH;</span><br><span class="line">	ad.u.path = file-&gt;f_path;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (sid != fsec-&gt;sid) &#123;</span><br><span class="line">		rc = avc_has_perm(sid, fsec-&gt;sid,</span><br><span class="line">				  SECCLASS_FD,</span><br><span class="line">				  FD__USE,</span><br><span class="line">				  &amp;ad);</span><br><span class="line">		<span class="keyword">if</span> (rc)</span><br><span class="line">			<span class="keyword">goto</span> out;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* av is zero if only checking access to the descriptor. */</span></span><br><span class="line">	rc = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (av)</span><br><span class="line">		rc = inode_has_perm(cred, inode, av, &amp;ad, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">out:</span><br><span class="line">	<span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="16-hook-functions：SystemV-IPC"><a href="#16-hook-functions：SystemV-IPC" class="headerlink" title="16 hook functions：SystemV IPC"></a>16 hook functions：SystemV IPC</h1><h1 id="17-hook-functions：socket"><a href="#17-hook-functions：socket" class="headerlink" title="17 hook functions：socket"></a>17 hook functions：socket</h1><h2 id="17-1-Managing-Socket-Security-Fields"><a href="#17-1-Managing-Socket-Security-Fields" class="headerlink" title="17.1. Managing Socket Security Fields"></a>17.1. Managing Socket Security Fields</h2><h2 id="17-1-1-Socket-Security-Structure"><a href="#17-1-1-Socket-Security-Structure" class="headerlink" title="17.1.1. Socket Security Structure"></a>17.1.1. Socket Security Structure</h2><p>每个用户空间socket都有一个关联的inode，因此inode 安全结构 也被扩展用于socket对象。请参考14.1节查看inode 安全结构和相关函数的讨论。在网络层socket structure（struct socket）中也存在一个安全字段，但是<strong>这个字段只能被安全的用于local/unix 域套接字。</strong>TCP 代码的一个修改将要求确保在新创建的server socket时对此字段的正确处理，相应的修改也包含在LSM 内核patch中，但是没能进入内核主线。</p>
+<p>对于unix/local域套接字，该<strong>sk_security_struct</strong>用于存储连接建立阶段时对端的安全信息，此时连接中的用户socket还没有分配好。</p>
+<p><img src="images/selinux_implement_as_LSM_04.png" alt=""></p>
+<h3 id="17-1-2-sk-alloc-security-and-sk-free-security"><a href="#17-1-2-sk-alloc-security-and-sk-free-security" class="headerlink" title="17.1.2. sk_alloc_security and sk_free_security"></a>17.1.2. sk_alloc_security and sk_free_security</h3><p>###17.1.3. selinux_socket_getpeersec<br>This hook function is called to handle the SO_PEERSEC getsockopt option.</p>
+<h1 id="18-hook-functions：IP-网络"><a href="#18-hook-functions：IP-网络" class="headerlink" title="18 hook functions：IP 网络"></a>18 hook functions：IP 网络</h1><h1 id="19-hook-functions：-其他"><a href="#19-hook-functions：-其他" class="headerlink" title="19 hook functions： 其他"></a>19 hook functions： 其他</h1><h1 id="20-kernel-3-4"><a href="#20-kernel-3-4" class="headerlink" title="20 kernel 3.4"></a>20 kernel 3.4</h1><h2 id="task-security-struct"><a href="#task-security-struct" class="headerlink" title="task_security_struct"></a>task_security_struct</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//old</span></span><br><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> task_struct *task;</span><br><span class="line">	u32 osid;</span><br><span class="line">	u32 sid;</span><br><span class="line">	u32 exec_sid;</span><br><span class="line">	u32 create_sid;</span><br><span class="line">	u32 ptrace_sid;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//new kernel3.4</span></span><br><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	u32 osid;		<span class="comment">/* SID prior to last execve */</span></span><br><span class="line">	u32 sid;		<span class="comment">/* current SID */</span></span><br><span class="line">	u32 exec_sid;		<span class="comment">/* exec SID */</span></span><br><span class="line">	u32 create_sid;		<span class="comment">/* fscreate SID */</span></span><br><span class="line">	u32 keycreate_sid;	<span class="comment">/* keycreate SID */</span></span><br><span class="line">	u32 sockcreate_sid;	<span class="comment">/* fscreate SID */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="selinux-capable"><a href="#selinux-capable" class="headerlink" title="selinux_capable"></a>selinux_capable</h2><p>kernel3.4  security/selinux/hooks.c</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line"> * (This comment used to live with the selinux_task_setuid hook,</span><br><span class="line"> * which was removed).</span><br><span class="line"> *</span><br><span class="line"> * Since setuid only affects the current process, and since the SELinux</span><br><span class="line"> * controls are not based on the Linux identity attributes, SELinux does not</span><br><span class="line"> * need to control this operation.  However, SELinux does control the use of</span><br><span class="line"> * the CAP_SETUID and CAP_SETGID capabilities using the capable hook.</span><br><span class="line"> */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_capable</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred *cred, <span class="keyword">struct</span> user_namespace *ns,</span><br><span class="line">			   <span class="keyword">int</span> cap, <span class="keyword">int</span> audit)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	rc = cap_capable(cred, ns, cap, audit);</span><br><span class="line">	<span class="keyword">if</span> (rc)</span><br><span class="line">		<span class="keyword">return</span> rc;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> cred_has_capability(cred, cap, audit);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/selinux_implement_as_LSM/" data-id="cipdbh0nf000px7jwzcidoihe" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LSM/">LSM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-introduction-information-security" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/introduction-information-security/" class="article-date">
+  <time datetime="2016-06-13T00:52:52.474Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/OpenCourse/">OpenCourse</a>►<a class="article-category-link" href="/categories/OpenCourse/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概要介绍"><a href="#概要介绍" class="headerlink" title="概要介绍"></a>概要介绍</h1><p>本文是在线公开课 <a href="http://www.open.edu/openlearn/science-maths-technology/computing-and-ict/introduction-information-security/content-section-2.1" target="_blank" rel="external">《introduction-information-security》</a>的笔记。</p>
+<p>本课程定义了信息的价值的来源，提出信息安全管理是一个过程，如何通过该过程对一个组织的每项信息进行价值评估和持续保护。</p>
+<p>ISMS：an information security management system</p>
+<h1 id="2-Information-information-security-and-information-security-management"><a href="#2-Information-information-security-and-information-security-management" class="headerlink" title="2 Information, information security and information security management"></a>2 Information, information security and information security management</h1><h2 id="什么是信息？"><a href="#什么是信息？" class="headerlink" title="什么是信息？"></a>什么是<strong>信息</strong>？</h2><p>商业分析更多地认识到信息也是资产。不过，消极的一面是，考虑到信息的误用给个人带来的危害，如何使用信息，包括盈利目的和非盈利目的，都更多地成为立法和规划的主体。</p>
+<h2 id="什么是信息安全？"><a href="#什么是信息安全？" class="headerlink" title="什么是信息安全？"></a>什么是<strong>信息安全</strong>？</h2><p>信息的价值，取决于其给所有者带来的竞争优势和用处，主要特征为：</p>
+<ul>
+<li>组织外，该信息的稀缺性scarity</li>
+<li>组织内，该信息的共享性shareability</li>
+</ul>
+<p>因此，信息的价值与其共享性和稀缺性的等级相关。<strong>信息安全</strong> 的目标，是通过保证信息的等级被正确识别和维持，从而维持信息的价值。</p>
+<p>对信息的威胁影响了组织在内部分享信息和在外部保持稀缺性的能力。威胁一旦被实施，补偿和民生可能耗费数百万，危机组织的生存。</p>
+<h2 id="什么是信息安全管理？"><a href="#什么是信息安全管理？" class="headerlink" title="什么是信息安全管理？"></a>什么是<strong>信息安全管理</strong>？</h2><p>信息安全管理是一个过程，通过该过程对一个组织的每项信息进行价值评估和持续保护。组织的信息通常是通过各种介质来存储、使用和传输。有些介质是有形的（tangible），如纸张；有些介质是无形的（intangible），如员工脑海中的点子。</p>
+<p>信息安全管理系统的建立过程包括：</p>
+<ol>
+<li>对用于信息资产的系统、技术和介质进行系统性的评估；</li>
+<li>对安全损坏的代价的估计；the appraisal of the costs of security breaches；</li>
+<li>针对威胁的反制措施的开发和部署。简单的说，信息安全管理识别组织中最薄弱点，然后制造保护盔甲。</li>
+</ol>
+<p>困难主要有：</p>
+<ol>
+<li>介质的多样性；</li>
+<li>有效的信息安全措施常与组织的任务有冲突，例如：保护一台计算机最安全的方式是完全不容许访问；</li>
+<li>要求尊重用户的需要，以便用户能持续正确的工作。</li>
+</ol>
+<p>单个解决方案无法处理所有可能的安全点。唯一的策略是实现一个适用目标的解决方案，在风险和保护间达到一个可接受的平衡。</p>
+<h1 id="3-Information-security-imperatives（必要性）-and-incentives（激励）"><a href="#3-Information-security-imperatives（必要性）-and-incentives（激励）" class="headerlink" title="3 Information security imperatives（必要性） and incentives（激励）"></a>3 Information security imperatives（必要性） and incentives（激励）</h1><h2 id="3-1-介绍"><a href="#3-1-介绍" class="headerlink" title="3.1 介绍"></a>3.1 介绍</h2><p>一个成功的信息安全策略和政策的设计，要求对大量关键因素的评估。因素包括两类：imperatives，incentives：</p>
+<ul>
+<li>imperatives：迫使你行动的压力</li>
+<li>incentives：从行动中发现的回报和机遇<h2 id="3-2-imperatives"><a href="#3-2-imperatives" class="headerlink" title="3.2 imperatives"></a>3.2 imperatives</h2>必要性的来源：威胁，法律（legislation），规定（regulation）</li>
+</ul>
+<h2 id="3-3-Incentives"><a href="#3-3-Incentives" class="headerlink" title="3.3 Incentives"></a>3.3 Incentives</h2><h1 id="4-Information-assets"><a href="#4-Information-assets" class="headerlink" title="4 Information assets"></a>4 Information assets</h1><h2 id="4-1-介绍"><a href="#4-1-介绍" class="headerlink" title="4.1 介绍"></a>4.1 介绍</h2><p>本周我们检查那些使得信息资产值得保护的特征，讨论共享性、稀缺性、机密性、完整性、可用性的概念</p>
+<h1 id="5-计划一个信息安全管理系统"><a href="#5-计划一个信息安全管理系统" class="headerlink" title="5 计划一个信息安全管理系统"></a>5 计划一个信息安全管理系统</h1><p>前面将构建ISMS的过程分为四个任务，每个任务可能被细分为阶段stags。本节也检视了BS标准所推荐支持ISMS开发的管理和组织结构。</p>
+<h1 id="6-Risk-assessment-风险评估-and-asset-identification-资产确认"><a href="#6-Risk-assessment-风险评估-and-asset-identification-资产确认" class="headerlink" title="6 Risk assessment(风险评估) and asset identification(资产确认)"></a>6 Risk assessment(风险评估) and asset identification(资产确认)</h1><p>上一章讨论了ISMS 计划和文档任务的过程，深入了解了文档任务的1,2，8阶段。本章中，我们讨论ISMS 文档任务的阶段3，了解<strong>如何定义风险评估的系统性方法</strong>。我们也观察资产确认任务。其余的两个任务，风险评估和风险处理，超出范围。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/introduction-information-security/" data-id="cipdbh0m50007x7jwkq87y6bt" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-introduction_bigdata" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/introduction_bigdata/" class="article-date">
+  <time datetime="2016-06-13T00:52:52.474Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/OpenCourse/">OpenCourse</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>艾莫拉法则，就是人们往往会高估技术的短期影响力，而低估技术的长期影响力。对技术的长期影响力事实上是代表着技术的一种积累效应，你在很短的一段时间内，你发现这个技术不过如此，但是经过了几个时间段以后，它这种积累效应就爆发了。<br>指数时代：指数效应或者说指数的颠覆性效应它是一种新的常态。<br>摩尔定律它是我们指数社会的基因：CPU，氧化铁存储器，主干网带宽，CMOS像素数/美元。<br>大数据是指数社会的蛋白质。</p>
+<p>f（数据量，t）  </p>
+<p>大数据技术解决下面四个问题：</p>
+<pre><code>1. 全集 &gt; 采样 数据产生时，价值最大；随着时间的推移，价值衰变。
+2. 实施和全时
+3. 见微知著
+4. 人与工具，降低数据价值提取门槛
+</code></pre><h1 id="膨胀宇宙："><a href="#膨胀宇宙：" class="headerlink" title="膨胀宇宙："></a>膨胀宇宙：</h1><p><img src="images/1458384207977_2.png" alt=""><br><img src="images/1464364652552_3.png" alt=""><br>TB=&gt;PB=&gt;EB=&gt;ZB=&gt;YB</p>
+<p>对于数据库：</p>
+<ul>
+<li>MPP(多路并行处理)处理搞到PB级数据，叫Massive Parallel Processing</li>
+<li>NoSql是无模式的，放弃了原子性，放弃了对精确事务特性的需求，放弃了transaction，使其扩展性提升到PB</li>
+<li>DFS 分布式文件系统 对非结构化数据有更好的存储能力，处理比NoSql更大的数据量。某些NOSQL基于DFS。</li>
+<li>NewSQL 既能处理大量数据，也能满足事务特性。</li>
+<li>Globally-Distributed DB:跨数千个数据中心，GPS全局时间同步，支持事务性。那么Google的spanner事实上就是一个典型的Globally-Distributed DB。</li>
+<li>Array DBMS：最主流的这样一种array database叫SciDB</li>
+</ul>
+<p>它就是针对科学计算针对线性代数的database。</p>
+<p>对于文件系统：</p>
+<ul>
+<li>Cache，in memory FS：比如说最著名的distributed file system HDFS它就有了这样一种内存缓存的这样一种扩展。同时呢也出现了in-memory file system它把文件系统放到大的内存里面。</li>
+<li>Erasure Coding：编码方式，早期应于通讯领域，利用编码机制，使得数据在传输上的容错。</li>
+</ul>
+<p>存储介质：</p>
+<ul>
+<li>Flash Storage：新的数据存储介质。</li>
+<li>DRAM Storage：内存中高速存储。</li>
+<li>NVRAM：性能与DRAM类似，但非易失。不用文件了，因为存储状态和使用状态一致了，不用序列化反序列化了。</li>
+<li>RDMA：高性能计算中的高扩展性的介质间传输。</li>
+<li>Heterogeneous Storage：自动根据数据的访问特性，自动选择存储位置。google的%1 的数据放在flash中，接受了%28的访问</li>
+<li>Tape System。高密度数据备份系统。</li>
+</ul>
+<h1 id="巴别之难"><a href="#巴别之难" class="headerlink" title="巴别之难"></a>巴别之难</h1><p>数据它并不是在同一个地方，说同一种语言。<br>我用的词就是：数据它能够相互说话，但是它们用不同的语言，它们格式可能是不一样的，它们的语意是不一样的，它们的度量衡是不一样的。<br>导致了一个问题：就是没办法利用更多的数据来产生更好的价值。<br>那为了实现这个一定要做一件事情，叫Data Curation，可以说是数据的治理，数据质量的提升。<br>Data Curation里面我认为现在最有研究价值的叫做Data Wrangle：Data Wrangling它就是希望能够把格式的这样一种差异能够打破，<br>能够发现数据跟数据之间的关系。从半结构甚至无结构的数据中提取信息。</p>
+<p>那么什么是Data Wrangling呢？我这边主要用一个问题来跟大家说，这个问题叫做DB-hard；大家知道我们计算机历史上有很多hard的问题：比如说NP-hard这是一类，还有叫AI-hard，人工智能也很难实现；还有叫DB-hard，DB-hard；一个简单的一个体现就是：比如说你在这个地方你输入的地址是这么写的，而你在另外一个地方输入同一个地址的时候，你的写法不一样，那么你用简单的计算机匹配，是匹配不上的。但事实上它们代表是同样的一个东西。<br>Data Wrangling它就是希望：能够把格式能够格式的这样一种差异能够打破，能够发现数据跟数据之间的</p>
+<p>它里面的一个重要的一个概念或者是反映我们的一个描述对象的属性的一个单位就是entity，我怎么能够resolve这些entity，怎么来做数据跟数据之间的transformation，而这一切是希望能够通过自动化的learning来完成的，而且希望能够从半结构化或者是多结构化的数据，进一步能够推展到Unstructured完全非结构化的数据，</p>
+<h1 id="数据有价"><a href="#数据有价" class="headerlink" title="数据有价"></a>数据有价</h1><h2 id="数据权利的定义："><a href="#数据权利的定义：" class="headerlink" title="数据权利的定义："></a>数据权利的定义：</h2><ul>
+<li>数据拥有权。独占但可能变更</li>
+<li>数据隐私权。什么数据不能给你</li>
+<li>数据许可权。什么数据可以给你，但是可撤销可转移</li>
+<li>数据审计权。保证客户按照我许可的方式来使用数据。</li>
+<li>数据分红权。</li>
+</ul>
+<h2 id="系统的安全："><a href="#系统的安全：" class="headerlink" title="系统的安全："></a>系统的安全：</h2><p>数据高度分布，去中心化场景下的安全：分布式安全架构。</p>
+<p>安全：系统安全，数据的安全，数据使用的安全</p>
+<h2 id="数据的安全"><a href="#数据的安全" class="headerlink" title="数据的安全"></a>数据的安全</h2><ul>
+<li>静态数据安全<ul>
+<li>机密</li>
+<li>访问控制：NSA使用的accumulo是一种label base的。</li>
+</ul>
+</li>
+<li>动态数据安全<ul>
+<li>动态审计能力：数据泄露防护</li>
+</ul>
+</li>
+<li>个人对数据的控制<ul>
+<li>Do Not Track，MAC地址混淆，个人数据清洗</li>
+<li>OpenPDS（personal data store）</li>
+</ul>
+</li>
+<li>数据脱敏、匿名化</li>
+<li>数据使用的安全<ul>
+<li>可用不可见，相交不相识<ul>
+<li>同步加密数据库技术</li>
+<li>基于加密协议的多方安全计算</li>
+<li>基于可信计算的多方计算安全</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="审计和定价"><a href="#审计和定价" class="headerlink" title="审计和定价"></a>审计和定价</h2><ul>
+<li>对数据安全和隐私条款形式化</li>
+<li>根据形式化的规范，对数据的使用进行审计</li>
+<li>定价：效用和稀缺性</li>
+</ul>
+<h1 id="软硬兼施"><a href="#软硬兼施" class="headerlink" title="软硬兼施"></a>软硬兼施</h1><h2 id="选择更好的硬件架构-计算"><a href="#选择更好的硬件架构-计算" class="headerlink" title="选择更好的硬件架构-计算"></a>选择更好的硬件架构-计算</h2><p>大小核<br>异构计算<br>内存和处理器更加靠近</p>
+<h2 id="选择更好的硬件架构-存储和互联"><a href="#选择更好的硬件架构-存储和互联" class="headerlink" title="选择更好的硬件架构-存储和互联"></a>选择更好的硬件架构-存储和互联</h2><ul>
+<li>大内存服务器。小于100G的内存的服务器基本上没法用。</li>
+<li>SSD-&gt;PCIe SSD -&gt;Flash storage</li>
+<li>NVRAM</li>
+<li>互联:节点间的互联，RDMA：remote data memory-access</li>
+</ul>
+<h2 id="软件和硬件架构协同优化"><a href="#软件和硬件架构协同优化" class="headerlink" title="软件和硬件架构协同优化"></a>软件和硬件架构协同优化</h2><p>针对硬件特点对软件站优化。<br>硬件可重构<br>Big Learning System：帮助机器学习算法和底层硬件更好的结合。</p>
+<h1 id="多快好省"><a href="#多快好省" class="headerlink" title="多快好省"></a>多快好省</h1><p>处理的数据量多，处理的快，结果要好。</p>
+<h2 id="降低空间、时间复杂度"><a href="#降低空间、时间复杂度" class="headerlink" title="降低空间、时间复杂度"></a>降低空间、时间复杂度</h2><h1 id="天下三分分久必合"><a href="#天下三分分久必合" class="headerlink" title="天下三分分久必合"></a>天下三分分久必合</h1>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/introduction_bigdata/" data-id="cipdbh0me0009x7jwxacczmdf" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/BigData/">BigData</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-algorithm_name_match" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/algorithm_name_match/" class="article-date">
+  <time datetime="2016-06-13T00:52:52.402Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>腾讯的现场招聘会题目：在一篇英文文章中查找指定的人名，人名使用二十六个英文字母（可以是大写或小写）、空格以及两个通配符组成（<em>、?），通配符“</em>”表示零个或多个任意字母，通配符“?”表示一个任意字母。如：“J<em> Smi??” 可以匹配“John Smith” .<br>void scan(const char</em> pszText, const char* pszName);<br>注：pszText为整个文章字符，pszName为要求匹配的英文名。<br>请完成函数实现输出所有匹配的英文名，除了printf外，不能用第三方的库函数等。</p>
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>有人是这样分析的：这 个是kmp子串搜索（匹配），稍加改造，如 abcabd<em>?abe*</em>??de这个窜，我们可以分成abcabd,?,abe,?,?,并按顺序先匹配abcabd，当匹配后，将匹配的文章中地址 及匹配的是何子串放到栈里记录下来，这样，每次匹配都入栈保存当前子串匹配信息，当一次完整的全部子串都匹配完后，就输出一个匹配结果，然后回溯一下，开 始对栈顶的子串的进行文中下一个起始位置的匹配。</p>
+<p>我的看法是这样的，有一个细节被提及的比较少：要求匹配的是人名，以空格分隔的连续字符串。<br>标准的实现其实是一种状态机的模式：</p>
+<ul>
+<li>如果是“*”,那么需要注意其匹配边界是当前单词。否则，启动递归匹配模式。</li>
+<li>如果是空格，那么需要注意，1）连续空格应该等同于一个空格2）tab字符应该等同于空格，这里做了简化，没处理。</li>
+<li>如果是？，匹配单个字母即可</li>
+</ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">bool</span> _isalpha(<span class="keyword">char</span> c)&#123;</span><br><span class="line">    <span class="keyword">return</span>  (c &gt;= <span class="string">'a'</span> &amp;&amp; c &lt;= <span class="string">'z'</span>) || (c &gt;= <span class="string">'A'</span> &amp;&amp; c &lt;= <span class="string">'Z'</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">bool</span> _isalphanum(<span class="keyword">char</span> c)&#123;</span><br><span class="line">    <span class="keyword">return</span>  _isalpha(c) || (c &gt;= <span class="string">'0'</span> &amp;&amp; c &lt;= <span class="string">'9'</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">bool</span> _isspace(<span class="keyword">char</span> c)&#123;</span><br><span class="line">    <span class="keyword">return</span> c == <span class="string">' '</span> || c == <span class="string">'\t'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">bool</span> _match(<span class="keyword">const</span> <span class="keyword">char</span>* s, <span class="keyword">const</span> <span class="keyword">char</span>* m, <span class="keyword">const</span> <span class="keyword">char</span>** _end = <span class="literal">NULL</span>)&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (*s &amp;&amp; *m)&#123;</span><br><span class="line">        <span class="keyword">switch</span> (*m)</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'*'</span>:</span><br><span class="line">            <span class="comment">//如果*是最后一个，那么匹配</span></span><br><span class="line">            m++;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//下一个模式字符是空白</span></span><br><span class="line">            <span class="keyword">if</span> (_isspace(*m))&#123;</span><br><span class="line">                <span class="comment">//匹配完当前单词</span></span><br><span class="line">                <span class="keyword">while</span> (_isalpha(*s))&#123; s++; &#125;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//*已经是模式字符串的最后一个字符了，over</span></span><br><span class="line">            <span class="keyword">if</span> (*m == <span class="number">0</span>)&#123;</span><br><span class="line">                <span class="keyword">while</span> (!_isalpha(*s))&#123; s++; &#125;</span><br><span class="line">                <span class="keyword">if</span> (_end) *_end = s;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/*加持递归模式，注意只需要匹配当前word*/</span></span><br><span class="line">            <span class="keyword">for</span> (s; *s &amp;&amp; _isalpha(*s); s++)&#123;</span><br><span class="line">                <span class="keyword">if</span> (_match(s, m, _end))</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'?'</span>:</span><br><span class="line">            <span class="keyword">if</span> (!_isalpha(*s))<span class="comment">//匹配任意字母</span></span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">' '</span>:</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'\t'</span>:<span class="comment">//匹配空白</span></span><br><span class="line">            <span class="keyword">if</span> (!_isspace(*s))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="comment">//跳过连续空白</span></span><br><span class="line">            <span class="keyword">while</span> (_isspace(*(m + <span class="number">1</span>))) &#123; m++; &#125;</span><br><span class="line">            <span class="keyword">while</span> (_isspace(*(s + <span class="number">1</span>))) &#123; s++; &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:<span class="comment">//alpha and space</span></span><br><span class="line">            <span class="comment">//模式中不应该出现标点和数字</span></span><br><span class="line">            <span class="keyword">if</span> (*m != *s)</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        s++, m++;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!*m &amp;&amp; !_isalphanum(*s))&#123;</span><br><span class="line">        <span class="keyword">if</span> (_end) *_end = s;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* _strdump(<span class="keyword">const</span> <span class="keyword">char</span>* start, <span class="keyword">const</span> <span class="keyword">char</span>* end)&#123;</span><br><span class="line">    <span class="keyword">char</span> name[<span class="number">1024</span>];</span><br><span class="line">    <span class="keyword">char</span> * t = name;</span><br><span class="line">    <span class="keyword">while</span> (start &lt; end) &#123; *t++ = *start++; &#125;</span><br><span class="line">    *t = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> name;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> _scan(<span class="keyword">const</span> <span class="keyword">char</span>* pszText, <span class="keyword">const</span> <span class="keyword">char</span>* pszName)&#123;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">char</span>* s = pszText; *s;)&#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">char</span> * _start = <span class="literal">NULL</span>, *_end = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//find a start</span></span><br><span class="line">        <span class="keyword">while</span> (*s &amp;&amp; !_isalpha(*s))&#123; s++; &#125;</span><br><span class="line">        _start = s;</span><br><span class="line">        <span class="keyword">if</span> (_match(s, pszName, &amp;_end))&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"%s\n"</span>, _strdump(_start, _end));</span><br><span class="line">            s = _end;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">while</span> (*s &amp;&amp; _isalpha(*s))&#123; s++; &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="string">"gtest/gtest.h"</span></span></span><br><span class="line">TEST(MatchNameTest, dummy) &#123;</span><br><span class="line">    <span class="comment">//    EXPECT_TRUE(match_token("John", 4, "J*", 2));</span></span><br><span class="line">    <span class="comment">//EXPECT_TRUE(match_token("Smith",5, "Smi??",5));</span></span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"John"</span>, <span class="string">"J*"</span>));</span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"Smith"</span>, <span class="string">"Smi??"</span>));</span><br><span class="line">    EXPECT_FALSE(_match(<span class="string">"John Smith"</span>, <span class="string">"j* Smi??"</span>));</span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"John Smith"</span>, <span class="string">"J* Smi??"</span>));</span><br><span class="line">    EXPECT_FALSE(_match(<span class="string">"John Smith1"</span>, <span class="string">"J* Smi??"</span>));</span><br><span class="line"></span><br><span class="line">    EXPECT_FALSE(_match(<span class="string">"John Jack Smith"</span>, <span class="string">"J* Smi??"</span>));</span><br><span class="line">    EXPECT_FALSE(_match(<span class="string">"John John1 Smith"</span>, <span class="string">"J* Smi??"</span>));</span><br><span class="line">    EXPECT_FALSE(_match(<span class="string">",John Zhang Smith."</span>, <span class="string">"J*h* S*i??"</span>));</span><br><span class="line">    EXPECT_FALSE(_match(<span class="string">",JohnSmith."</span>, <span class="string">"J*h* S*i??"</span>));</span><br><span class="line"></span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"John Smith Tom"</span>, <span class="string">"J* Smi?? Tom"</span>));</span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"John    Smith Tom"</span>, <span class="string">"J* Smi?? Tom"</span>));</span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"John Smith Tom"</span>, <span class="string">"J* Smi??     Tom"</span>));</span><br><span class="line">    EXPECT_TRUE(_match(<span class="string">"John       Smith         Tom"</span>, <span class="string">"J* Smi??     Tom"</span>));</span><br><span class="line"></span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">"John Smith"</span>, <span class="string">"J* Smi??"</span>), <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith"</span>, <span class="string">"J* Smi??"</span>), <span class="number">1</span>);</span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith,c,John Smith."</span>, <span class="string">"J* Smi??"</span>), <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith,c,John Smith."</span>, <span class="string">"J*h* S*i??"</span>), <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith,John Zhang,John Smith."</span>, <span class="string">"J*h* S*i??"</span>), <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith,John Zhang John John Smith,John Smith."</span>, <span class="string">"J*h* S*i??"</span>), <span class="number">3</span>);</span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith,John Zhang John1 John Smith,John Smith."</span>, <span class="string">"J*h* S*i??"</span>), <span class="number">3</span>);</span><br><span class="line">    EXPECT_EQ(_scan(<span class="string">", John Smith,John Zhang Smith,John Smith."</span>, <span class="string">"J*h* S*i??"</span>), <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/algorithm_name_match/" data-id="cipdbh0lj0001x7jwp529ic0p" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/">c++</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
 
     </footer>
   </div>
@@ -115,7 +522,7 @@
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/12/hello-world/" class="article-date">
-  <time datetime="2016-06-12T09:03:51.233Z" itemprop="datePublished">2016-06-12</time>
+  <time datetime="2016-06-12T09:37:51.947Z" itemprop="datePublished">2016-06-12</time>
 </a>
     
   </div>
@@ -147,7 +554,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/hello-world/" data-id="cipcdeum50001xpjwqsn381zr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/12/hello-world/" data-id="cipdbh0ly0005x7jw3ewzgs3v" class="article-share-link">Share</a>
       
       
     </footer>
@@ -157,10 +564,10 @@
 
 
   
-    <article id="post-sercurity" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-introduction_dm_crypt" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/06/12/sercurity/" class="article-date">
-  <time datetime="2016-06-12T08:49:24.000Z" itemprop="datePublished">2016-06-12</time>
+    <a href="/2016/06/12/introduction_dm_crypt/" class="article-date">
+  <time datetime="2016-06-12T09:09:52.000Z" itemprop="datePublished">2016-06-12</time>
 </a>
     
   <div class="article-category">
@@ -175,7 +582,127 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/12/sercurity/">安全杂记</a>
+      <a class="article-title" href="/2016/06/12/introduction_dm_crypt/">dm-crypt简介</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>dm-crypt是一个透明磁盘加密子系统，建立在2.6版本内核的device-mapper特性之上的,使用了内核密码应用编程接口实现了透明的加密。<br>与早期的cryptoloop不同，dm-crypt被设计为支持更高级的操作，如XTS、LRW和ESSIV，以便避免水印攻击。<br>dm-crypt 作为一个设备映射器目标(device-mapper target)来实现,可以被堆叠在其他设备映射器的顶端。因此，它可以用来加密整个磁盘、分区、raid卷、逻辑卷以及文件。</p>
+<h1 id="设备映射器-device-mapper"><a href="#设备映射器-device-mapper" class="headerlink" title="设备映射器 device-mapper"></a>设备映射器 device-mapper</h1><p>设备映射器是设计用来为在实际的块设备之上添加虚拟层提供一种通用灵活的方法, 用于将一个块设备映射到另一个块设备。除了提供加密功能，设备映射器还为LVM、软RAID提供支持，并为系统添加了一些诸如文件系统快照之类的附加特性。<br>设备映射器相当于一个过滤装置，它从它自己提供的虚拟块设备中获得数据并对它们进行处理，然后才把它们传递给另一个块设备。<br>当设备映射器被用于数据加密时，它会在/dev/mapper/目录下创建一个新的块设备。对于用户来说，这个虚拟设备和系统上的其它任何块设备在使用时没有区别。设备映射器（更确切地说是设备映射器的dm-crypt模块）使用对称加密算法，如AES，对输入该虚拟设备的所有数据进行加密。加密后的数据被传输到另一个块设备加以保存。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
+<li><a href="https://en.wikipedia.org/wiki/Dm-crypt" target="_blank" rel="external">https://en.wikipedia.org/wiki/Dm-crypt</a></li>
+<li><a href="http://wiki.ubuntu.org.cn/index.php?title=EncryptedFilesystemHowto&amp;variant=zh-cn#.E5.8A.A0.E5.AF.86.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" target="_blank" rel="external">EncryptedFilesystemHowto</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/12/introduction_dm_crypt/" data-id="cipdbh0mh000bx7jwtvq1ybvj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crypt/">crypt</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-mylog1" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/12/mylog1/" class="article-date">
+  <time datetime="2016-06-12T08:12:46.000Z" itemprop="datePublished">2016-06-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/12/mylog1/">mylog1</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/12/mylog1/" data-id="cipdbh0n2000hx7jwyi67g7nl" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-mylog" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/12/mylog/" class="article-date">
+  <time datetime="2016-06-12T08:12:43.000Z" itemprop="datePublished">2016-06-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/12/mylog/">mylog</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/12/mylog/" data-id="cipdbh0mr000fx7jws0jmgifq" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-sercurity_outline" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/27/sercurity_outline/" class="article-date">
+  <time datetime="2016-05-27T08:49:24.000Z" itemprop="datePublished">2016-05-27</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/27/sercurity_outline/">安全杂记</a>
     </h1>
   
 
@@ -196,9 +723,9 @@
 </ul>
 <h2 id="CIA原则"><a href="#CIA原则" class="headerlink" title="CIA原则"></a>CIA原则</h2><p>任何类型的安全控制共有的三个主要的<strong>网路安全原则</strong>被称为 CIA原则, 保密性 完整性 和可用性:</p>
 <ol>
-<li>保密性 confidentiality: 指的是若未经授权访问 则信息不向用户 流程或设备公开 </li>
-<li>完整性 integrity: 指的是信息没有受到未经授权的 修改或损坏 </li>
-<li>可用性 accountability: 指的是能够被访问 </li>
+<li>保密性 confidentiality: 指的是若未经授权访问 则信息不向用户 流程或设备公开</li>
+<li>完整性 integrity: 指的是信息没有受到未经授权的 修改或损坏</li>
+<li>可用性 accountability: 指的是能够被访问</li>
 </ol>
 <h2 id="软件安全框架的设计原则："><a href="#软件安全框架的设计原则：" class="headerlink" title="软件安全框架的设计原则："></a>软件安全框架的设计原则：</h2><ul>
 <li>Policy as code instead of data。策略是代码而非数据。</li>
@@ -210,11 +737,11 @@
 <li>detection and recovery</li>
 </ul>
 <hr>
-<h1 id="安全机制"><a href="#安全机制" class="headerlink" title="安全机制"></a>安全机制</h1><h2 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h2><p>访问控制的一些基本概念包括: </p>
+<h1 id="安全机制"><a href="#安全机制" class="headerlink" title="安全机制"></a>安全机制</h1><h2 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h2><p>访问控制的一些基本概念包括:</p>
 <ol>
-<li>身份信息: 用户提供的身份验证信息 例如用户名 </li>
-<li>验证: 身份信息通过例如密码等机制得以确认 </li>
-<li>授权: 通过特定的指标来确定某一用户是否有权执行某些操作 </li>
+<li>身份信息: 用户提供的身份验证信息 例如用户名</li>
+<li>验证: 身份信息通过例如密码等机制得以确认</li>
+<li>授权: 通过特定的指标来确定某一用户是否有权执行某些操作</li>
 <li>可追究性: 监控和记录某一用户的操作过程</li>
 </ol>
 <h2 id="密码学"><a href="#密码学" class="headerlink" title="密码学"></a>密码学</h2><h3 id="密码学原则"><a href="#密码学原则" class="headerlink" title="密码学原则"></a>密码学原则</h3><p>加密机制不是秘密，唯一的秘密是<strong>密钥</strong>，随机选择，保持机密性。某些参数有利于此原则：</p>
@@ -307,7 +834,7 @@
 <h2 id="android中如何隔离不同的账户："><a href="#android中如何隔离不同的账户：" class="headerlink" title="android中如何隔离不同的账户："></a>android中如何隔离不同的账户：</h2><ul>
 <li>DAC： uid =  userid * AID_USER + appid</li>
 <li>seapp_contexts:      isOwner, affect the label of process domain and app_data</li>
-<li>seapp_contexts:    levelFrom, affect the multiple category of a process </li>
+<li>seapp_contexts:    levelFrom, affect the multiple category of a process</li>
 </ul>
 <hr>
 <h1 id="移动操作系统"><a href="#移动操作系统" class="headerlink" title="移动操作系统"></a>移动操作系统</h1><h2 id="IOS-安全白皮书"><a href="#IOS-安全白皮书" class="headerlink" title="IOS 安全白皮书"></a>IOS 安全白皮书</h2><ul>
@@ -353,7 +880,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/sercurity/" data-id="cipcdeumk0005xpjw7oveqmjf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/27/sercurity_outline/" data-id="cipdbh0no000zx7jwte5i3n2g" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
@@ -365,118 +892,11 @@
 
 
   
-    <article id="post-mylog3" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/12/mylog3/" class="article-date">
-  <time datetime="2016-06-12T08:19:53.000Z" itemprop="datePublished">2016-06-12</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/12/mylog3/">mylog3</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>#介绍</p>
-<p>安全很重要</p>
-<p>#结论<br>别玩了</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/mylog3/" data-id="cipcdeumi0004xpjwcbdv449z" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
 
 
-  
-    <article id="post-mylog1" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/12/mylog1/" class="article-date">
-  <time datetime="2016-06-12T08:12:46.000Z" itemprop="datePublished">2016-06-12</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/12/mylog1/">mylog1</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/mylog1/" data-id="cipcdeumh0003xpjwtax1csu7" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-mylog" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/12/mylog/" class="article-date">
-  <time datetime="2016-06-12T08:12:43.000Z" itemprop="datePublished">2016-06-12</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/12/mylog/">mylog</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/mylog/" data-id="cipcdeume0002xpjwh6o0o8ny" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
+  <nav id="page-nav">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">__('next') &raquo;</a>
+  </nav>
 </section>
         
           <aside id="sidebar">
@@ -485,7 +905,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a></li></ul></li></ul>
     </div>
   </div>
 
@@ -495,7 +915,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li></ul>
     </div>
   </div>
 
@@ -505,7 +925,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/security/" style="font-size: 20px;">security</a>
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
     </div>
   </div>
 
@@ -514,7 +934,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a></li></ul>
     </div>
   </div>
 
@@ -527,23 +947,23 @@
       <ul>
         
           <li>
-            <a href="/2016/06/12/dm-crypt简介/">dm-crypt简介</a>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/hello-world/">Hello World</a>
+            <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/sercurity/">安全杂记</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/mylog3/">mylog3</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/mylog1/">mylog1</a>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
           </li>
         
       </ul>

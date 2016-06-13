@@ -19,7 +19,7 @@
 CIA原则任何类型的安全控制共有的三个主要的网路安全原则被称为 CIA原则, 保密性 完整">
 <meta property="og:type" content="article">
 <meta property="og:title" content="安全杂记">
-<meta property="og:url" content="http://yoursite.com/2016/06/12/sercurity/index.html">
+<meta property="og:url" content="http://yoursite.com/2016/05/27/sercurity_outline/index.html">
 <meta property="og:site_name" content="牧云人">
 <meta property="og:description" content="安全目的安全边界问题：安全的核心是安全边界。安全的核心是保护信息资产，其实现方式是信息流控制。
 信息资产信息资产assets的价值在于提供给组织的竞争优势（advantage）和效用（utils）:
@@ -33,7 +33,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
 安全保障
 
 CIA原则任何类型的安全控制共有的三个主要的网路安全原则被称为 CIA原则, 保密性 完整">
-<meta property="og:updated_time" content="2016-06-12T09:28:58.901Z">
+<meta property="og:updated_time" content="2016-06-13T00:52:52.478Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="安全杂记">
 <meta name="twitter:description" content="安全目的安全边界问题：安全的核心是安全边界。安全的核心是保护信息资产，其实现方式是信息流控制。
@@ -96,10 +96,10 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-sercurity" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-sercurity_outline" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/06/12/sercurity/" class="article-date">
-  <time datetime="2016-06-12T08:49:24.000Z" itemprop="datePublished">2016-06-12</time>
+    <a href="/2016/05/27/sercurity_outline/" class="article-date">
+  <time datetime="2016-05-27T08:49:24.000Z" itemprop="datePublished">2016-05-27</time>
 </a>
     
   <div class="article-category">
@@ -135,9 +135,9 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
 </ul>
 <h2 id="CIA原则"><a href="#CIA原则" class="headerlink" title="CIA原则"></a>CIA原则</h2><p>任何类型的安全控制共有的三个主要的<strong>网路安全原则</strong>被称为 CIA原则, 保密性 完整性 和可用性:</p>
 <ol>
-<li>保密性 confidentiality: 指的是若未经授权访问 则信息不向用户 流程或设备公开 </li>
-<li>完整性 integrity: 指的是信息没有受到未经授权的 修改或损坏 </li>
-<li>可用性 accountability: 指的是能够被访问 </li>
+<li>保密性 confidentiality: 指的是若未经授权访问 则信息不向用户 流程或设备公开</li>
+<li>完整性 integrity: 指的是信息没有受到未经授权的 修改或损坏</li>
+<li>可用性 accountability: 指的是能够被访问</li>
 </ol>
 <h2 id="软件安全框架的设计原则："><a href="#软件安全框架的设计原则：" class="headerlink" title="软件安全框架的设计原则："></a>软件安全框架的设计原则：</h2><ul>
 <li>Policy as code instead of data。策略是代码而非数据。</li>
@@ -149,11 +149,11 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
 <li>detection and recovery</li>
 </ul>
 <hr>
-<h1 id="安全机制"><a href="#安全机制" class="headerlink" title="安全机制"></a>安全机制</h1><h2 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h2><p>访问控制的一些基本概念包括: </p>
+<h1 id="安全机制"><a href="#安全机制" class="headerlink" title="安全机制"></a>安全机制</h1><h2 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h2><p>访问控制的一些基本概念包括:</p>
 <ol>
-<li>身份信息: 用户提供的身份验证信息 例如用户名 </li>
-<li>验证: 身份信息通过例如密码等机制得以确认 </li>
-<li>授权: 通过特定的指标来确定某一用户是否有权执行某些操作 </li>
+<li>身份信息: 用户提供的身份验证信息 例如用户名</li>
+<li>验证: 身份信息通过例如密码等机制得以确认</li>
+<li>授权: 通过特定的指标来确定某一用户是否有权执行某些操作</li>
 <li>可追究性: 监控和记录某一用户的操作过程</li>
 </ol>
 <h2 id="密码学"><a href="#密码学" class="headerlink" title="密码学"></a>密码学</h2><h3 id="密码学原则"><a href="#密码学原则" class="headerlink" title="密码学原则"></a>密码学原则</h3><p>加密机制不是秘密，唯一的秘密是<strong>密钥</strong>，随机选择，保持机密性。某些参数有利于此原则：</p>
@@ -246,7 +246,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
 <h2 id="android中如何隔离不同的账户："><a href="#android中如何隔离不同的账户：" class="headerlink" title="android中如何隔离不同的账户："></a>android中如何隔离不同的账户：</h2><ul>
 <li>DAC： uid =  userid * AID_USER + appid</li>
 <li>seapp_contexts:      isOwner, affect the label of process domain and app_data</li>
-<li>seapp_contexts:    levelFrom, affect the multiple category of a process </li>
+<li>seapp_contexts:    levelFrom, affect the multiple category of a process</li>
 </ul>
 <hr>
 <h1 id="移动操作系统"><a href="#移动操作系统" class="headerlink" title="移动操作系统"></a>移动操作系统</h1><h2 id="IOS-安全白皮书"><a href="#IOS-安全白皮书" class="headerlink" title="IOS 安全白皮书"></a>IOS 安全白皮书</h2><ul>
@@ -292,7 +292,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/12/sercurity/" data-id="cipcdeumk0005xpjw7oveqmjf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/27/sercurity_outline/" data-id="cipdbh0no000zx7jwte5i3n2g" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
@@ -303,19 +303,19 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
     
 <nav id="article-nav">
   
-    <a href="/2016/06/12/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/06/12/mylog/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          Hello World
+          mylog
         
       </div>
     </a>
   
   
-    <a href="/2016/06/12/mylog3/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/05/26/selinux_resources/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">mylog3</div>
+      <div class="article-nav-title">SELinux 资源索引</div>
     </a>
   
 </nav>
@@ -331,7 +331,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a></li></ul></li></ul>
     </div>
   </div>
 
@@ -341,7 +341,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li></ul>
     </div>
   </div>
 
@@ -351,7 +351,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/security/" style="font-size: 20px;">security</a>
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
     </div>
   </div>
 
@@ -360,7 +360,7 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a></li></ul>
     </div>
   </div>
 
@@ -373,23 +373,23 @@ CIA原则任何类型的安全控制共有的三个主要的网路安全原则�
       <ul>
         
           <li>
-            <a href="/2016/06/12/dm-crypt简介/">dm-crypt简介</a>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/hello-world/">Hello World</a>
+            <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/sercurity/">安全杂记</a>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/mylog3/">mylog3</a>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
           </li>
         
           <li>
-            <a href="/2016/06/12/mylog1/">mylog1</a>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
           </li>
         
       </ul>

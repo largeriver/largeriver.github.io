@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>SELinux: 如何为进程创建专有的数据目录？ | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？
+
+策略1（FAILED）先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file
+file_con">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SELinux: 如何为进程创建专有的数据目录？">
+<meta property="og:url" content="http://yoursite.com/2016/06/13/selinux_howto_create_data_dir_for_app/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？
+
+策略1（FAILED）先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file
+file_con">
+<meta property="og:updated_time" content="2016-06-13T01:04:41.830Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SELinux: 如何为进程创建专有的数据目录？">
+<meta name="twitter:description" content="需求在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？
+
+策略1（FAILED）先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file
+file_con">
+  
+    <link rel="alternate" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/" class="article-date">
+  <time datetime="2016-06-13T01:04:41.834Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SELinux: 如何为进程创建专有的数据目录？
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
+<hr>
+<h1 id="策略1（FAILED）"><a href="#策略1（FAILED）" class="headerlink" title="策略1（FAILED）"></a>策略1（FAILED）</h1><p>先定义一个策略，该策略的意图是：cpnoui 进程在创建专有目录/data/eeprom_data_from_sysprops.tmp时,内核会根据file_contexts中的设定，直接将新目录的安全标记设定为eeprom_data_file</p>
+<pre><code>file_contexts
+/data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
+------------------------------
+file.te:
+type eeprom_data_file, file_type, data_file_type;
+------------------------------
+cpnoui.te
+allow cpnoui eeprom_data_file:file create;
+</code></pre><p>不过，该策略并不能工作，其denied日志如下：</p>
+<pre><code>type=1400 audit(1463139871.920:5): avc: denied { create } for pid=167 comm=&quot;sh&quot; name=&quot;eeprom_data_from_sysprops.tmp&quot; scontext=u:r:cpnoui:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=0
+</code></pre><p>WHY？</p>
+<hr>
+<h1 id="策略2-just-works"><a href="#策略2-just-works" class="headerlink" title="策略2 (just works)"></a>策略2 (just works)</h1><p><strong>file_contexts是用户空间配置，其作用是：1）编译时，编译系统使用该文件标记初始文件系统镜像； 2）运行时，init/ueventd等程序使用该文件来决定其创建的文件系统、目录的安全标签。</strong></p>
+<p>内核实际上用不到file_contexts，因此无法影响运行时的文件安全标记。要做到这一点，你可以使用type_transition规则，例如：</p>
+<pre><code>type_transition cpnoui system_data_file:file eeprom_data_file;
+</code></pre><p>因此，完整的策略定义是：</p>
+<pre><code>file.te:
+type eeprom_data_file, file_type, data_file_type;
+------------------------------
+cpnoui.te
+type_transition cpnoui system_data_file:dir eeprom_data_file;
+type_transition cpnoui system_data_file:file eeprom_data_file;
+allow cpnoui system_data_file:dir {  remove_name add_name };
+allow cpnoui eeprom_data_file:dir { create_dir_perms remove_name add_name };
+allow cpnoui eeprom_data_file:file { create_file_perms };
+</code></pre><hr>
+<h1 id="策略3-（推荐）"><a href="#策略3-（推荐）" class="headerlink" title="策略3 （推荐）"></a>策略3 （推荐）</h1><p>较好的方法应该在init.<board>.rc中创建该专有目录，这种方法的好处是：</board></p>
+<ol>
+<li>init 进程将会根据file_contexts来决定该专有目录和目录下的文件的安全标记。</li>
+<li>cpnoui进程无需system_data_file:dir { write add_name } 权限</li>
+<li>当cpnoui进程在该专有目录中继续创建文件或者文件夹时，将自动继承父目录的安全标记。</li>
+</ol>
+<p>所以，最终的策略是怎样的呢？</p>
+<pre><code>file_contexts
+/data/eeprom_data_from_sysprops\.tmp  u:object_r:eeprom_data_file:s0
+-----------------------------
+file.te:
+type eeprom_data_file, file_type, data_file_type;
+------------------------------
+cpnoui.te
+allpw cpnoui eeprom_data_file:dir rw_dir_perms;
+allow cpnoui eeprom_data_file:file create_file_perms;
+------------------------------
+init.&lt;board&gt;.rc
+mkdir /data/eeprom_data_from_sysprops.tmp
+</code></pre><hr>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://seandroid-list.tycho.nsa.narkive.com/mLU2RVyz/regarding-issue-in-defining-file-in-file-contexts" target="_blank" rel="external">http://seandroid-list.tycho.nsa.narkive.com/mLU2RVyz/regarding-issue-in-defining-file-in-file-contexts</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/selinux_howto_create_data_dir_for_app/" data-id="cipdbhy700000y1jwbegf7de2" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/06/13/selinux_implement_as_LSM/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">SELinux 基于LSM的实现</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/13/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Berg<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
