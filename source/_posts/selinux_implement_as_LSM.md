@@ -26,7 +26,8 @@ tags:
 ## 主要文件
 
 * **include/linux/security.h**： LSM所有的钩子函数; 通用接口；详细的文档。
-* **security/security.c**: 通用接口的实现，主要是将钩子函数的回调封装为函数。``` int security_cred_alloc_blank(struct cred *cred, gfp_t gfp){	return security_ops->cred_alloc_blank(cred, gfp);}```
+* **security/security.c**: 通用接口的实现，主要是将钩子函数的回调封装为函数。
+`int security_cred_alloc_blank(struct cred *cred, gfp_t gfp){	return security_ops->cred_alloc_blank(cred, gfp);}`
 * **security/selinux/hooks.c** LSM钩子函数的SELinux代码实现
 * **security/capability.c** capabilities 模块,也是linux的默认模块
 
@@ -225,18 +226,18 @@ SELinux为某些安全结构定义了初始化辅助函数，例如 inode_doinit
 ## 11.1 管理task security fields
 ### 11.1.1 task security structure
 
+```c++
+struct task_security_struct {
+	struct task_struct * task;
+	u32 osid;
+	u32 sid;
+	u32 exec_sid;
+	u32 create_sid;
+	u32 ptrace_sid;
+};
+```
 
-
-    struct task_security_struct {
-    	struct task_struct *task;
-    	u32 osid;
-    	u32 sid;
-    	u32 exec_sid;
-    	u32 create_sid;
-    	u32 ptrace_sid;
-    };
-
-
+每个字段的定义如下：
 
 |Field |Description|
 |--|--|
@@ -293,8 +294,8 @@ security/selinux/hooks.c
  * tsk1 is the actor and tsk2 is the target
  * - this uses the default subjective creds of tsk1
  */
-static int task_has_perm(const struct task_struct *tsk1,
-			 const struct task_struct *tsk2,
+static int task_has_perm(const struct task_struct * tsk1,
+			 const struct task_struct * tsk2,
 			 u32 perms)
 {
 	const struct task_security_struct *__tsec1, *__tsec2;
@@ -307,7 +308,6 @@ static int task_has_perm(const struct task_struct *tsk1,
 	return avc_has_perm(sid1, sid2, SECCLASS_PROCESS, perms, NULL);
 }
 
-
 ```
 
 #### task_has_capability(cred_has_capability)
@@ -317,7 +317,7 @@ security/selinux/hooks.c
 
 ```c
 /* Check whether a task is allowed to use a capability. */
-static int cred_has_capability(const struct cred *cred,
+static int cred_has_capability(const struct cred * cred,
 			       int cap, int audit)
 {
 	struct common_audit_data ad;
@@ -428,7 +428,7 @@ static int selinux_task_getpgid(struct task_struct *p)
 
 由于SELinux不依赖于Linux 身份属性，并且既然这些操作仅影响当前进程，所以目前SELinux没有控制这些操作。这些操作的特权方面也已经通过了selinux_capable钩子函数进行了控制。**然而，SELinux也可能在将来控制这些钩子，以在更好的粒度上约束Linux身份更改动作。**
 
-#12 hook functions：程序加载
+# 12 hook functions：程序加载
 S ELinux binprm 钩子函数 实现了对structure linux_binprm的安全字段的管理，并执行程序加载操作的访问控制检查。
 
 ## 12.1 管理binprm安全字段
@@ -459,6 +459,7 @@ struct bprm_security_struct {
 执行程序时，如果新任务的SID不变，将检查file execute_no_trans权限。该权限保证 一个任务被容许执行并不改变其安全属性。例如，尽管登录进程可以执行一个用户shell，它总是同时修改器SID，那么这种情形就无需execute_no_trans权限。
 
 在任务的SID改变时，将检查process transition权限和file entrypoint 权限。前者检查旧的SID是否被容许转换到新SID；后者保证只能在执行指定程序时才能进入新的SID。
+
 ### 12.1.4. selinux_bprm_apply_creds
 
 当执行execve时发生SID转换时，内核调用selinux_bprm_appluy_creds来设置新进程的新安全属性。该钩子函数首先调用capabilities，然后从bprm安全结构中提取新task的SID，并将当前SID拷贝到 task security structure的old SID字段，然后清除bprm security structure中的unsafe标志。如果新SID与旧SID相同，那么该钩子的工作就结束了。
@@ -473,7 +474,8 @@ struct bprm_security_struct {
 
 该钩子函数在selinux_bprm_apply_creds之后被调用。它首先检查bprm安全结构中的unsafe标识，如果为真，强制向任务发送SIFKILL并立即退出。然后，它将检查task SID是否改变，如果没有，立即返回。
 
-否则，如果任务不再被容许访问关联的tty，它将继续调用副主函数flush_unauthorized_files  来撤销对控制tty的访问，并关闭任何不再访问的fd。**然后，它将在每个打开的文件上调用file_has_perm，检查是否任务在新SID中是否还具有相对应的访问权限（即 fd use permission），如果没有，关闭fd。**file_has_perm描述在15.2.1节。为了避免那些期望某些描述符被打开的应用中引入错误，该辅助函数将重打开那些引用null device 节点的描述符，null device节点 在初始化时在selinuxfs中设置。
+否则，如果任务不再被容许访问关联的tty，它将继续调用副主函数flush_unauthorized_files  来撤销对控制tty的访问，并关闭任何不再访问的fd。
+** 然后，它将在每个打开的文件上调用file_has_perm，检查是否任务在新SID中是否还具有相对应的访问权限（即 fd use permission），如果没有，关闭fd。** file_has_perm描述在15.2.1节。为了避免那些期望某些描述符被打开的应用中引入错误，该辅助函数将重打开那些引用null device 节点的描述符，null device节点 在初始化时在selinuxfs中设置。
 
 。。。
 
@@ -519,7 +521,7 @@ file 钩子函数管理struct file的安全字段，并为文件操作执行访�
 
 ```c
 struct file_security_struct {
-struct file *file;//Back pointer to the associated file.
+struct file * file;//Back pointer to the associated file.
 u32 sid;//SID of the open file descriptor
 u32 fown_sid;//SID of the file owner; used for SIGIO events
 };
@@ -544,12 +546,12 @@ file_alloc_security 将 sid 字段设置为分配file_securityy_struct实例的�
    has the same SID as the process.  If av is zero, then
    access to the file is not checked, e.g. for cases
    where only the descriptor is affected like seek. */
-static int file_has_perm(const struct cred *cred,
-			 struct file *file,
+static int file_has_perm(const struct cred * cred,
+			 struct file * file,
 			 u32 av)
 {
-	struct file_security_struct *fsec = file->f_security;
-	struct inode *inode = file_inode(file);
+	struct file_security_struct * fsec = file->f_security;
+	struct inode * inode = file_inode(file);
 	struct common_audit_data ad;
 	u32 sid = cred_sid(cred);
 	int rc;
@@ -566,7 +568,7 @@ static int file_has_perm(const struct cred *cred,
 			goto out;
 	}
 
-	/* av is zero if only checking access to the descriptor. */
+	/* av is zero if only checking access to the descriptor. * /
 	rc = 0;
 	if (av)
 		rc = inode_has_perm(cred, inode, av, &ad, 0);
@@ -583,7 +585,7 @@ out:
 ## 17.1. Managing Socket Security Fields
 ## 17.1.1. Socket Security Structure
 
-每个用户空间socket都有一个关联的inode，因此inode 安全结构 也被扩展用于socket对象。请参考14.1节查看inode 安全结构和相关函数的讨论。在网络层socket structure（struct socket）中也存在一个安全字段，但是**这个字段只能被安全的用于local/unix 域套接字。**TCP 代码的一个修改将要求确保在新创建的server socket时对此字段的正确处理，相应的修改也包含在LSM 内核patch中，但是没能进入内核主线。
+每个用户空间socket都有一个关联的inode，因此inode 安全结构 也被扩展用于socket对象。请参考14.1节查看inode 安全结构和相关函数的讨论。在网络层socket structure（struct socket）中也存在一个安全字段，但是 **这个字段只能被安全的用于local/unix 域套接字。** TCP 代码的一个修改将要求确保在新创建的server socket时对此字段的正确处理，相应的修改也包含在LSM 内核patch中，但是没能进入内核主线。
 
 对于unix/local域套接字，该**sk_security_struct**用于存储连接建立阶段时对端的安全信息，此时连接中的用户socket还没有分配好。
 
@@ -591,7 +593,7 @@ out:
 
 ### 17.1.2. sk_alloc_security and sk_free_security
 
-###17.1.3. selinux_socket_getpeersec
+### 17.1.3. selinux_socket_getpeersec
 This hook function is called to handle the SO_PEERSEC getsockopt option.
 
 
@@ -606,7 +608,7 @@ This hook function is called to handle the SO_PEERSEC getsockopt option.
 ```c++
 //old
 struct task_security_struct {
-	struct task_struct *task;
+	struct task_struct * task;
 	u32 osid;
 	u32 sid;
 	u32 exec_sid;
@@ -615,12 +617,12 @@ struct task_security_struct {
 };
 //new kernel3.4
 struct task_security_struct {
-	u32 osid;		/* SID prior to last execve */
-	u32 sid;		/* current SID */
-	u32 exec_sid;		/* exec SID */
-	u32 create_sid;		/* fscreate SID */
-	u32 keycreate_sid;	/* keycreate SID */
-	u32 sockcreate_sid;	/* fscreate SID */
+	u32 osid;		/* SID prior to last execve * /
+	u32 sid;		/* current SID * /
+	u32 exec_sid;		/* exec SID *  /
+	u32 create_sid;		/* fscreate SID * /
+ 	u32 keycreate_sid;	/* keycreate SID * /
+	u32 sockcreate_sid;	/* fscreate SID * /
 };
 ```
 
@@ -639,7 +641,7 @@ kernel3.4  security/selinux/hooks.c
  * the CAP_SETUID and CAP_SETGID capabilities using the capable hook.
  */
 
-static int selinux_capable(const struct cred *cred, struct user_namespace *ns,
+static int selinux_capable(const struct cred * cred, struct user_namespace * ns,
 			   int cap, int audit)
 {
 	int rc;
