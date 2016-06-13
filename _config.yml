@@ -4,10 +4,11 @@
 
 # Site
 title: 牧云人
-subtitle: 
+subtitle:
 description: 专注于SELinux for Android, TIOS
-author: Berg
-language: zh-cn
+author: LargeRiver
+email: large.river.dance@gmail.com
+language: zh-CN
 timezone:
 
 # URL
@@ -30,6 +31,7 @@ skip_render:
 # Writing
 new_post_name: :title.md # File name of new posts
 default_layout: post
+auto_spacing: true
 titlecase: false # Transform title into titlecase
 external_link: true # Open external links in new tab
 filename_case: 0
@@ -63,7 +65,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: landscape-plus
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html

@@ -17,7 +17,7 @@ tags:
 SECMARK 基于iptable 配置中的报文特征来设置数据包标签，然后执行send/recv策略检查。策略的组成是：sender 域、receiver域 以及数据包类型。为启用SECMARK机制，你需要在kernel中开启相应的支持，并且配置iptable SECMARK或者CONNSECMARK规则。这些报文标签仅存在于本机的网络协议栈，并不会传播到其他主机。
 
 SEC处理过程：
-![SECMARK处理过程](images/selinux_iptable_SECMARK_01.png)
+![SECMARK处理过程](/img/selinux_iptable_SECMARK_01.png)
 
 
 # Labeled XFRM or NetLabel

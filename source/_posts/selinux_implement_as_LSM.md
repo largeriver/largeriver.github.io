@@ -280,7 +280,7 @@ struct task_security_struct {
 
 除了task_has_perm，这些检查函数都基于一个task，所有target SID没有必要。
 
-![](images/selinux_implement_as_LSM_01.png)
+![](/img/selinux_implement_as_LSM_01.png)
 
 
 从后面的源码可以看出，这些帮助函数最终调用了**avc_has_perm**系列的函数。
@@ -392,7 +392,7 @@ static int task_has_security(struct task_struct *tsk,
 ```
 ### 11.2.2. Hook Functions for Controlling Task Operations
 
-![](images/selinux_implement_as_LSM_02.png)
+![](/img/selinux_implement_as_LSM_02.png)
 ```c
 static int selinux_task_setpgid(struct task_struct *p, pid_t pgid)
 {
@@ -468,7 +468,7 @@ struct bprm_security_struct {
 
 * 任何一个权限检查的失败，都会导致SID不会改变，并且unsafe标识被设置为真，供随后的selinux_bprm_post_apply_creds使用，然后钩子函数立即返回。
 * 如果所有的权限都被授予了，钩子函数将当前SID改为新的SID，然后返回。
-![](images/selinux_implement_as_LSM_03.png)
+![](/img/selinux_implement_as_LSM_03.png)
 
 ### 12.1.5. selinux_bprm_post_apply_creds
 
@@ -589,7 +589,7 @@ out:
 
 对于unix/local域套接字，该**sk_security_struct**用于存储连接建立阶段时对端的安全信息，此时连接中的用户socket还没有分配好。
 
-![](images/selinux_implement_as_LSM_04.png)
+![](/img/selinux_implement_as_LSM_04.png)
 
 ### 17.1.2. sk_alloc_security and sk_free_security
 

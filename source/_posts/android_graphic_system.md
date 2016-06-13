@@ -18,7 +18,7 @@ tags:
 # OpenGL ES与EGL
 **SurfaceFlinger**虽然是GUI的核心，但相对于OpenGL ES来讲，它其实**只是一个“应用”**。
 
-![](images/android_graphic_system_01.png)
+![](/img/android_graphic_system_01.png)
 我们根据上面这个图，由底层往上层来逐步分析整个架构：
 
 1. Linux内核提供了统一的framebuffer显示驱动，设备节点/dev/graphics/fb*或者/dev/fb*，以fb0表示第一个Monitor，当前实现中只用到了一个显示屏
@@ -73,7 +73,7 @@ Gralloc实际操作了两个设备：
 
 * fb0 就是我们前面说的主屏幕，
 * gpu0负责图形缓冲区的分配和释放。
-![](images/android_graphic_system_02.png)
+![](/img/android_graphic_system_02.png)
 
 
 # 本地窗口
@@ -89,14 +89,14 @@ Gralloc实际操作了两个设备：
 
 ### 理想的窗口系统
 
-![](images/android_graphic_system_03.png)
+![](/img/android_graphic_system_03.png)
 理想的窗口系统
 
 假如整个系统仅有一个需要显示UI的程序，我们有理由相信它是可以胜任的。但是如果有N个UI程序的情况呢？Framebuffer显然只有一个，不可能让各个应用程序自己单独管理。
 
 ### 改进的窗口系统
 
-![](images/android_graphic_system_04.png)
+![](/img/android_graphic_system_04.png)
 改进的窗口系统
 
 在这个改进的窗口系统中，我们有了两类本地窗口，即Window-1和Window-2。
@@ -107,11 +107,11 @@ Gralloc实际操作了两个设备：
 当系统中存在多个应用程序时，这能保证它们都可以获得一个“本地窗口”，并且这些窗口最终也能显示到屏幕上——SurfaceFlinger会收集所有程序的显示需求，对它们做统一的图像混合操作(有点类似于AudioFlinger)，然后输出到自己的Window-1上。
 当然，这个改进的窗口系统有一个前提，即应用程序与SurfaceFlinger都是基于OpenGL ES来实现的。有没有其它选择呢？答案是肯定的，比如**应用程序端完全可以采用Skia等第三方的图形库，只要保持它们与SurfaceFlinger间的“协议”不变就可以了**，如下所示：
 
-![](images/android_graphic_system_05.png)
+![](/img/android_graphic_system_05.png)
 
 理论上来说，采用哪一种方式都是可行的。不过对于开发人员，特别是没有OpenGLES项目经验的人而言，前一种系统的门槛相对较高。事实上，Android系统同时提供了这两种实现来供上层选择。正常情况下我们按照SDK向导生成的apk应用，就属于后面的情况;而对于希望使用OpenGLES来完成复杂的界面渲染的应用开发者，也可以使用GLSurfaceView来达到目标。
 
-![](images/android_graphic_system_06.png)
+![](/img/android_graphic_system_06.png)
 Canvas为在画布的意思。Android上层的作图几乎都通过Canvas实例来完成，其实Canvas更多是一种接口的包装。
 
 ## FramebufferNativeWindow（面向SurfaceFlinger）
@@ -240,7 +240,7 @@ SurfaceTextureClient是面向Android系统中所有UI应用程序的，也就是
 
 SurfaceTextureClient只是一个中介，它间接调用mSurfaceTexture也就是ISurfaceTexture的服务。那么ISurfaceTexture在Server端又是由谁来完成的呢？
 
-![](images/android_graphic_system_07.png)
+![](/img/android_graphic_system_07.png)
 
 ## 小结
 通过这两个小节，我们学习了显示系统中两个重要的本地窗口，即FramebufferNativewindow和SurfaceTextureClient。
@@ -268,7 +268,7 @@ BufferQueue，它是SurfaceTextureClient实现本地窗口的关键。从逻辑�
 
 因为BufferQueue是ISurfaceTexture的本地实现，所以它必须重载接口中的各虚函数，比如queueBuffer、requestBuffer、dequeueBuffer等等。
 
-![](images/android_graphic_system_08.png)
+![](/img/android_graphic_system_08.png)
 
 另外，这个类的内部有一个非常重要的成员数组，即mSlots[NUM_BUFFER_SLOTS]，大家是否还记得前面SurfaceTextureClient类中也有一个一模一样的数组：
 
@@ -291,7 +291,7 @@ BufferQueue，它是SurfaceTextureClient实现本地窗口的关键。从逻辑�
 ```
 
 Buffer状态迁移图如下：
-![](images/android_graphic_system_09.png)
+![](/img/android_graphic_system_09.png)
 
 
 在这样的模型下，我们怎么保证Consumer可以及时的处理buffer呢？换句话说，当一块buffer数据ready后，应该怎么告知Consumer来操作呢？
@@ -369,7 +369,7 @@ BootAnimation是一个C++程序，其工程源码路径是/frameworks/base/cmds/
 
 这样子的设计是合理的，体现了模块化的思想——SurfaceFlinger的职责是“Flinger”，即把系统中所有应用程序的最终的“绘图结果”进行“混合”，然后统一显示到物理屏幕上。它不应该，也没有办法分出太多的精力去一一关注各个应用程序的“绘画过程”。这个光荣的任务自然而然地落在了BufferQueue的肩膀上，它是每个应用程序“一对一”的辅导老师，指导着UI程序的“画板申请”、“作画流程”等一系列细节。下面的图描述了这三者的关系：
 
-![](images/android_graphic_system_10.png)
+![](/img/android_graphic_system_10.png)
 
 的确是太乱了，我们有必要先来整理下目前已经出现的容易混淆的相关类的关系：
 
@@ -379,10 +379,10 @@ BootAnimation是一个C++程序，其工程源码路径是/frameworks/base/cmds/
 - **Layer**：既然Layer代表了一个画面图层，那么它肯定需要有存储图层数据的地方。当应用端通过ISurfaceComposerClient::createSurface()来发起创建Surface的请求时，SurfaceFlinger服务进程这边会创建一个Layer。
 
 一个典型的应用程序使用SurfaceFlinger进行绘图的流程如下图所示：
-![](images/android_graphic_system_11.png)
+![](/img/android_graphic_system_11.png)
 
 各个class之间的关系式这样的：
-![](images/android_graphic_system_12.png)
+![](/img/android_graphic_system_12.png)
 
 ## 应用程序与BufferQueue的关系
 原文：http://blog.csdn.net/xuesen_lin/article/details/8954853
@@ -392,9 +392,9 @@ BootAnimation是一个C++程序，其工程源码路径是/frameworks/base/cmds/
 1. 应用程序可以调用createSurface来建立多个Layer，它们是一对多的关系。理由就是createSurface中没有任何机制来限制应用程序的多次调用，相反，它会把一个应用程序多次申请而产生的Layer统一管理。为应用程序申请的layer，一方面需要告知SurfaceFlinger，另一方面也要记录到各Client内部中，这两个步骤是由addClientLayer()分别调用Client::attachLayer()和SurfaceFlinger::addLayer_l()来完成的。对于SurfaceFlinger，它需要对系统中当前所有的Layer进行Z-order排序，以决定用户所能看到的“画面”是什么样的。对于Client，它则利用内部的mLayers成员变量来一一记录新增(attachLayer)和移除(detachLayer)的图层。
 2. 每个Layer对应一个BufferQueue，换句话说，一个应用程序可能对应多个BufferQueue。Layer没有直接持有BufferQueue，而是由其内部的mSurfaceTexture来管理。
 
-![](images/android_graphic_system_13.png)
+![](/img/android_graphic_system_13.png)
 
-![](images/android_graphic_system_14.png)
+![](/img/android_graphic_system_14.png)
 
 图 11‑19 应用程序与BufferQueue的对应关系
 
@@ -411,10 +411,10 @@ FPS（Frame peer Second） 代表CPU、GPU每秒能够渲染的桢数量。
 刷新率 代表 显示设备的刷新率。
 VSync(垂直同步)是VerticalSynchronization的简写，它利用VBI时期出现的vertical sync pulse来保证双缓冲在最佳时间点才进行交换。
 
-![](images/android_graphic_system_15.png)
+![](/img/android_graphic_system_15.png)
 图 11‑22绘图过程没有采用VSync同步的情况
 
-![](images/android_graphic_system_16.png)
+![](/img/android_graphic_system_16.png)
 图 11‑25 FPS低于屏幕刷新率的情况
 
 当CPU/GPU的处理时间超过16ms时，第一个VSync到来时，缓冲区B中的数据还没有准备好，于是只能继续显示之前A缓冲区中的内容。而B完成后，又因为缺乏VSync pulse信号，它只能等待下一个signal的来临。于是在这一过程中，有一大段时间是被浪费的。当下一个VSync出现时，CPU/GPU马上执行操作，此时它可操作的buffer是A，相应的显示屏对应的就是B。这时看起来就是正常的。只不过由于执行时间仍然超过16ms，导致下一次应该执行的缓冲区交换又被推迟了——如此循环反复，便出现了越来越多的“Jank”。
@@ -429,7 +429,7 @@ VSync(垂直同步)是VerticalSynchronization的简写，它利用VBI时期出�
 ## SurfaceComposerClient
 原文：http://blog.csdn.net/xuesen_lin/article/details/8954957
 
-![](images/android_graphic_system_17.png)
+![](/img/android_graphic_system_17.png)
 图 11‑28 每个应用程序在SurfaceFlinger中都对应一个Client
 
 
@@ -441,7 +441,7 @@ ISurfaceComposerClient接口中最重要的两个方法createSurface()和destroy
 
 这是因为每个SurfaceFlinger的**客户程序**都只会有唯一一个Client连接，但它们**内部拥有的Surface数量却很可能有多个**。通常情况下，同一个Activity中的UI布局共用系统分配的Surface进行绘图，但像SurfaceView这种UI组件就是特例——它独占一个Surface进行绘制。举个例子来说，如果我们制作一个带SurfaceView的视频播放器，其所在的应用程序最终就会有不止一个的Surface存在。这样设计是必须的，因为播放视频对刷新频率要求很高，采用单独的Surface既可以保证视频的流畅度，也同时能让用户的交互动作(比如触摸屏操作)及时得到响应。
 
-![](images/android_graphic_system_18.png)
+![](/img/android_graphic_system_18.png)
 
 
 # VSync
