@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>SELinux: 什么是process::execmem权限？ | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="定义class process
+{
+...
+    execmem
+    execstack
+    execheap
+...
+}
+
+execmemMake executable an anonymous mapping or private file mapping that iswritable
+execheap: Make the heap executable.
+execstack: M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SELinux: 什么是process::execmem权限？">
+<meta property="og:url" content="http://blog.andjoin.com/2015/06/19/Security/SELinux/selinux_exemem/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="定义class process
+{
+...
+    execmem
+    execstack
+    execheap
+...
+}
+
+execmemMake executable an anonymous mapping or private file mapping that iswritable
+execheap: Make the heap executable.
+execstack: M">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.389Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SELinux: 什么是process::execmem权限？">
+<meta name="twitter:description" content="定义class process
+{
+...
+    execmem
+    execstack
+    execheap
+...
+}
+
+execmemMake executable an anonymous mapping or private file mapping that iswritable
+execheap: Make the heap executable.
+execstack: M">
+  
+    <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.andjoin.com">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-Security/SELinux/selinux_exemem" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/06/19/Security/SELinux/selinux_exemem/" class="article-date">
+  <time datetime="2015-06-19T03:21:49.000Z" itemprop="datePublished">2015-06-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SELinux: 什么是process::execmem权限？
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h1><pre><code>class process
+{
+...
+    execmem
+    execstack
+    execheap
+...
+}
+</code></pre><ul>
+<li><strong>execmem</strong><br>Make executable an anonymous mapping or private file mapping that is<br>writable</li>
+<li><strong>execheap</strong>: Make the heap executable.</li>
+<li><p><strong>execstack</strong>: Make the main process stack executable.</p>
+<a id="more"></a>
+<h1 id="相关allow规则"><a href="#相关allow规则" class="headerlink" title="相关allow规则"></a>相关allow规则</h1><p>  tios_zygote.te(69):allow tios_zygote self:process execmem;<br>  tios_radio.te(58):allow tios_radio self:process execmem;<br>  tiosappdomain.te(3):allow tiosappdomain self:process execmem;<br>  tios_unconfined.te(11):allow tios_unconfined self:process execmem;</p>
+<p>  recovery.te(63):  allow recovery self:process execmem;<br>  system_server.te(10):allow system_server self:process execmem;<br>  healthd.te(36):allow healthd self:process execmem;<br>  dumpstate.te(84):allow dumpstate self:process execmem;<br>  mediaserver.te(17):allow mediaserver self:process execmem;<br>  app.te(10):allow appdomain self:process execmem;</p>
+</li>
+</ul>
+<p>在android中,execmem 主要与dalvik有关：</p>
+<pre><code>system_server.te
+...
+# Dalvik Compiler JIT Mapping.
+allow system_server self:process execmem;
+allow system_server ashmem_device:chr_file execute;
+allow system_server system_server_tmpfs:file execute;
+....
+</code></pre><h1 id="解释"><a href="#解释" class="headerlink" title="解释"></a>解释</h1><h2 id="English"><a href="#English" class="headerlink" title="English"></a>English</h2><ul>
+<li><strong>execmem</strong> is purely a task-self check, i.e. a process can either make an anonymous mapping executable (and thus execute arbitrary code) or not.</li>
+<li><strong>execmod</strong> is a task-file check to allow finer granularity for the case of text relocations; it is applied when a process attempts to make a modified private file mapping executable, which normally only occurs for text relocations.  Thus, under strict policy, execmod is normally restricted to a particular file type (texrel_shlib_t) and all files requiring text relocation must be explicitly labeled with that type in order to allow the relocation.  allow_execmod just controls whether or not execmod is <em>ever</em> allowed, but even when it is enabled, you are still limited to texrel_shlib_t.<h2 id="中文版解释"><a href="#中文版解释" class="headerlink" title="中文版解释"></a>中文版解释</h2></li>
+<li>execmem纯粹是任务自身的一种检查，例如，进程可以设置或者取消匿名映射内存 的可执行能力。如果设置该能力，也就可以执行任意代码。</li>
+<li>execmode则是对文本重定位（text relocation）的更好粒度的任务文件检查。当进程试图将修改过的私有文件映射变为可执行时（通常仅发生于文本重定位），执行该检查。因此，在策略限制下，execmod用于限制特定的文件类型（texrel_shlib_t）,所有要求文本重定位的文件必须显示标记为该类型。allow_execmod 仅控制execmod是否 ”曾经“被容许，但即使被allow，其文本类型仍限制为texrel_shlib_t.</li>
+</ul>
+<h1 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h1><ul>
+<li><a href="https://www.redhat.com/archives/fedora-selinux-list/2005-June/msg00152.html" target="_blank" rel="external">allow execmod and execmem for self debugging process</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2015/06/19/Security/SELinux/selinux_exemem/" data-id="cipez37yk001g8djw0aod3v4b" class="article-share-link" data-share="baidu" data-title="SELinux: 什么是process::execmem权限？">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2015/06/19/Security/SELinux/selinux_exemem/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/06/30/Android/adb service out of date/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          如何解决adb过时问题：adb service out of date
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/05/18/Security/SELinux/selinux_iptable_SECMARK/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">SELinux: 利用iptable 的 SECMARK 机制来为Android网络通信进行MAC访问控制</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2015/06/19/Security/SELinux/selinux_exemem/" data-title="SELinux: 什么是process::execmem权限？" data-url="http://blog.andjoin.com/2015/06/19/Security/SELinux/selinux_exemem/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a><span class="category-list-count">1</span></li></ul></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://github.com" target="_blank">github</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LargeRiver<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"largeriver"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

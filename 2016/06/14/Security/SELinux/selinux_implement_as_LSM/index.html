@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>SELinux 基于LSM的实现 | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="[TOC]
+介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SELinux 基于LSM的实现">
+<meta property="og:url" content="http://blog.andjoin.com/2016/06/14/Security/SELinux/selinux_implement_as_LSM/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="[TOC]
+介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。">
+<meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_01.png">
+<meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_02.png">
+<meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_03.png">
+<meta property="og:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_04.png">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.476Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SELinux 基于LSM的实现">
+<meta name="twitter:description" content="[TOC]
+介绍注意原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。">
+<meta name="twitter:image" content="http://blog.andjoin.com/img/selinux_implement_as_LSM_01.png">
+  
+    <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.andjoin.com">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-Security/SELinux/selinux_implement_as_LSM" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/14/Security/SELinux/selinux_implement_as_LSM/" class="article-date">
+  <time datetime="2016-06-14T04:52:37.298Z" itemprop="datePublished">2016-06-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SELinux 基于LSM的实现
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>[TOC]</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。<br><a id="more"></a></p>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
+<li>LSM(linux security modules): Linux 安全模块</li>
+<li>hook function：钩子函数</li>
+<li>security field：安全字段</li>
+<li>System V IPC: 系统5 进程间通讯机制</li>
+<li>access control：访问控制</li>
+<li>help function：辅助函数</li>
+</ul>
+<h2 id="主要文件"><a href="#主要文件" class="headerlink" title="主要文件"></a>主要文件</h2><ul>
+<li><strong>include/linux/security.h</strong>： LSM所有的钩子函数; 通用接口；详细的文档。</li>
+<li><strong>security/security.c</strong>: 通用接口的实现，主要是将钩子函数的回调封装为函数。<br><code>int security_cred_alloc_blank(struct cred *cred, gfp_t gfp){    return security_ops-&gt;cred_alloc_blank(cred, gfp);}</code></li>
+<li><strong>security/selinux/hooks.c</strong> LSM钩子函数的SELinux代码实现</li>
+<li><strong>security/capability.c</strong> capabilities 模块,也是linux的默认模块</li>
+</ul>
+<h1 id="3-概览"><a href="#3-概览" class="headerlink" title="3 概览"></a>3 概览</h1><p>LSM 框架提供了一种机制，让各种安全检查可以通过钩子函数挂在新的内核扩展上。LSM可以配置所需要的安全模块的名称：</p>
+<ul>
+<li>内核编译选项 CONFIG_DEFAULT_SECURITY</li>
+<li>内核命令行参数 “security=…”</li>
+</ul>
+<p>LSM框架在内核数据结构中增加了security字段，在内核代码的关键点插入了对hook函数的调用，以便管理安全字段和执行访问控制。它也增加了用于注册和反注册安全模块的函数。用于新安全名字空间的扩展属性句柄（extended attribute handlers）被加入到文件系统中，以支持新的文件安全属性；在用于空间，引入了/proc/pid/attr子目录，以提供对新的进程安全属性的用户空间访问。</p>
+<p>LSM security field  仅仅是简单的void*指针。对于进程和程序执行安全信息，security fields 被加入到struct task_struct和struct linux_binprm。对于文件系统安全信息，一个security filed被加入了struct super_block。对于pipe，fifo 和socket 安全信息，security fields被计入了struct sock。为了System V IPC的安全信息，security fields被加入了struct kern_ipc_perm和 struct msg_msg。</p>
+<p>每一个LSM 都是 在全局表security_ops中的一个函数指针，该全局表定义在<strong>include/linux/security.h</strong>中（该文件也包含了钩子函数详尽的文档）。钩子函数基于内核目标被逻辑分组为task、file、sock等等，以及一些用于系统操作的琐碎的钩子。</p>
+<p>全局表security_ops被初始化为一个dummy 安全模块所提供的钩子函数集，该模块支持传统的superuser 逻辑。register_security 函数(security/security.c)用于容许一个安全模块将security_ops执行自己的钩子函数集，而unregister_security 则相反，用于将security_ops指向dummy安全模块。该机制用于设置主安全模块，它负责为每个钩子做出最终决策。</p>
+<p>LSM也提供了一个简单的机制，用于在主安全模块上堆叠额外的安全模块。LSM在security_operations 结构中定义了register_security和unregister_security钩子，并提供了mod_reg_security和mod_unreg_security函数来在执行了某些合理性检查后调用这些钩子。这些辅助安全模块堆叠后如何被调用，由主模块来决定。</p>
+<p>尽管LSM 钩子按照内核对象来组织，所有的钩子函数都可以分为两类：</p>
+<ul>
+<li>用于管理security field的钩子。例如用于含有security field的每个内核数据结构的alloc_security和free_security钩子</li>
+<li>用于执行访问控制的钩子。例如 inode_permission钩子，在访问inode时执行检查。</li>
+</ul>
+<h1 id="4-基本概念"><a href="#4-基本概念" class="headerlink" title="4 基本概念"></a>4 基本概念</h1><h1 id="5-新版SELinux-基于LSM-内核实现与-旧版SELinux内核实现的对比"><a href="#5-新版SELinux-基于LSM-内核实现与-旧版SELinux内核实现的对比" class="headerlink" title="5 新版SELinux(基于LSM) 内核实现与 旧版SELinux内核实现的对比"></a>5 新版SELinux(基于LSM) 内核实现与 旧版SELinux内核实现的对比</h1><h1 id="5-1-通用改变"><a href="#5-1-通用改变" class="headerlink" title="5.1 通用改变"></a>5.1 通用改变</h1><ul>
+<li>安全中间层的增加</li>
+<li>动态分配安全字段</li>
+<li>与capabilities的堆叠</li>
+<li>SELinux API的重新设计</li>
+<li>利用现存的linux permission函数</li>
+</ul>
+<h2 id="5-2-程序执行相关的改变"><a href="#5-2-程序执行相关的改变" class="headerlink" title="5.2 程序执行相关的改变"></a>5.2 程序执行相关的改变</h2><h3 id="5-2-1-Filr-execute-no-trans-权限"><a href="#5-2-1-Filr-execute-no-trans-权限" class="headerlink" title="5.2.1 Filr execute_no_trans 权限"></a>5.2.1 Filr execute_no_trans 权限</h3><p>在初始SELinux内核patch中，file execute权限控制了程序发起执行的能力；process execute权限则控制从一个可执行image执行代码的能力。 这种区分是必要的，因为任何的SID可能在执行时改变。然而，当进程的SID改变时，process execute 权限与process entrypoint 权限是相同的，因此冗余了，因此其仅在SID不改变时起作用。</p>
+<p>因此，process execute权限被file execute_no_trans权限所替代了，在任务的SID不变时检查；process  entrypoint 也被移动到了file class之中，为了保持一致性。</p>
+<p>总结：</p>
+<ul>
+<li>SID不变时，检查file:execute, file:excute_no_trans</li>
+<li>SID改变时，检查file:execute, process:transition 和 file:entrypoint</li>
+</ul>
+<h3 id="5-2-2-状态的继承"><a href="#5-2-2-状态的继承" class="headerlink" title="5.2.2 状态的继承"></a>5.2.2 状态的继承</h3><p>当执行execv函数导致上下文切换时，继承的状态将有一些 改变。这些改变包括：文件描述符继承控制的改变，进程跟踪和状态共享的控制改变，新控制的增加。</p>
+<p>在程序执行时的文件描述符继承权限检查也基于LSM的SELinux中被修订，我们在5.3.4节中讨论。</p>
+<p>在旧版的SELinux内核补丁中，对程序跟踪和共享进程状态的检查 被插入了内核函数 compute_creds。然而该函数不能返回错误，因此当检查失败时，SELinux只能不改变SID，如同Linux在测试失败时不修改uid一样。</p>
+<p>新版SELinux中，实现了新的权限检查来控制 信号相关的状态、资源限制的继承性，这些检查描述在12.1.4节。此外，AT_SECURE标识增加到了ELF 辅助表中，这样在执行execv并发生上下文转换时，SELinux就能够通知glibc 容许该进程自己的secure mode，以便清理环境变量以及其他一些继承状态。这个行为也受到权限检查的控制，请参考12.1.6。</p>
+<h2 id="5-3-文件系统的改变"><a href="#5-3-文件系统的改变" class="headerlink" title="5.3 文件系统的改变"></a>5.3 文件系统的改变</h2><p>新版对比旧版的改变：</p>
+<ul>
+<li>使用扩展属性，而不是通过映射来保存文件的安全上下文</li>
+<li>重新实现了对伪文件系统的安全标记的支持</li>
+<li>利用现存permission函数的hook</li>
+<li>消除了class pipe</li>
+</ul>
+<h2 id="5-4-socket-ipc和网络的改变"><a href="#5-4-socket-ipc和网络的改变" class="headerlink" title="5.4  socket ipc和网络的改变"></a>5.4  socket ipc和网络的改变</h2><p>新版SELinux和旧版SELinux在socket IPC和网络方面的修改包括：</p>
+<ul>
+<li>重新设计了网络访问控制机制</li>
+<li>在socket对应的inode节点的security字段存储安全信息</li>
+<li>使用最低限度的侵入hook 来重新实现了SELinux 访问控制</li>
+<li>改变了fd传输控制</li>
+<li>省略了某些底层ioctl</li>
+<li>实现了扩展的socket调用。</li>
+</ul>
+<h2 id="5-5-System-V-IPC"><a href="#5-5-System-V-IPC" class="headerlink" title="5.5 System V IPC"></a>5.5 System V IPC</h2><p>由于在基于LSM重新实现SELinux之前，System V IPC 安全增强还没来得及从2.2移植到2.4，所以新版的SELinux模块不得不使用SELinux 安全增强的实现来适配到2.4。<br>此外，新版SELinux与旧版SELinux在System V IPC上的修改还包括：</p>
+<ul>
+<li>一种更容易的存储IPC安全数据的方式</li>
+<li>利用现存的ipcperms函数中的hook</li>
+</ul>
+<h2 id="5-6-零碎改变"><a href="#5-6-零碎改变" class="headerlink" title="5.6 零碎改变"></a>5.6 零碎改变</h2><ul>
+<li>重新实现了sysctl 的控制方式</li>
+<li>对在旧版SELinux实现中某些未特别处理的系统操作增加了新的控制，例如syslog，该操作之前仅由粗粒度的capabel来控制</li>
+<li>在2.6 版本的SELinux中引入了对netlink 合适粒度的控制。请参考19章</li>
+</ul>
+<h1 id="6-内部架构"><a href="#6-内部架构" class="headerlink" title="6 内部架构"></a>6 内部架构</h1><p>本章描述了SELinux安全模型的内部架构，相关代码在内核树的security/selinux 目录中。安全模型包含六个主要组件：</p>
+<ul>
+<li>the Sercurity Server：安全服务</li>
+<li>the access vector cache（AVC）</li>
+<li>the network interface table：网络接口表</li>
+<li>the netlink event notification code（用以通知策略的变更）：netlink事件通知</li>
+<li>the selinuxfs pseudo filesystem：selinux 伪文件系统</li>
+<li>the hook function implementations：钩子函数的实现</li>
+</ul>
+<p>SS提供的通用接口包括：获取策略决策，容许安全模型的其他部分独立于所使用的特定安全策略。这些接口定义在SELinux目录中的include/security.h。SS的特定实现可以被修改或者完全替换，而不要求修改模型的其他部分。例如：SELinux 复合实现了RBAC、TE和MLS。RBAC和TE是高度可配置的，能够满足多种不同的安全目标。可以在ss子目录中找到样例SS。</p>
+<p>AVC提供了从SS获取到的对访问决策的缓冲，以便最小化SELinux机制的性能开销。AVC给钩子函数提供了接口以便进行权限检查，给SS提供了接口以管理缓冲。</p>
+<p>网络接口表 提供网络设备到安全上下文的映射关系。维护一个单独的接口表是必须的，因为LSM网络设备security field 被拒绝了。在第一次通过钩子函数查找网络设备时，他们被加入这个表格；在网络设备被关闭，或者策略重载时，网络设备从该表格中移除。网络接口表提供了一个接口（定义在include/netif.h），用于钩子函数查找并获取某个网络设备相关的SID。回调函数 则被注册，用于在设备配置改变或者策略重载时得到通知。网络接口表的代码在netif.c中。</p>
+<p>netlink事件通知代码则用于： 在策略重载或者enforcing状态被改变时，SELinux模块通知各个进程。这些通知被用户空间AVC同内核保持一致。相关代码在netlink.c中。</p>
+<p>selinuxfs 伪文件系统 输出安全服务策略到进程中。初期的SELinux 内核API，作为linux2.6重设计的一部分，被分解为三组正交的组件（进程属性，文件属性，策略API）。selinuxfs提供了对策略API调用的底层支持。在新内核API中，这三个组件被封装在更高层的libselinux API中。selinuxfs.c</p>
+<p>钩子函数的实现 管理内核对象相关的安全信息，为每个内核操作执行SElinux访问控制。钩子函数调用SS和AVC来获取策略决策，使用那些决策来标记和控制内核对象。 钩子函数也调用文件系统扩展属性代码来获取和设置文件的安全上下文。这些钩子函数的代码实现位于hooks.c ,并且内核对象相关安全信息的数据结构定义在include/object.h之中。</p>
+<p>LSM钩子函数的位置，与旧版SELinux patch的插入点位置，并不总是一一对应。LSM利用了现存的NetFilter框架来支持许多网络操作上的钩子。</p>
+<h1 id="7-初始化"><a href="#7-初始化" class="headerlink" title="7 初始化"></a>7 初始化</h1><p>SELinux的初始化由<strong>selinux_init</strong>函数开始，在内核初始化早期被调用；SELinux的某些方面需要延迟到内核初始化后期，由普通的initcall来处理，例如：selinux_nf_ip_init,sel_netif_init和init_sel_fs。SELinux 直到初始安全策略被/sbin/init加载后才基本完成，才调用<strong>selinux_complete_init</strong>函数宣告结束。</p>
+<h2 id="7-1-selinux-init-hook-c"><a href="#7-1-selinux-init-hook-c" class="headerlink" title="7.1 selinux_init(hook.c)"></a>7.1 selinux_init(hook.c)</h2><p>selinux_init 用于处理SELinux模块额早期初始化，其主要工作包括：</p>
+<ul>
+<li>设置initial 任务的安全状态</li>
+<li>调用avc_init初始化AVC。</li>
+<li>设置次安全模块到原安全模块，通常是dummy，以支持同dummy或者capabilities模块的堆叠。在第8章详细讨论</li>
+<li>调用register_security函数，将SELinux注册为LSM的主安全模块。</li>
+</ul>
+<h2 id="7-2-selinux-nf-ip-init-hook-c"><a href="#7-2-selinux-nf-ip-init-hook-c" class="headerlink" title="7.2 selinux_nf_ip_init(hook.c)"></a>7.2 selinux_nf_ip_init(hook.c)</h2><p>处理SELinux NetFilter钩子的初始化。NetFilter钩子用于检查发送的报文。该函数调用nf_register_hook函数 来注册 SELinux post-routing 钩子函数，将这些钩子函数注册到NetFilter 框架，用于ipv4和ipv6。详情参见第18章。</p>
+<h2 id="7-3-selinux-nf-init-netif-h"><a href="#7-3-selinux-nf-init-netif-h" class="headerlink" title="7.3 selinux_nf_init(netif.h)"></a>7.3 selinux_nf_init(netif.h)</h2><p>处理SELinux网络接口表的初始化：</p>
+<ul>
+<li>初始化SELinux 网络接口哈希表</li>
+<li>注册网络设备提醒器，以便在设备关闭时删除对应表现。</li>
+<li>注册AVC回调，以便在策略重置时清空整张表。</li>
+</ul>
+<h2 id="7-4-selnl-init-netlink-c"><a href="#7-4-selnl-init-netlink-c" class="headerlink" title="7.4 selnl_init(netlink.c)"></a>7.4 selnl_init(netlink.c)</h2><p>创建一个SELinux netlink套接字，并容许非root进程接收通知。</p>
+<h2 id="7-5-init-sel-fs-selinuxfs-c"><a href="#7-5-init-sel-fs-selinuxfs-c" class="headerlink" title="7.5 init_sel_fs(selinuxfs.c)"></a>7.5 init_sel_fs(selinuxfs.c)</h2><p>初始化selinuxfs伪文件系统。它注册了selinuxfs 文件系统类型，并创建了一个私有的内核mount点，这样创建了公开的selinuxfs 文件系统，并创建了一个特殊的null device 节点。在执行execve并改变进程上下文时，该节点 被SELinux用于关闭未授权的文件。</p>
+<p>This function, located in the selinuxfs.c file, handles initialization of the selinuxfs pseudo filesystem.<br>It registers the selinuxfs filesystem type and creates a private kernel mount of selinuxfs. This results in a populated selinuxfs filesystem and sets up the special null device node used by SELinux when it closes unauthorized files upon a context-changing execve.</p>
+<h2 id="7-6-selinux-complete-init-hooks-c"><a href="#7-6-selinux-complete-init-hooks-c" class="headerlink" title="7.6 selinux_complete_init(hooks.c)"></a>7.6 selinux_complete_init(hooks.c)</h2><p>在/sbin/init完成初始策略的加载后调用，标志着SELinux初始化的结束。</p>
+<ul>
+<li>该函数遍历先于策略加载前的超级块链表，依次调用superblock_init。</li>
+<li>该函数也调用inode_doinit函数，为任何关联到超级块的现存inode设置安全结构。</li>
+</ul>
+<h1 id="8-堆叠"><a href="#8-堆叠" class="headerlink" title="8 堆叠"></a>8 堆叠</h1><p>本节描述了SELinux与其他安全模块堆叠支持。LSM仅仅提供了最小的堆叠支持，为该目的提供了钩子，但是将如何堆叠的细节留给了主安全模块。当前，SELinux 安全模块作仅能做为主安全模块，对使用dummy或者capabilities作为次安全模块提供了最小支持。dummy安全模块提供了传统的superuser逻辑。</p>
+<p>如第七章所提到的，selinux_init函数在注册SELinux安全模块之前， 初始化 次安全模块为dummy。这种方式，容许SELInux钩子函数安全的调用次钩子函数。selinux_register_security钩子函数可以设置次安全模块为另外一个模块，如capabilities。而selinux_unregister_security钩子函数 将次安全模块恢复为dummy。</p>
+<h1 id="9-SELinux-API"><a href="#9-SELinux-API" class="headerlink" title="9 SELinux API"></a>9 SELinux API</h1><p>基于LSM的SELinux API设计策略是减少 侵入性，通过setexecon和setfacreatecon先于普通系统调用设置上下文环境，从而避免引入大量专用的扩展系统调用。</p>
+<h1 id="10-hook-functions：辅助函数"><a href="#10-hook-functions：辅助函数" class="headerlink" title="10 hook functions：辅助函数"></a>10 hook functions：辅助函数</h1><h2 id="10-1-原语分配辅助函数"><a href="#10-1-原语分配辅助函数" class="headerlink" title="10.1 原语分配辅助函数"></a>10.1 原语分配辅助函数</h2><p>对于include/objsec.h中定义的安全数据结构，SELinux模块提供了 两个原语:alloc_sercurity和free_security，例如，task_alloc_security 和 task_free_security。这些帮助函数被用于alloc_sercurity和free_security, 后者可能包含更多的额外的处理。</p>
+<p>原语alloc_security辅助函数负责分配一个合适类型的安全结构，设置back指针指向对应的内核对象数据结构，初始化安全信息，设置对象的security field以引用新的安全结构。<br>原语free_security 辅助函数清除security field并释放安全结构。</p>
+<h2 id="10-2-初始化辅助函数"><a href="#10-2-初始化辅助函数" class="headerlink" title="10.2 初始化辅助函数"></a>10.2 初始化辅助函数</h2><p>SELinux为某些安全结构定义了初始化辅助函数，例如 inode_doinit,superblock_doinit。这些初始化辅助函数被特定SELinux hook函数调用，后面再详细讨论。</p>
+<h2 id="10-3-权限检查辅助函数"><a href="#10-3-权限检查辅助函数" class="headerlink" title="10.3 权限检查辅助函数"></a>10.3 权限检查辅助函数</h2><p>提供了一套用于内核对象和权限检查的辅助函数：解引用security field，设置辅助审计数据，调用AVC执行权限检查。辅助函数简化了很多执行权限检查的钩子函数。例如:task_has_perm,inode_has_perm和may_create</p>
+<p>尽管这些辅助函数可能非常方便，钩子函数还是被容许自由调用AVC进行权限检查。这种情况是可能发生的，例如，某些权限检查牵扯的SID没有关联内核对象；或者某些操作要求基于相同的某些SID执行多个权限检查。</p>
+<h1 id="11-hook-functions：task"><a href="#11-hook-functions：task" class="headerlink" title="11 hook functions：task"></a>11 hook functions：task</h1><h2 id="11-1-管理task-security-fields"><a href="#11-1-管理task-security-fields" class="headerlink" title="11.1 管理task security fields"></a>11.1 管理task security fields</h2><h3 id="11-1-1-task-security-structure"><a href="#11-1-1-task-security-structure" class="headerlink" title="11.1.1 task security structure"></a>11.1.1 task security structure</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> task_struct * task;</span><br><span class="line">	u32 osid;</span><br><span class="line">	u32 sid;</span><br><span class="line">	u32 exec_sid;</span><br><span class="line">	u32 create_sid;</span><br><span class="line">	u32 ptrace_sid;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>每个字段的定义如下：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>task</td>
+<td>Back pointer to the associated task_struct structure.</td>
+</tr>
+<tr>
+<td>osid</td>
+<td>SID prior to the last execve.</td>
+</tr>
+<tr>
+<td>sid</td>
+<td>current SID for the task.</td>
+</tr>
+<tr>
+<td>exec_sid</td>
+<td>SID for the task upon the next execve call.</td>
+</tr>
+<tr>
+<td>create_sid</td>
+<td>SID for files created by the task.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="11-1-2-task-alloc-security-and-task-free-security"><a href="#11-1-2-task-alloc-security-and-task-free-security" class="headerlink" title="11.1.2 task_alloc_security and task_free_security"></a>11.1.2 task_alloc_security and task_free_security</h3><h3 id="11-1-3-selinux-task-reparent-to-init"><a href="#11-1-3-selinux-task-reparent-to-init" class="headerlink" title="11.1.3 selinux_task_reparent_to_init"></a>11.1.3 selinux_task_reparent_to_init</h3><p>内核函数reparent_to_init调用该hook 来设置某个内核task的安全属性。该hook 首先调用次安全模块以支持capabilities，然后设置task SID为初始SID kernel。</p>
+<h3 id="11-1-4-selinux-task-post-setuid"><a href="#11-1-4-selinux-task-post-setuid" class="headerlink" title="11.1.4. selinux_task_post_setuid"></a>11.1.4. selinux_task_post_setuid</h3><p>在setuid操作成功后调用。既然SELinux模块不适用Linux identify 属性（uid、gid），因此该hook函数不执行任何SELInux处理，而是调用次安全函数来支持linux capabilities。</p>
+<h3 id="11-1-5-selinux-task-to-inode"><a href="#11-1-5-selinux-task-to-inode" class="headerlink" title="11.1.5. selinux_task_to_inode"></a>11.1.5. selinux_task_to_inode</h3><p>该hook函数由procfs伪文件系统调用，以设置任务相关的/proc/pid的安全状态。该函数根据task SID来设置inode SID，并将该inode 安全结构标记为已初始化的。</p>
+<h3 id="11-1-6-selinux-getprocattr"><a href="#11-1-6-selinux-getprocattr" class="headerlink" title="11.1.6. selinux_getprocattr"></a>11.1.6. selinux_getprocattr</h3><p>在进程读取/proc/pid/attr下某个节点时，procfs伪文件系统调用该hook 函数从安全模块来获取该进程的安全属性。如果目标任务与当前任务不同，该hook函数将首先检查getattr权限；然后，从task安全结构中提取合适的SID。如果对应SID并没有被设置（例如：没有设置显式的exec SID，任务使用默认的策略行为）,hook将返回一个零长度的结果；否则，hook调用security_sid_to_context ,获取安全上下文，将其拷贝到内核缓冲区并返回其长度。</p>
+<h3 id="11-1-7-selinux-setprocattr"><a href="#11-1-7-selinux-setprocattr" class="headerlink" title="11.1.7. selinux_setprocattr"></a>11.1.7. selinux_setprocattr</h3><p>在某个进程试图写/proc/pid/attr下的某个节点时， procfs调用该hook以在设置该进程的安全属性值。</p>
+<h2 id="11-2-Controlling-Task-Operations"><a href="#11-2-Controlling-Task-Operations" class="headerlink" title="11.2. Controlling Task Operations"></a>11.2. Controlling Task Operations</h2><h3 id="11-2-1-Helper-Functions-for-Checking-Task-Permissions"><a href="#11-2-1-Helper-Functions-for-Checking-Task-Permissions" class="headerlink" title="11.2.1. Helper Functions for Checking Task Permissions"></a>11.2.1. Helper Functions for Checking Task Permissions</h3><p>有几个辅助函数，被用以执行任务权限检查。这些函数和他们的所执行的权限检查在表2中描述。</p>
+<ul>
+<li>task_has_perm 函数检查一个task是否持有另外一个task的特定权限；</li>
+<li>task_has_capability 函数检查一个task是否使用特定capability的能力。注意，在sepolicy中我们已经知道，这里的主体和客体的相同的。</li>
+<li>task_has_system 检查task是否具有 class system中的某项权限。其target SID = Kernel</li>
+<li>task_has_security 检查task是否有权限使用某个selinuxfs API。其target SID = Security</li>
+</ul>
+<p>除了task_has_perm，这些检查函数都基于一个task，所有target SID没有必要。</p>
+<p><img src="/img/selinux_implement_as_LSM_01.png" alt=""></p>
+<p>从后面的源码可以看出，这些帮助函数最终调用了<strong>avc_has_perm</strong>系列的函数。</p>
+<h4 id="task-has-perm"><a href="#task-has-perm" class="headerlink" title="task_has_perm"></a>task_has_perm</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">security/selinux/hooks.c</span><br><span class="line"><span class="comment">/*</span><br><span class="line"> * Check permission between a pair of tasks, e.g. signal checks,</span><br><span class="line"> * fork check, ptrace check, etc.</span><br><span class="line"> * tsk1 is the actor and tsk2 is the target</span><br><span class="line"> * - this uses the default subjective creds of tsk1</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_perm</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> task_struct * tsk1,</span><br><span class="line">			 <span class="keyword">const</span> <span class="keyword">struct</span> task_struct * tsk2,</span><br><span class="line">			 u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">struct</span> task_security_struct *__tsec1, *__tsec2;</span><br><span class="line">	u32 sid1, sid2;</span><br><span class="line"></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	__tsec1 = __task_cred(tsk1)-&gt;security;	sid1 = __tsec1-&gt;sid;</span><br><span class="line">	__tsec2 = __task_cred(tsk2)-&gt;security;	sid2 = __tsec2-&gt;sid;</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid1, sid2, SECCLASS_PROCESS, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="task-has-capability-cred-has-capability"><a href="#task-has-capability-cred-has-capability" class="headerlink" title="task_has_capability(cred_has_capability)"></a>task_has_capability(cred_has_capability)</h4><p>在kernel 3.4中，task_has_capability被cred_has_capability 取代。</p>
+<p>security/selinux/hooks.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a capability. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">cred_has_capability</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred * cred,</span><br><span class="line">			       <span class="keyword">int</span> cap, <span class="keyword">int</span> audit)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> common_audit_data ad;</span><br><span class="line">	<span class="keyword">struct</span> av_decision avd;</span><br><span class="line">	u16 sclass;</span><br><span class="line">	u32 sid = cred_sid(cred);</span><br><span class="line">	u32 av = CAP_TO_MASK(cap);</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	ad.type = LSM_AUDIT_DATA_CAP;</span><br><span class="line">	ad.u.cap = cap;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (CAP_TO_INDEX(cap)) &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">		sclass = SECCLASS_CAPABILITY;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">		sclass = SECCLASS_CAPABILITY2;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		printk(KERN_ERR</span><br><span class="line">		       <span class="string">"SELinux:  out of range capability %d\n"</span>, cap);</span><br><span class="line">		BUG();</span><br><span class="line">		<span class="keyword">return</span> -EINVAL;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	rc = avc_has_perm_noaudit(sid, sid, sclass, av, <span class="number">0</span>, &amp;avd);</span><br><span class="line">	<span class="keyword">if</span> (audit == SECURITY_CAP_AUDIT) &#123;</span><br><span class="line">		<span class="keyword">int</span> rc2 = avc_audit(sid, sid, sclass, av, &amp;avd, rc, &amp;ad, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">if</span> (rc2)</span><br><span class="line">			<span class="keyword">return</span> rc2;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="task-has-system"><a href="#task-has-system" class="headerlink" title="task_has_system"></a>task_has_system</h4><p>security/selinux/hooks.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a system operation. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_system</span><span class="params">(<span class="keyword">struct</span> task_struct *tsk,</span><br><span class="line">			   u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	u32 sid = task_sid(tsk);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid, SECINITSID_KERNEL,</span><br><span class="line">			    SECCLASS_SYSTEM, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="task-has-security"><a href="#task-has-security" class="headerlink" title="task_has_security"></a>task_has_security</h4><p>security/selinux/selinuxfs.c<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task is allowed to use a security operation. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">task_has_security</span><span class="params">(<span class="keyword">struct</span> task_struct *tsk,</span><br><span class="line">			     u32 perms)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">struct</span> task_security_struct *tsec;</span><br><span class="line">	u32 sid = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	tsec = __task_cred(tsk)-&gt;security;</span><br><span class="line">	<span class="keyword">if</span> (tsec)</span><br><span class="line">		sid = tsec-&gt;sid;</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	<span class="keyword">if</span> (!tsec)</span><br><span class="line">		<span class="keyword">return</span> -EACCES;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> avc_has_perm(sid, SECINITSID_SECURITY,</span><br><span class="line">			    SECCLASS_SECURITY, perms, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="11-2-2-Hook-Functions-for-Controlling-Task-Operations"><a href="#11-2-2-Hook-Functions-for-Controlling-Task-Operations" class="headerlink" title="11.2.2. Hook Functions for Controlling Task Operations"></a>11.2.2. Hook Functions for Controlling Task Operations</h3><p><img src="/img/selinux_implement_as_LSM_02.png" alt=""><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_setpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p, <span class="keyword">pid_t</span> pgid)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__SETPGID);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_task_getpgid</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> current_has_perm(p, PROCESS__GETPGID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这些钩子函数中，只有3个需要进一步解释:</p>
+<ul>
+<li>selinux_task_kill 钩子函数检查 当前task是否有权限向目标task发送指定的信号。</li>
+<li><p>selinux_task_wait 检查当前task是否有权限等待子task的exit信号，子task可能与当前task有着不同的SID。</p>
+<ul>
+<li>就这两个钩子函数而言，SIGKILL和SIGSTOP有着他们自己独立的权限，因为他们都不能被阻塞。</li>
+<li>SIGCHLD 有着单独的权限，因为其通常由子进程发送给父进程。</li>
+<li>signull权限用于检查是否信号0 被传递给kill，因为它纯粹代表了一种存在测试，而不是分发实际信号。</li>
+<li>对于所有的其他信号，则使用通用的signal权限。</li>
+</ul>
+</li>
+<li><p>selinux_task_rlimit 钩子函数在试图修改硬限制（hardlimit）时检查setrlimit权限，以便硬限制稍后可以被用于软限制（softlimit）上下文转换时的一个安全的reset点。请查看selinux_bprm_creds 关于资源限制继承控制的进一步讨论。</p>
+</li>
+</ul>
+<p>此外，检查ptrace权限时，selinux_ptrace钩子函数也在子任务的security structure中设置了tracer的SID，以便稍后由selinux_bprm_apply_creds和selinux_setprocattr使用。请移步12.1.4和11.1.7查看更多信息。</p>
+<p>有几个task钩子函数并不由SELinux安全模块使用，</p>
+<p>• selinux_task_setuid<br>• selinux_task_setgid<br>• selinux_task_setgroups<br>• selinux_task_prctl</p>
+<p>由于SELinux不依赖于Linux 身份属性，并且既然这些操作仅影响当前进程，所以目前SELinux没有控制这些操作。这些操作的特权方面也已经通过了selinux_capable钩子函数进行了控制。<strong>然而，SELinux也可能在将来控制这些钩子，以在更好的粒度上约束Linux身份更改动作。</strong></p>
+<h1 id="12-hook-functions：程序加载"><a href="#12-hook-functions：程序加载" class="headerlink" title="12 hook functions：程序加载"></a>12 hook functions：程序加载</h1><p>S ELinux binprm 钩子函数 实现了对structure linux_binprm的安全字段的管理，并执行程序加载操作的访问控制检查。</p>
+<h2 id="12-1-管理binprm安全字段"><a href="#12-1-管理binprm安全字段" class="headerlink" title="12.1 管理binprm安全字段"></a>12.1 管理binprm安全字段</h2><h3 id="12-1-1-binprm安全结构"><a href="#12-1-1-binprm安全结构" class="headerlink" title="12.1.1 binprm安全结构"></a>12.1.1 binprm安全结构</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> bprm_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> linux_binprm *	bprm;<span class="comment">//Back pointer to the associated linux_binprm structure.</span></span><br><span class="line">	u32 sid;                   <span class="comment">//SID for the transformed process.</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="built_in">set</span>;         <span class="comment">//Flag indicating whether sid has been set.</span></span><br><span class="line">	<span class="keyword">char</span> unsafe;               <span class="comment">//Flag indicating whether an unsafe transition was attempted.</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="12-1-2-selinux-bprm-alloc-security-and-selinux-bprm-free-security"><a href="#12-1-2-selinux-bprm-alloc-security-and-selinux-bprm-free-security" class="headerlink" title="12.1.2. selinux_bprm_alloc_security and selinux_bprm_free_security"></a>12.1.2. selinux_bprm_alloc_security and selinux_bprm_free_security</h3><h3 id="12-1-3-selinux-bprm-set-security"><a href="#12-1-3-selinux-bprm-set-security" class="headerlink" title="12.1.3. selinux_bprm_set_security"></a>12.1.3. selinux_bprm_set_security</h3><p>在加载新程序时，调用selinux_bprm_set_security钩子函数用以填充linux_binprm安全字段， 并条件执行权限检查。</p>
+<p>在execve脚本时，该钩子函数可能会标调用多次。该函数首先调用辅助安全模块以支持capabilities。如果bprm安全结构中的set 标志已经在先前的对本钩子函数的调用中被设置，这个钩子函数将直接返回。如果策略批准，这将容许在执行脚本时安全转换。自然，这样的转换将仅仅发上在 调用者比新域更可信的情况下，。。。因为脚本是极其可疑的。然而，SELinux容许符合策略的脚本的暗转转换。</p>
+<pre><code>This hook function may be called multiple times during a single execve, e.g. for interpreted scripts. This hook function first calls the secondary security module to support Linux capabilities. If the set flag in the bprm security structure has already been set by a prior call to this hook, this hook merely returns without further processing. This allows security transitions to occur on scripts if permitted by the policy. Naturally, such transitions should only occur when the caller is more trusted than the new domain, as script invocation is subject to an inherent race and scripts are highly susceptible to influence by their caller. However, SELinux does allow transitions on scripts subject to policy, e.g. to support shedding of permissions upon script invocation where the caller is trusted.
+</code></pre><p>该钩子默认设置bprm结构中的SID字段为当前任务的SID。它也将清除任务先前设置的任何文件创建SID，以保证新程序以干净的初始状态启动。该钩子检查当前任务的安全结构，查看是否任务已经指定了下次execve调用的exec SID。如果是，就将使用这个exec SID，执行完毕后再清除；否则，该钩子函数咨询使用security_transition_sid来咨询SS，检查安全策略是否容许转换SID。<strong>如果文件系统使用nosuid选项来加载，那么之前设置的exec SID 和 策略转换SID都将被忽略，新任务的SID 保持不变</strong>。</p>
+<p>该钩子函数然后根据SID是否改变来执行不同的权限检查。在open_exec过程中，selinux_inode_permission钩子已经检查了file execute权限，因此这里并不列出。</p>
+<p>执行程序时，如果新任务的SID不变，将检查file execute_no_trans权限。该权限保证 一个任务被容许执行并不改变其安全属性。例如，尽管登录进程可以执行一个用户shell，它总是同时修改器SID，那么这种情形就无需execute_no_trans权限。</p>
+<p>在任务的SID改变时，将检查process transition权限和file entrypoint 权限。前者检查旧的SID是否被容许转换到新SID；后者保证只能在执行指定程序时才能进入新的SID。</p>
+<h3 id="12-1-4-selinux-bprm-apply-creds"><a href="#12-1-4-selinux-bprm-apply-creds" class="headerlink" title="12.1.4. selinux_bprm_apply_creds"></a>12.1.4. selinux_bprm_apply_creds</h3><p>当执行execve时发生SID转换时，内核调用selinux_bprm_appluy_creds来设置新进程的新安全属性。该钩子函数首先调用capabilities，然后从bprm安全结构中提取新task的SID，并将当前SID拷贝到 task security structure的old SID字段，然后清除bprm security structure中的unsafe标志。如果新SID与旧SID相同，那么该钩子的工作就结束了。</p>
+<p>当任务的SID改变时，可能发生两个额外的权限检查。如果task由clone创建，并且共享了状态，那么需要检查新旧SID间是否有share 权限。如果task正在被跟踪，那么需要检查跟踪者的task SID（保存当前任务的security structure中的 ptrace_sid字段）和新的SID之间的ptrace权限。</p>
+<ul>
+<li>任何一个权限检查的失败，都会导致SID不会改变，并且unsafe标识被设置为真，供随后的selinux_bprm_post_apply_creds使用，然后钩子函数立即返回。</li>
+<li>如果所有的权限都被授予了，钩子函数将当前SID改为新的SID，然后返回。<br><img src="/img/selinux_implement_as_LSM_03.png" alt=""></li>
+</ul>
+<h3 id="12-1-5-selinux-bprm-post-apply-creds"><a href="#12-1-5-selinux-bprm-post-apply-creds" class="headerlink" title="12.1.5. selinux_bprm_post_apply_creds"></a>12.1.5. selinux_bprm_post_apply_creds</h3><p>该钩子函数在selinux_bprm_apply_creds之后被调用。它首先检查bprm安全结构中的unsafe标识，如果为真，强制向任务发送SIFKILL并立即退出。然后，它将检查task SID是否改变，如果没有，立即返回。</p>
+<p>否则，如果任务不再被容许访问关联的tty，它将继续调用副主函数flush_unauthorized_files  来撤销对控制tty的访问，并关闭任何不再访问的fd。<br><strong> 然后，它将在每个打开的文件上调用file_has_perm，检查是否任务在新SID中是否还具有相对应的访问权限（即 fd use permission），如果没有，关闭fd。</strong> file_has_perm描述在15.2.1节。为了避免那些期望某些描述符被打开的应用中引入错误，该辅助函数将重打开那些引用null device 节点的描述符，null device节点 在初始化时在selinuxfs中设置。</p>
+<p>。。。</p>
+<h3 id="12-1-6-selinux-bprm-secureexec"><a href="#12-1-6-selinux-bprm-secureexec" class="headerlink" title="12.1.6. selinux_bprm_secureexec"></a>12.1.6. selinux_bprm_secureexec</h3><p>在selinux_bprm_post_apply_creds 之后调用本钩子函数，检查ELF辅助表中AT_SECURE标识是否应该被设置，如果被设置，将使能其安全模式，这将导致libc清理执行环境和其他状态，以防止新程序被调用者以某种形式被影响。</p>
+<p>如果任务 SID已经改变，那么该钩子函数检查新旧SID间的noatsecure权限。如果noatsecure权限被拒绝，该钩子函数将设置 AT_SECURE标识；如果权限检查通过，且UID/GID/capabilities发生改变，该钩子函数继续调用辅助安全模块看是否需要设置AT_SECURE标志；否则，该标志将不设置，libc的secure模式将不被使能。</p>
+<h1 id="13-hook-functions：superblock"><a href="#13-hook-functions：superblock" class="headerlink" title="13 hook functions：superblock"></a>13 hook functions：superblock</h1><p>管理super_block structure的安全字段，执行文件系统操作的安全检查</p>
+<h2 id="13-1-Managing-Superblock-Security-Fields"><a href="#13-1-Managing-Superblock-Security-Fields" class="headerlink" title="13.1. Managing Superblock Security Fields"></a>13.1. Managing Superblock Security Fields</h2><h3 id="13-1-1-Superblock-Security-Structure"><a href="#13-1-1-Superblock-Security-Structure" class="headerlink" title="13.1.1. Superblock Security Structure"></a>13.1.1. Superblock Security Structure</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> superblock_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> super_block* sb;<span class="comment">//Back pointer to the associated superblock.</span></span><br><span class="line">	<span class="keyword">struct</span> list_head <span class="built_in">list</span>;<span class="comment">//Link into list of superblock security structures setup prior to initial policy load.</span></span><br><span class="line">	u32 sid;<span class="comment">//SID for the file system.</span></span><br><span class="line">	u32 def_sid;<span class="comment">//default SID for labeling</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> behavior;<span class="comment">//Labeling behavior to apply to inodes.</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> initialized;<span class="comment">//Flag indicating whether the security structure has been initialized.</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> proc;</span><br><span class="line">	<span class="keyword">struct</span> semaphore sem;<span class="comment">//Semaphore used to synchronize initialization</span></span><br><span class="line">	<span class="keyword">struct</span> list_head isec_head;<span class="comment">//List of inode security structures setup prior to superblock security initialization.</span></span><br><span class="line">	<span class="keyword">spinlock_t</span> isec_lock;<span class="comment">//Lock for list of inode security structures.</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>注意， superblock的安全结构是一个链表结构，why？一个文件系统的superblock将存在多个sercurity structure?</p>
+<h1 id="14-hook-functions：inode"><a href="#14-hook-functions：inode" class="headerlink" title="14 hook functions：inode"></a>14 hook functions：inode</h1><h1 id="15-hook-functions：-File"><a href="#15-hook-functions：-File" class="headerlink" title="15 hook functions： File"></a>15 hook functions： File</h1><p>file 钩子函数管理struct file的安全字段，并为文件操作执行访问控制。每个struct file包含状态信息，例如 便宜、打开标识。既然<strong>fd可以经由execve继承，并且也可能通过IPC传递</strong>，因此它们可能被不同安全属性的进程跨进程共享，因此 这值得分别标记这些结构并控制其使用。此外，也有必要为SIGIO信号在这些结构中保存任务安全信息。</p>
+<h2 id="15-1-Manager-File-Security-Fields"><a href="#15-1-Manager-File-Security-Fields" class="headerlink" title="15.1 Manager File Security Fields"></a>15.1 Manager File Security Fields</h2><h3 id="15-1-1-file-security-struct"><a href="#15-1-1-file-security-struct" class="headerlink" title="15.1.1 file_security_struct"></a>15.1.1 file_security_struct</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> file_security_struct &#123;</span><br><span class="line"><span class="keyword">struct</span> file * file;<span class="comment">//Back pointer to the associated file.</span></span><br><span class="line">u32 sid;<span class="comment">//SID of the open file descriptor</span></span><br><span class="line">u32 fown_sid;<span class="comment">//SID of the file owner; used for SIGIO events</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="15-1-2-file-alloc-security-and-file-free-security"><a href="#15-1-2-file-alloc-security-and-file-free-security" class="headerlink" title="15.1.2. file_alloc_security and file_free_security"></a>15.1.2. file_alloc_security and file_free_security</h3><p>file_alloc_security 将 sid 字段设置为分配file_securityy_struct实例的任务的SID。</p>
+<h3 id="15-1-3-selinux-file-set-fowner"><a href="#15-1-3-selinux-file-set-fowner" class="headerlink" title="15.1.3. selinux_file_set_fowner"></a>15.1.3. selinux_file_set_fowner</h3><p>例如，当执行fcntl（F_SETOWN）命令时，内核调用该钩子函数，将fown_sid字段设置为当前任务的SID。</p>
+<h2 id="15-2-Controlling-File-Operations"><a href="#15-2-Controlling-File-Operations" class="headerlink" title="15.2. Controlling File Operations"></a>15.2. Controlling File Operations</h2><h3 id="15-2-1-file-has-perm"><a href="#15-2-1-file-has-perm" class="headerlink" title="15.2.1. file_has_perm"></a>15.2.1. file_has_perm</h3><p>该辅助函数检查一个任务是否能通过fd以指定的方式访问一个文件。该函数首先设置辅助审计数据，然后调用avc检查 任务的fd use权限。如果该权限被授予，那么该函数将继续调用inode_has_perm在目标文件上检查 所请求的权限。在某些情形下，权限参数可能为空，这样就仅仅检查任务是否能够使用该fd。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check whether a task can use an open file descriptor to</span><br><span class="line">   access an inode in a given way.  Check access to the</span><br><span class="line">   descriptor itself, and then use dentry_has_perm to</span><br><span class="line">   check a particular permission to the file.</span><br><span class="line">   Access to the descriptor is implicitly granted if it</span><br><span class="line">   has the same SID as the process.  If av is zero, then</span><br><span class="line">   access to the file is not checked, e.g. for cases</span><br><span class="line">   where only the descriptor is affected like seek. */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">file_has_perm</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred * cred,</span><br><span class="line">			 <span class="keyword">struct</span> file * file,</span><br><span class="line">			 u32 av)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> file_security_struct * fsec = file-&gt;f_security;</span><br><span class="line">	<span class="keyword">struct</span> inode * inode = file_inode(file);</span><br><span class="line">	<span class="keyword">struct</span> common_audit_data ad;</span><br><span class="line">	u32 sid = cred_sid(cred);</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	ad.type = LSM_AUDIT_DATA_PATH;</span><br><span class="line">	ad.u.path = file-&gt;f_path;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (sid != fsec-&gt;sid) &#123;</span><br><span class="line">		rc = avc_has_perm(sid, fsec-&gt;sid,</span><br><span class="line">				  SECCLASS_FD,</span><br><span class="line">				  FD__USE,</span><br><span class="line">				  &amp;ad);</span><br><span class="line">		<span class="keyword">if</span> (rc)</span><br><span class="line">			<span class="keyword">goto</span> out;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* av is zero if only checking access to the descriptor. * /</span><br><span class="line">	rc = 0;</span><br><span class="line">	if (av)</span><br><span class="line">		rc = inode_has_perm(cred, inode, av, &amp;ad, 0);</span><br><span class="line"></span><br><span class="line">out:</span><br><span class="line">	return rc;</span><br><span class="line">&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="16-hook-functions：SystemV-IPC"><a href="#16-hook-functions：SystemV-IPC" class="headerlink" title="16 hook functions：SystemV IPC"></a>16 hook functions：SystemV IPC</h1><h1 id="17-hook-functions：socket"><a href="#17-hook-functions：socket" class="headerlink" title="17 hook functions：socket"></a>17 hook functions：socket</h1><h2 id="17-1-Managing-Socket-Security-Fields"><a href="#17-1-Managing-Socket-Security-Fields" class="headerlink" title="17.1. Managing Socket Security Fields"></a>17.1. Managing Socket Security Fields</h2><h2 id="17-1-1-Socket-Security-Structure"><a href="#17-1-1-Socket-Security-Structure" class="headerlink" title="17.1.1. Socket Security Structure"></a>17.1.1. Socket Security Structure</h2><p>每个用户空间socket都有一个关联的inode，因此inode 安全结构 也被扩展用于socket对象。请参考14.1节查看inode 安全结构和相关函数的讨论。在网络层socket structure（struct socket）中也存在一个安全字段，但是 <strong>这个字段只能被安全的用于local/unix 域套接字。</strong> TCP 代码的一个修改将要求确保在新创建的server socket时对此字段的正确处理，相应的修改也包含在LSM 内核patch中，但是没能进入内核主线。</p>
+<p>对于unix/local域套接字，该<strong>sk_security_struct</strong>用于存储连接建立阶段时对端的安全信息，此时连接中的用户socket还没有分配好。</p>
+<p><img src="/img/selinux_implement_as_LSM_04.png" alt=""></p>
+<h3 id="17-1-2-sk-alloc-security-and-sk-free-security"><a href="#17-1-2-sk-alloc-security-and-sk-free-security" class="headerlink" title="17.1.2. sk_alloc_security and sk_free_security"></a>17.1.2. sk_alloc_security and sk_free_security</h3><h3 id="17-1-3-selinux-socket-getpeersec"><a href="#17-1-3-selinux-socket-getpeersec" class="headerlink" title="17.1.3. selinux_socket_getpeersec"></a>17.1.3. selinux_socket_getpeersec</h3><p>This hook function is called to handle the SO_PEERSEC getsockopt option.</p>
+<h1 id="18-hook-functions：IP-网络"><a href="#18-hook-functions：IP-网络" class="headerlink" title="18 hook functions：IP 网络"></a>18 hook functions：IP 网络</h1><h1 id="19-hook-functions：-其他"><a href="#19-hook-functions：-其他" class="headerlink" title="19 hook functions： 其他"></a>19 hook functions： 其他</h1><h1 id="20-kernel-3-4"><a href="#20-kernel-3-4" class="headerlink" title="20 kernel 3.4"></a>20 kernel 3.4</h1><h2 id="task-security-struct"><a href="#task-security-struct" class="headerlink" title="task_security_struct"></a>task_security_struct</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//old</span></span><br><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	<span class="keyword">struct</span> task_struct * task;</span><br><span class="line">	u32 osid;</span><br><span class="line">	u32 sid;</span><br><span class="line">	u32 exec_sid;</span><br><span class="line">	u32 create_sid;</span><br><span class="line">	u32 ptrace_sid;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//new kernel3.4</span></span><br><span class="line"><span class="keyword">struct</span> task_security_struct &#123;</span><br><span class="line">	u32 osid;		<span class="comment">/* SID prior to last execve * /</span><br><span class="line">	u32 sid;		/* current SID * /</span><br><span class="line">	u32 exec_sid;		/* exec SID *  /</span><br><span class="line">	u32 create_sid;		/* fscreate SID * /</span><br><span class="line"> 	u32 keycreate_sid;	/* keycreate SID * /</span><br><span class="line">	u32 sockcreate_sid;	/* fscreate SID * /</span><br><span class="line">&#125;;</span></span><br></pre></td></tr></table></figure>
+<h2 id="selinux-capable"><a href="#selinux-capable" class="headerlink" title="selinux_capable"></a>selinux_capable</h2><p>kernel3.4  security/selinux/hooks.c</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line"> * (This comment used to live with the selinux_task_setuid hook,</span><br><span class="line"> * which was removed).</span><br><span class="line"> *</span><br><span class="line"> * Since setuid only affects the current process, and since the SELinux</span><br><span class="line"> * controls are not based on the Linux identity attributes, SELinux does not</span><br><span class="line"> * need to control this operation.  However, SELinux does control the use of</span><br><span class="line"> * the CAP_SETUID and CAP_SETGID capabilities using the capable hook.</span><br><span class="line"> */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">selinux_capable</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> cred * cred, <span class="keyword">struct</span> user_namespace * ns,</span><br><span class="line">			   <span class="keyword">int</span> cap, <span class="keyword">int</span> audit)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> rc;</span><br><span class="line"></span><br><span class="line">	rc = cap_capable(cred, ns, cap, audit);</span><br><span class="line">	<span class="keyword">if</span> (rc)</span><br><span class="line">		<span class="keyword">return</span> rc;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> cred_has_capability(cred, cap, audit);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/14/Security/SELinux/selinux_implement_as_LSM/" data-id="cipez37yn001j8djw4v2ganu4" class="article-share-link" data-share="baidu" data-title="SELinux 基于LSM的实现">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/06/14/Security/SELinux/selinux_implement_as_LSM/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LSM/">LSM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SELinux/">SELinux</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">SELinux: 如何为进程创建专有的数据目录？</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/06/14/Security/SELinux/selinux_implement_as_LSM/" data-title="SELinux 基于LSM的实现" data-url="http://blog.andjoin.com/2016/06/14/Security/SELinux/selinux_implement_as_LSM/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a><span class="category-list-count">1</span></li></ul></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://github.com" target="_blank">github</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LargeRiver<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"largeriver"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

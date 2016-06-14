@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>【译】BYOD终极指南 | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="原文：《The Ultimate Guide to BYOD》
+介绍企业拥抱移动技术的速率，不仅仅是一场进化了，而是一次全球性的转换。移动设备和应用的爆炸性的流行，提供了企业一个巨大的机会：成为一个“Mobile Fiest”企业。用户期望在任何地方，在自己的设备上，弹性管理个人和专业事务。然而，安全的，高性价比的使能BYOD的能力，对大多数前瞻性公司是一种挑战。
+利用移动性的便利性的同时，也需要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】BYOD终极指南">
+<meta property="og:url" content="http://blog.andjoin.com/2016/03/25/Security/byod_ultimate_guide_CN/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="原文：《The Ultimate Guide to BYOD》
+介绍企业拥抱移动技术的速率，不仅仅是一场进化了，而是一次全球性的转换。移动设备和应用的爆炸性的流行，提供了企业一个巨大的机会：成为一个“Mobile Fiest”企业。用户期望在任何地方，在自己的设备上，弹性管理个人和专业事务。然而，安全的，高性价比的使能BYOD的能力，对大多数前瞻性公司是一种挑战。
+利用移动性的便利性的同时，也需要">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.358Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【译】BYOD终极指南">
+<meta name="twitter:description" content="原文：《The Ultimate Guide to BYOD》
+介绍企业拥抱移动技术的速率，不仅仅是一场进化了，而是一次全球性的转换。移动设备和应用的爆炸性的流行，提供了企业一个巨大的机会：成为一个“Mobile Fiest”企业。用户期望在任何地方，在自己的设备上，弹性管理个人和专业事务。然而，安全的，高性价比的使能BYOD的能力，对大多数前瞻性公司是一种挑战。
+利用移动性的便利性的同时，也需要">
+  
+    <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.andjoin.com">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-Security/byod_ultimate_guide_CN" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/25/Security/byod_ultimate_guide_CN/" class="article-date">
+  <time datetime="2016-03-25T06:09:52.000Z" itemprop="datePublished">2016-03-25</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>►<a class="article-category-link" href="/categories/security/OpenCourse/">OpenCourse</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      【译】BYOD终极指南
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原文：<a href="https://www.mobileiron.com/sites/default/files/whitepapers/files/Guide-to-BYOD.pdf" target="_blank" rel="external">《The Ultimate Guide to BYOD》</a></p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>企业拥抱移动技术的速率，不仅仅是一场进化了，而是一次全球性的转换。移动设备和应用的爆炸性的流行，提供了企业一个巨大的机会：成为一个“Mobile Fiest”企业。用户期望在任何地方，在自己的设备上，弹性管理个人和专业事务。然而，安全的，高性价比的使能BYOD的能力，对大多数前瞻性公司是一种挑战。</p>
+<p>利用移动性的便利性的同时，也需要保护企业数据和网络资源，这是一种平衡。大多数企业仅仅是简单夸夸其谈，而在具体的政策和闺房上，让IT部门和员工一头雾水。<br>例如：</p>
+<ul>
+<li>公司应该对员工的设备和内容有多少控制？</li>
+<li>谁应该为设备和服务付费？</li>
+<li>合理的最终用户协议是什么？</li>
+<li>公司应该支持何种设备？</li>
+<li>当员工离职时，个人设备上的公司数据将怎么办？</li>
+</ul>
+<p>本书的目的是：帮助你的企业预测、理解和管理与BYOD相关的问题。<br><a id="more"></a></p>
+<h1 id="Part1：准备你的企业"><a href="#Part1：准备你的企业" class="headerlink" title="Part1：准备你的企业"></a>Part1：准备你的企业</h1><h2 id="确定你的BYOD风险容忍度"><a href="#确定你的BYOD风险容忍度" class="headerlink" title="确定你的BYOD风险容忍度"></a>确定你的BYOD风险容忍度</h2><p>企业该如何充分利用移动化的业务潜力（business potential）而不危及安全和效率呢？</p>
+<p>第一步，BYOD风险容忍度评估，将帮助企业识别和关注相关区域，充分了解公司对员工弹性工作的容忍度，包括：容许的设备、IT参与度和安全策略。这种风险容忍度评估是一个良好的开始：在不牺牲安全和员工满意度的前提下，保证你BYOD Program(方案)支持公司文化和商业目标。</p>
+<h2 id="尽早让利益相关者参与定义方案目标"><a href="#尽早让利益相关者参与定义方案目标" class="headerlink" title="尽早让利益相关者参与定义方案目标"></a>尽早让利益相关者参与定义方案目标</h2><p>通常来说，移动用户期望在任何地方，在他们自己选择的设备上，访问他们所需要的工作和个人事务的数据。<br>执行层面的利益相关者的支持是重要的，你还需要了解最终用户的需要和期望，让员工代表参与需求定义。</p>
+<p>预测BYOD的公共对象，也能帮助你推进计划阶段。本阶段常见的关注点和回答是这样的：</p>
+<ul>
+<li>EXECUTIVE SPONSORSHIP<ul>
+<li>我们无法获得决策者支持，但让我们继续推进BYOD计划吧</li>
+<li>停！BYOD项目需要各个利益相关者的参与。为了保证deadline和responsibilities，决策层的支持非常重要。</li>
+</ul>
+</li>
+<li><p>人力资源</p>
+<ul>
+<li>如果危及员工个人设备上的私人数据，公司不负责。</li>
+<li>合作！HR和IT应该清晰的界定契合和个人数据。同时，你的最终用户协议应该指明：如果司法分析设备时，公司可能访问私人数据。同时，除了需要同公司数据分离，应尽可能保护员工数据上的用户个人数据，但必要时可能全盘清除数据。</li>
+</ul>
+</li>
+<li><p>财务</p>
+<ul>
+<li>我们不能投资一项不能证明可节省开支的方案。</li>
+<li>实际上，利用自助工具、用户支持社区、社交网络和用户论坛，实现用户自助服务，可以减少支持和运营成本。</li>
+</ul>
+</li>
+<li><p>IT人员</p>
+<ul>
+<li>我们没法在个人设备对大量多变的商业应用提供支持。</li>
+<li>对于IOS设备，AppConnect可以无需部署新的应用版本就可以管理应用配置和策略，从而大大降低IT的负担。</li>
+</ul>
+</li>
+</ul>
+<h2 id="在雇员中调查"><a href="#在雇员中调查" class="headerlink" title="在雇员中调查"></a>在雇员中调查</h2><ul>
+<li>Which OS/devices employees currently own and plan<br>to purchase in the future</li>
+<li>Which factors would encourage BYOD participation</li>
+<li>Which factors would discourage BYOD participation</li>
+<li>Which corporate apps they consider most valuable</li>
+<li>Their comfort level with self-service support</li>
+<li>The impact of BYOD on company perception, productivity and work/life balance</li>
+</ul>
+<h1 id="PART-II-BUILD-THE-PROGRAM"><a href="#PART-II-BUILD-THE-PROGRAM" class="headerlink" title="PART II: BUILD THE PROGRAM"></a>PART II: BUILD THE PROGRAM</h1><h2 id="更新你的基础设施以支持BYOD"><a href="#更新你的基础设施以支持BYOD" class="headerlink" title="更新你的基础设施以支持BYOD"></a>更新你的基础设施以支持BYOD</h2><p>管理移动IT设施的所需技能，与管理企业传统的PC设施的技能是大不相同的。下面是构建和运维BYOD所需的几个角色：</p>
+<ol>
+<li>Mobile System Engineer：熟悉移动技术各个方面的专家，掌握实施BYOD方案所需的所有软件、硬件和网络技术，并将移动技术集成到企业中去。其专业领域包括：1）OS 2）通讯网络 3）移动软硬件、应用、API和开发工具</li>
+<li>Mobile Device Expert：熟悉现在和未来的，可影响移动设施的设备、软件。他们为支持和限制用户的新设备而准备环境，熟悉主流平台和制造商。</li>
+<li>Mobile Security Expert：负责构建移动安全策略和控制，保持其有效性，必要时进行调整。他们也需要对用户进行安全风险教育，设置合适的用户策略，帮助安全策略的开发：1）移动安全和风险控制 2）移动数据保护 3）移动OS平台评估 4）移动应用威胁管理</li>
+<li>Mobile Application Developer</li>
+<li>Mobile Service and Support Resources</li>
+</ol>
+<h2 id="BYOD策略八要素"><a href="#BYOD策略八要素" class="headerlink" title="BYOD策略八要素"></a>BYOD策略八要素</h2><p>BYOD的终极跳帧不仅仅是管理数据安全或者优化最终用户效率。它维护一种常态平衡：安全、合规compliance、法律责任liability、成本和良好的用户体验。成功BYOD方案策略的八要素：</p>
+<ul>
+<li>SUSTAINABILITY:Maintain a positive user experience</li>
+<li>TRUST MODEL：Mitigate security risks</li>
+<li>DEVICE CHOICE：It’s a popularity contest</li>
+<li>LIABILITY  [ˌlaɪə’bɪləti]    责任：Protect your company from legal action</li>
+<li>USER experience &amp; privacy：Establish employee trust</li>
+<li>Economics：The cost of doing BYOD</li>
+<li>App design and governance：Enforce security without becoming Big Brother</li>
+<li>internal marketing： Build your IT “brand”</li>
+</ul>
+<h1 id="PART-III-ROLL-OUT-THE-PROGRAM"><a href="#PART-III-ROLL-OUT-THE-PROGRAM" class="headerlink" title="PART III: ROLL OUT THE PROGRAM"></a>PART III: ROLL OUT THE PROGRAM</h1><p>软启动你的BYOD方案。在你的方案目标，策略，过程和技术设施建立后，你就可以开始rollout(展开)，也称软启动。你将容许一部分用户测试方案，提出反馈。BYOD方案展开分为三个阶段：</p>
+<h2 id="initiate-pilot-tests"><a href="#initiate-pilot-tests" class="headerlink" title="initiate pilot tests."></a>initiate pilot tests.</h2><p>steps:</p>
+<pre><code>* Select the sample user group for the pilot
+* Survey employees to continually improve the user experience
+</code></pre><h2 id="Deploy-the-BYOD-program-and-training-services"><a href="#Deploy-the-BYOD-program-and-training-services" class="headerlink" title="Deploy the BYOD program and training services"></a>Deploy the BYOD program and training services</h2><p>#PART IV: SUSTAIN BYOD SECURITY AND PERFORMANCE</p>
+<h1 id="CONCLUSION"><a href="#CONCLUSION" class="headerlink" title="CONCLUSION"></a>CONCLUSION</h1><p>2014年底，BYOD在你的工作间可能高达%80，以你从没想到的方式改变你的业务。为这种转变做准备，将不仅仅出于安全考虑。 利用人、过程和必要的工具成为Mobile First企业，准备好探索整个新的机遇，这才是BYOD。</p>
+<p>本GUIDE是通过成功实施以达成你的移动化的伟大的第一步。不过成功的BYOD依赖于其长期持续性，这意味着保证企业数据的安全、支持员工设备的配置去驱动用户调整、维持一个弹性的技术组合。</p>
+<p>BYOD可持续性也依赖于与利益相关者和用户之间有效而开放的沟通。</p>
+<p>一句话，成功的BYOD方案要求持续关注和反馈。BYOD已经来到。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/03/25/Security/byod_ultimate_guide_CN/" data-id="cipez37xv000j8djwep1x21aa" class="article-share-link" data-share="baidu" data-title="【译】BYOD终极指南">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/03/25/Security/byod_ultimate_guide_CN/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/BYOD/">BYOD</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/05/24/Security/SELinux/selinux_status_android_LM/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          【译】AndroidL和AndroidM的SEAndroid状态与展望
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/02/26/Security/SELinux/setools4_sedta/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">setools4 sedta 转换图的构建分析</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/03/25/Security/byod_ultimate_guide_CN/" data-title="【译】BYOD终极指南" data-url="http://blog.andjoin.com/2016/03/25/Security/byod_ultimate_guide_CN/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a><span class="category-list-count">1</span></li></ul></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://github.com" target="_blank">github</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LargeRiver<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"largeriver"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

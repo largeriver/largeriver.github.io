@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>dm-crypt简介 | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="简介dm-crypt是一个透明磁盘加密子系统，建立在2.6版本内核的device-mapper特性之上的,使用了内核密码应用编程接口实现了透明的加密。与早期的cryptoloop不同，dm-crypt被设计为支持更高级的操作，如XTS、LRW和ESSIV，以便避免水印攻击。dm-crypt 作为一个设备映射器目标(device-mapper target)来实现,可以被堆叠在其他设备映射器的顶端。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dm-crypt简介">
+<meta property="og:url" content="http://blog.andjoin.com/2016/06/12/Security/introduction_dm_crypt/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="简介dm-crypt是一个透明磁盘加密子系统，建立在2.6版本内核的device-mapper特性之上的,使用了内核密码应用编程接口实现了透明的加密。与早期的cryptoloop不同，dm-crypt被设计为支持更高级的操作，如XTS、LRW和ESSIV，以便避免水印攻击。dm-crypt 作为一个设备映射器目标(device-mapper target)来实现,可以被堆叠在其他设备映射器的顶端。">
+<meta property="og:updated_time" content="2016-06-13T04:49:25.430Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dm-crypt简介">
+<meta name="twitter:description" content="简介dm-crypt是一个透明磁盘加密子系统，建立在2.6版本内核的device-mapper特性之上的,使用了内核密码应用编程接口实现了透明的加密。与早期的cryptoloop不同，dm-crypt被设计为支持更高级的操作，如XTS、LRW和ESSIV，以便避免水印攻击。dm-crypt 作为一个设备映射器目标(device-mapper target)来实现,可以被堆叠在其他设备映射器的顶端。">
+  
+    <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.andjoin.com">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-Security/introduction_dm_crypt" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/12/Security/introduction_dm_crypt/" class="article-date">
+  <time datetime="2016-06-12T09:09:52.000Z" itemprop="datePublished">2016-06-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      dm-crypt简介
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>dm-crypt是一个透明磁盘加密子系统，建立在2.6版本内核的device-mapper特性之上的,使用了内核密码应用编程接口实现了透明的加密。<br>与早期的cryptoloop不同，dm-crypt被设计为支持更高级的操作，如XTS、LRW和ESSIV，以便避免水印攻击。<br>dm-crypt 作为一个设备映射器目标(device-mapper target)来实现,可以被堆叠在其他设备映射器的顶端。因此，它可以用来加密整个磁盘、分区、raid卷、逻辑卷以及文件。<br><a id="more"></a></p>
+<h1 id="设备映射器-device-mapper"><a href="#设备映射器-device-mapper" class="headerlink" title="设备映射器 device-mapper"></a>设备映射器 device-mapper</h1><p>设备映射器是设计用来为在实际的块设备之上添加虚拟层提供一种通用灵活的方法, 用于将一个块设备映射到另一个块设备。除了提供加密功能，设备映射器还为LVM、软RAID提供支持，并为系统添加了一些诸如文件系统快照之类的附加特性。<br>设备映射器相当于一个过滤装置，它从它自己提供的虚拟块设备中获得数据并对它们进行处理，然后才把它们传递给另一个块设备。<br>当设备映射器被用于数据加密时，它会在/dev/mapper/目录下创建一个新的块设备。对于用户来说，这个虚拟设备和系统上的其它任何块设备在使用时没有区别。设备映射器（更确切地说是设备映射器的dm-crypt模块）使用对称加密算法，如AES，对输入该虚拟设备的所有数据进行加密。加密后的数据被传输到另一个块设备加以保存。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
+<li><a href="https://en.wikipedia.org/wiki/Dm-crypt" target="_blank" rel="external">https://en.wikipedia.org/wiki/Dm-crypt</a></li>
+<li><a href="http://wiki.ubuntu.org.cn/index.php?title=EncryptedFilesystemHowto&amp;variant=zh-cn#.E5.8A.A0.E5.AF.86.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" target="_blank" rel="external">EncryptedFilesystemHowto</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/12/Security/introduction_dm_crypt/" data-id="cipez37y2000m8djwj00zjc6w" class="article-share-link" data-share="baidu" data-title="dm-crypt简介">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/06/12/Security/introduction_dm_crypt/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crypt/">crypt</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/06/12/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          Hello World
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/06/12/mylog/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">mylog</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/06/12/Security/introduction_dm_crypt/" data-title="dm-crypt简介" data-url="http://blog.andjoin.com/2016/06/12/Security/introduction_dm_crypt/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/android/security/">security</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/security/OpenCourse/">OpenCourse</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/python/">python</a><span class="category-list-count">1</span></li></ul></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SELinux/">SELinux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Security/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/13/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://github.com" target="_blank">github</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LargeRiver<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"largeriver"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>
