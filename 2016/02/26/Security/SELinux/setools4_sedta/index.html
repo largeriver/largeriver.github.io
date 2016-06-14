@@ -8,26 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="sedta.py
 算法总结sedta命令用来分析动态域转换，其基本原理是首先构建域转换图，然后使用路径分析查找 源域和目标域 之间的路径。在apol中，还可以调用networkx等工具来绘图。
-本文分析了域转换有向图的构建。
-域转换的类型Standard transitions a-&amp;gt;b:# allow a b:process transition;
-# allow a b_exec:fil">
+本文分析了域转换有向图的构建。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="setools4 sedta 转换图的构建分析">
 <meta property="og:url" content="http://blog.andjoin.com/2016/02/26/Security/SELinux/setools4_sedta/index.html">
 <meta property="og:site_name" content="牧云人">
 <meta property="og:description" content="sedta.py
 算法总结sedta命令用来分析动态域转换，其基本原理是首先构建域转换图，然后使用路径分析查找 源域和目标域 之间的路径。在apol中，还可以调用networkx等工具来绘图。
-本文分析了域转换有向图的构建。
-域转换的类型Standard transitions a-&amp;gt;b:# allow a b:process transition;
-# allow a b_exec:fil">
-<meta property="og:updated_time" content="2016-06-14T05:06:10.393Z">
+本文分析了域转换有向图的构建。">
+<meta property="og:updated_time" content="2016-06-14T05:07:34.967Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="setools4 sedta 转换图的构建分析">
 <meta name="twitter:description" content="sedta.py
 算法总结sedta命令用来分析动态域转换，其基本原理是首先构建域转换图，然后使用路径分析查找 源域和目标域 之间的路径。在apol中，还可以调用networkx等工具来绘图。
-本文分析了域转换有向图的构建。
-域转换的类型Standard transitions a-&amp;gt;b:# allow a b:process transition;
-# allow a b_exec:fil">
+本文分析了域转换有向图的构建。">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
   
@@ -109,6 +103,7 @@
         <p>sedta.py</p>
 <h1 id="算法总结"><a href="#算法总结" class="headerlink" title="算法总结"></a>算法总结</h1><p>sedta命令用来分析动态域转换，其基本原理是首先构建域转换图，然后使用路径分析查找 源域和目标域 之间的路径。在apol中，还可以调用networkx等工具来绘图。</p>
 <p>本文分析了域转换有向图的构建。</p>
+<a id="more"></a>
 <h2 id="域转换的类型"><a href="#域转换的类型" class="headerlink" title="域转换的类型"></a>域转换的类型</h2><h3 id="Standard-transitions-a-gt-b"><a href="#Standard-transitions-a-gt-b" class="headerlink" title="Standard transitions a-&gt;b:"></a>Standard transitions a-&gt;b:</h3><pre><code># allow a b:process transition;
 # allow a b_exec:file execute;
 # allow b b_exec:file entrypoint;
