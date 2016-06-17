@@ -48,7 +48,17 @@ highlight:
 # Category & Tag
 default_category: uncategorized
 category_map:
+  Android: Android
+  Security: Security
+  编程: Program
+  其他: Other
+  大数据: BigData
+  Security,SELinux: Security/SELinux
+
 tag_map:
+  SELinux: Security/SELinux
+  Pyhton: Program/Python
+  Security: Security
 
 # Date / Time format
 ## Hexo uses Moment.js to parse and display date
