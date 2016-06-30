@@ -5,11 +5,11 @@
 # Site
 title: 牧云人
 subtitle:
-description: 专注于SELinux for Android, TIOS
+description: 专注于SELinux for Android
 author: LargeRiver
 email: large.river.dance@gmail.com
-language: zh-CN
-timezone:
+language: zh
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
@@ -48,12 +48,12 @@ highlight:
 # Category & Tag
 default_category: uncategorized
 category_map:
-  Android: Android
-  Security: Security
-  编程: Program
-  其他: Other
-  大数据: BigData
-  Security,SELinux: Security/SELinux
+- Android: Android
+- Security: Security
+- 编程: Program
+- 其他: Other
+- 大数据: BigData
+- Security,SELinux: Security/SELinux
 
 tag_map:
   SELinux: Security/SELinux
