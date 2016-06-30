@@ -69,6 +69,216 @@
     <div class="outer">
       <section id="main">
   
+    <article id="post-Security/SELinux/selinux_capabilities {dac_override}" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" class="article-date">
+  <time datetime="2016-06-29T20:22:35.730Z" itemprop="datePublished">2016-06-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="capabilities-dac-override"><a href="#capabilities-dac-override" class="headerlink" title="capabilities {dac_override}"></a>capabilities {dac_override}</h2><p>title: “capabilities {dac_override}”<br>date: 2016-05-19 11:21:49<br>categories:</p>
+<ul>
+<li>security</li>
+</ul>
+<p>tags:</p>
+<ul>
+<li>SELinux</li>
+<li>capabilities</li>
+</ul>
+<hr>
+<p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。</p>
+<p>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
+<p>而dac_override ，则用来容许进程旁路的所有DAC权限：uid，gid，ACL 等等。</p>
+<blockquote>
+<p>注意：capabilities 和 ACL （access control lists） 实际上是非常对称的两种权限控制模型：在capabilities，授权信息 绑定到主体，基于行（row）；在ACL中，授权信息绑定到客体，基于列（column）。</p>
+</blockquote>
+<h1 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#Used to manage the Linux capabilities granted to root processes. </span><br><span class="line">#Taken from the header file: /usr/include/linux/capability.h</span><br><span class="line">class capability</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">#Overrides all DAC including ACL execute access.</span><br><span class="line">dac_override</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在man capabilities中，该权限的对应描述是：</p>
+<p><strong>CAP_DAC_OVERRIDE</strong>：Bypass file read, write, and execute permission checks.  (DAC is an abbreviation of “discretionary access control”.)</p>
+<p>#HOOK函数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//kernel/fs/namei</span></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * generic_permission -  check for access rights on a Posix-like filesystem</span><br><span class="line"> * @inode:      inode to check access rights for</span><br><span class="line"> * @mask:       right to check for (%MAY_READ, %MAY_WRITE, %MAY_EXEC, ...)</span><br><span class="line"> *</span><br><span class="line"> * Used to check for read/write/execute permissions on a file.</span><br><span class="line"> * We use "fsuid" for this, letting us set arbitrary permissions</span><br><span class="line"> * for filesystem access without changing the "normal" uids which</span><br><span class="line"> * are used for other things.</span><br><span class="line"> *</span><br><span class="line"> * generic_permission is rcu-walk aware. It returns -ECHILD in case an rcu-walk</span><br><span class="line"> * generic_permission is rcu-walk aware. It returns -ECHILD in case an rcu-walk</span><br><span class="line"> * request cannot be satisfied (eg. requires blocking or too much complexity).</span><br><span class="line"> * It would then be called again in ref-walk mode.</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">generic_permission</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">int</span> mask)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ret;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span><br><span class="line">         * Do the basic permission checks.</span><br><span class="line">         */</span></span><br><span class="line">        ret = acl_permission_check(inode, mask);</span><br><span class="line">        <span class="keyword">if</span> (ret != -EACCES)</span><br><span class="line">                <span class="keyword">return</span> ret;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (S_ISDIR(inode-&gt;i_mode)) &#123;</span><br><span class="line">                <span class="comment">/* DACs are overridable for directories */</span></span><br><span class="line">                <span class="keyword">if</span> (capable_wrt_inode_uidgid(inode, CAP_DAC_OVERRIDE))</span><br><span class="line">                        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">if</span> (!(mask &amp; MAY_WRITE))</span><br><span class="line">                        <span class="keyword">if</span> (capable_wrt_inode_uidgid(inode,</span><br><span class="line">                                                     CAP_DAC_READ_SEARCH))</span><br><span class="line">                                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">return</span> -EACCES;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/*</span><br><span class="line">         * Read/write DACs are always overridable.</span><br><span class="line">         * Executable DACs are overridable when there is</span><br><span class="line">         * at least one exec bit set.</span><br><span class="line">         */</span></span><br><span class="line">        <span class="keyword">if</span> (!(mask &amp; MAY_EXEC) || (inode-&gt;i_mode &amp; S_IXUGO))</span><br><span class="line">                <span class="keyword">if</span> (capable_wrt_inode_uidgid(inode, CAP_DAC_OVERRIDE))</span><br><span class="line">                        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span><br><span class="line">         * Searching includes executable on directories, else just read.</span><br><span class="line">         */</span></span><br><span class="line">        mask &amp;= MAY_READ | MAY_WRITE | MAY_EXEC;</span><br><span class="line">        <span class="keyword">if</span> (mask == MAY_READ)</span><br><span class="line">                <span class="keyword">if</span> (capable_wrt_inode_uidgid(inode, CAP_DAC_READ_SEARCH))</span><br><span class="line">                        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> -EACCES;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * may_follow_link - Check symlink following for unsafe situations</span><br><span class="line"> * @link: The path of the symlink</span><br><span class="line"> * @nd: nameidata pathwalk data</span><br><span class="line"> *</span><br><span class="line"> * In the case of the sysctl_protected_symlinks sysctl being enabled,</span><br><span class="line"> * CAP_DAC_OVERRIDE needs to be specifically ignored if the symlink is</span><br><span class="line"> * in a sticky world-writable directory. This is to protect privileged</span><br><span class="line"> * processes from failing races against path names that may change out</span><br><span class="line"> * from under them by way of other users creating malicious symlinks.</span><br><span class="line"> * It will permit symlinks to be followed only when outside a sticky</span><br><span class="line"> * world-writable directory, or when the uid of the symlink and follower</span><br><span class="line"> * match, or when the directory owner matches the symlink's owner.</span><br><span class="line"> *</span><br><span class="line"> * Returns 0 if following the symlink is allowed, -ve on error.</span><br><span class="line"> */</span></span><br></pre></td></tr></table></figure>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p>通常，非root程序的capabilities的有效集为空。如果程序没有setuid属性，但是需要某些root特权才能工作，这就是capabilities大显身手的地方了。</p>
+<p>下面使用cap_dac_override对于普通程序的例子，测试环境为ubuntu：<br>1）首先，将系统setuid-root程序beep做一个拷贝，然后去除特权。现在，beep2就是一个非root进程，这样执行时就会因为权限不足而失败。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ ls -l /usr/bin/beep</span><br><span class="line">-rwsr-xr-x 1 root audio 10392 Jun 11  2012 /usr/bin/beep</span><br><span class="line">$ cp /usr/bin/beep beep2</span><br><span class="line">$ chmod a-s ./beep2</span><br><span class="line">$ ./beep2</span><br><span class="line">Could not open /dev/tty0 or /dev/vc/0 for writing</span><br><span class="line">open: No such file or directory</span><br></pre></td></tr></table></figure>
+<p>2） 然后调用setcap给beep授予赋予cap_dac_override和cap_sys_tty_config：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo setcap cap_dac_override,cap_sys_tty_config+ep ./beep2</span><br><span class="line">$ ./beep2</span><br></pre></td></tr></table></figure></p>
+<p>3）我们可以看看beep和beep2的capability有什么不同。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$getcap ./beep2</span><br><span class="line">./beep = cap_dac_override,cap_sys_tty_config+ep</span><br><span class="line">$ getcap /usr/bin/beep</span><br><span class="line">--nothing--</span><br></pre></td></tr></table></figure></p>
+<p>我们可以发现beep的有效集和许可集都为空。</p>
+<blockquote>
+<p>关于setcap cap_dac_override,cap_sys_tty_config+ep的解释：</p>
+<ul>
+<li>+ 增加</li>
+</ul>
+<ul>
+<li>e 代表有效集</li>
+<li>p 代表许可集</li>
+<li>cap_dac_override 对应于 CAP_DAC_OVERRIDE</li>
+<li>cap_sys_tty_config 对应于 CAP_SYS_TTY_CONFIG 在虚拟终端上，执行各种特权ioctl操作。</li>
+</ul>
+</blockquote>
+<p>#Android </p>
+<p>在AndroidL中，分析sepolicy，具有dac_override权限的系统服务主要包括：</p>
+<ul>
+<li>ueventd.te(7):allow ueventd self:capability { chown mknod net_admin setgid fsetid sys_rawio dac_override fowner };</li>
+<li>zygote.te(7):allow zygote self:capability { dac_override setgid setuid fowner chown };</li>
+<li>netd.te(44):allow netd self:capability { dac_override chown fowner };</li>
+<li>runas.te(14):dontaudit runas self:capability dac_override;</li>
+<li>vold.te(20):allow vold self:capability { net_admin dac_override mknod sys_admin chown fowner fsetid };</li>
+<li>installd.te(6):allow installd self:capability { chown dac_override fowner fsetid setgid setuid };</li>
+<li>tee.te(9):allow tee self:capability { dac_override };</li>
+</ul>
+<blockquote>
+<p>tip： class capability 仅作用于进程自身，这就是上述规则中的客体都是self的原因。</p>
+</blockquote>
+<p><strong>需要注意的是，在AndroidL中，即使是root进程，在使用到capability时，也需要显式申请。</strong> </p>
+<blockquote>
+<p>我会在另外一篇文章中详细探讨。</p>
+</blockquote>
+<hr>
+<p>#参考文献</p>
+<ol>
+<li><a href="http://www.eros-os.org/essays/ACLSvCaps.html" target="_blank" rel="external">Comparing ACLs and Capabilities</a></li>
+<li><a href="http://unix.stackexchange.com/questions/128394/passing-capabilities-through-exec" target="_blank" rel="external">Passing capabilities through exec</a></li>
+<li><a href="https://wiki.archlinux.org/index.php/Capabilities" target="_blank" rel="external">CAP_DAC_OVERRIDE - ArchWiki</a></li>
+<li><a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=4&amp;cad=rja&amp;uact=8&amp;ved=0CDMQFjAD&amp;url=http://packetstorm.foofus.com/papers/attack/exploiting_capabilities_the_dark_side.pdf&amp;ei=lOWQVYbTN4jR-QGfhILoDw&amp;usg=AFQjCNHqdejGbVmIrxh1DxAOXrqJvKzhYQ&amp;sig2=Vh2pu-zeZZ45fFGKydPPXg&amp;bvm=bv.96783405,d.cWw" target="_blank" rel="external">Exploiting capabilities</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" data-id="ciq1nqiw50001t103lhsw5pd4" class="article-share-link" data-share="baidu" data-title="">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Security/SELinux/selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/" class="article-date">
+  <time datetime="2016-06-29T11:28:38.052Z" itemprop="datePublished">2016-06-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a>
+        
+          <p class="article-more-link">
+            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/" data-id="cipezkf8v001gagjwtmyrbepd" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Security/SELinux/sepolicy_HWRNG" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/29/Security/SELinux/sepolicy_HWRNG/" class="article-date">
+  <time datetime="2016-06-29T11:27:40.326Z" itemprop="datePublished">2016-06-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/29/Security/SELinux/sepolicy_HWRNG/">SELinux: 如何为进程创建专有的数据目录？</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>HWRNG设备是<strong><a href="https://en.wikipedia.org/wiki/Hardware_random_number_generator" target="_blank" rel="external">硬件随机数产生器（hardware random number generator）</a></strong>的缩写，在我的android手机上，其设备名为 /dev/hw_random.</p>
+<blockquote>
+<p>crw——- root     root              u:object_r:hw_random_device:s0 hw_random</p>
+</blockquote>
+<p>在domain.te中，仅仅容许ueventd和system_server来访问HWRNG。</p>
+<blockquote>
+<p># Only init, ueventd and system_server should be able to access HW RNG<br>neverallow { domain -init -system_server -ueventd -unconfineddomain } hw_random_device:chr_file *;</p>
+</blockquote>
+<p>为什么不容许其他进程直接访问硬件随机数设备呢？</p>
+<h1 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h1><p>简短的说：使用/dev/random比直接使用HWRNG更安全。<br>在android的early-boot的阶段，init进程从/dev/hw_random中将随机字节拷贝到/dev/random中。这时候，/dev/random包含了HWRNG中所有熵信息加上自己的熵信息，这样远比仅仅使用HWRNG更安全。<br><strong>该规则保证所有的进程使用我们手头可用的最随机的数据</strong>。归根结底，对HWRNG本身，目前并没有强安全保证；其实现细节也各不相同，或好或坏；也没有公开的源代码</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/29/Security/SELinux/sepolicy_HWRNG/" data-id="ciq1nqiw80003t103e935zkgc" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/06/29/Security/SELinux/sepolicy_HWRNG/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sepolicy/">sepolicy</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Security/introduction-information-security" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/14/Security/introduction-information-security/" class="article-date">
@@ -287,60 +497,6 @@
 
 
   
-    <article id="post-Security/SELinux/selinux_howto_create_data_dir_for_app" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/" class="article-date">
-  <time datetime="2016-06-14T04:52:36.178Z" itemprop="datePublished">2016-06-14</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>在data分区中为某个原生进程（如系统服务）创建一个专有目录，用来存储该服务的数据。应该如何设定安全策略了？</p>
-<h2 id=""><a href="#" class="headerlink" title=""></a>
-        
-          <p class="article-more-link">
-            <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/" data-id="cipezkf8v001gagjwtmyrbepd" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/#ds-thread" class="article-comment-link">评论</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/12/hello-world/" class="article-date">
@@ -487,112 +643,6 @@
 
 
   
-    <article id="post-Security/sercurity_outline" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/27/Security/sercurity_outline/" class="article-date">
-  <time datetime="2016-05-27T08:49:24.000Z" itemprop="datePublished">2016-05-27</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/27/Security/sercurity_outline/">安全杂记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="安全目的"><a href="#安全目的" class="headerlink" title="安全目的"></a>安全目的</h1><p>安全边界问题：安全的核心是安全边界。<br>安全的核心是保护信息资产，其实现方式是信息流控制。</p>
-        
-          <p class="article-more-link">
-            <a href="/2016/05/27/Security/sercurity_outline/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/05/27/Security/sercurity_outline/" data-id="cipezkf85000kagjw790pfo9w" class="article-share-link" data-share="baidu" data-title="安全杂记">分享到</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/05/27/Security/sercurity_outline/#ds-thread" class="article-comment-link">评论</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Security/SELinux/selinux_resources" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/26/Security/SELinux/selinux_resources/" class="article-date">
-  <time datetime="2016-05-26T03:21:49.000Z" itemprop="datePublished">2016-05-26</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/26/Security/SELinux/selinux_resources/">SELinux 资源索引</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文列出了SEAndroid的常用资源。<br>
-        
-          <p class="article-more-link">
-            <a href="/2016/05/26/Security/SELinux/selinux_resources/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/05/26/Security/SELinux/selinux_resources/" data-id="cipezkf91001nagjwf0tiuwuu" class="article-share-link" data-share="baidu" data-title="SELinux 资源索引">分享到</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/05/26/Security/SELinux/selinux_resources/#ds-thread" class="article-comment-link">评论</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -606,7 +656,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">10</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">12</span></li></ul>
     </div>
   </div>
 
@@ -615,7 +665,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -624,7 +674,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
     </div>
   </div>
 
@@ -633,7 +683,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -645,23 +695,23 @@
       <ul>
         
           <li>
+            <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/29/Security/SELinux/sepolicy_HWRNG/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
             <a href="/2016/06/14/Security/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
           <li>
             <a href="/2016/06/14/Bigdata/introduction_bigdata/">大数据的十个技术前沿</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/14/Program/algorithm_name_match/">人名匹配问题</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/14/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/14/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>
