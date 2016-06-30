@@ -32,7 +32,7 @@ capabilities
 
 
 Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿p">
-<meta property="og:updated_time" content="2016-06-29T20:22:35.734Z">
+<meta property="og:updated_time" content="2016-06-30T02:39:56.370Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="牧云人">
 <meta name="twitter:description" content="capabilities {dac_override}title: “capabilities {dac_override}”date: 2016-05-19 11:21:49categories:
@@ -101,7 +101,7 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
       <section id="main"><article id="post-Security/SELinux/selinux_capabilities {dac_override}" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" class="article-date">
-  <time datetime="2016-06-29T20:22:35.730Z" itemprop="datePublished">2016-06-30</time>
+  <time datetime="2016-06-30T02:39:56.364Z" itemprop="datePublished">2016-06-30</time>
 </a>
     
   </div>
@@ -120,9 +120,8 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
 <li>capabilities</li>
 </ul>
 <hr>
-<p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。</p>
-<p>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
-<p>而dac_override ，则用来容许进程旁路的所有DAC权限：uid，gid，ACL 等等。</p>
+<p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。<br>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
+<p>而dac_override ，则用来容许进程旁路的所有DAC权限：uid，gid，ACL 等等。<br><a id="more"></a></p>
 <blockquote>
 <p>注意：capabilities 和 ACL （access control lists） 实际上是非常对称的两种权限控制模型：在capabilities，授权信息 绑定到主体，基于行（row）；在ACL中，授权信息绑定到客体，基于列（column）。</p>
 </blockquote>
@@ -195,9 +194,9 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
 <nav id="article-nav">
   
   
-    <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">SELinux: 如何为进程创建专有的数据目录？</div>
+      <div class="article-nav-title">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</div>
     </a>
   
 </nav>
@@ -260,11 +259,11 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
           </li>
         
           <li>
-            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+            <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</a>
           </li>
         
           <li>
-            <a href="/2016/06/29/Security/SELinux/sepolicy_HWRNG/">SELinux: 如何为进程创建专有的数据目录？</a>
+            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
           <li>

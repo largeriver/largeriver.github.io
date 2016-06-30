@@ -4,33 +4,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>SELinux: 如何为进程创建专有的数据目录？ | 牧云人</title>
+  <title>为什么不容许应用访问HWRNG(硬件随机数产生器)设备? | 牧云人</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?
-问题HWRNG设备是硬件随机数产生器（hardware random number generator）的缩写，在我的android手机上，其设备名为 /dev/hw_random.
-
-crw——- root     root              u:object_r:hw_random_device:s0 hw_random
-
-在d">
+  <meta name="description" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?简短的说：使用/dev/random比直接使用HWRNG更安全。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SELinux: 如何为进程创建专有的数据目录？">
-<meta property="og:url" content="http://blog.andjoin.com/2016/06/29/Security/SELinux/sepolicy_HWRNG/index.html">
+<meta property="og:title" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?">
+<meta property="og:url" content="http://blog.andjoin.com/2016/06/30/Security/SELinux/sepolicy_HWRNG/index.html">
 <meta property="og:site_name" content="牧云人">
-<meta property="og:description" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?
-问题HWRNG设备是硬件随机数产生器（hardware random number generator）的缩写，在我的android手机上，其设备名为 /dev/hw_random.
-
-crw——- root     root              u:object_r:hw_random_device:s0 hw_random
-
-在d">
-<meta property="og:updated_time" content="2016-06-29T11:27:18.054Z">
+<meta property="og:description" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?简短的说：使用/dev/random比直接使用HWRNG更安全。">
+<meta property="og:updated_time" content="2016-06-30T02:39:26.356Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="SELinux: 如何为进程创建专有的数据目录？">
-<meta name="twitter:description" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?
-问题HWRNG设备是硬件随机数产生器（hardware random number generator）的缩写，在我的android手机上，其设备名为 /dev/hw_random.
-
-crw——- root     root              u:object_r:hw_random_device:s0 hw_random
-
-在d">
+<meta name="twitter:title" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?">
+<meta name="twitter:description" content="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?简短的说：使用/dev/random比直接使用HWRNG更安全。">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
   
@@ -85,8 +70,8 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
     <div class="outer">
       <section id="main"><article id="post-Security/SELinux/sepolicy_HWRNG" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/06/29/Security/SELinux/sepolicy_HWRNG/" class="article-date">
-  <time datetime="2016-06-29T11:27:40.326Z" itemprop="datePublished">2016-06-29</time>
+    <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/" class="article-date">
+  <time datetime="2016-06-30T02:39:26.352Z" itemprop="datePublished">2016-06-30</time>
 </a>
     
   <div class="article-category">
@@ -101,7 +86,7 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
         
   
     <h1 class="article-title" itemprop="name">
-      SELinux: 如何为进程创建专有的数据目录？
+      为什么不容许应用访问HWRNG(硬件随机数产生器)设备?
     </h1>
   
 
@@ -109,7 +94,7 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</p>
+        <p>为什么不容许应用访问HWRNG(硬件随机数产生器)设备?简短的说：使用/dev/random比直接使用HWRNG更安全。<br><a id="more"></a></p>
 <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>HWRNG设备是<strong><a href="https://en.wikipedia.org/wiki/Hardware_random_number_generator" target="_blank" rel="external">硬件随机数产生器（hardware random number generator）</a></strong>的缩写，在我的android手机上，其设备名为 /dev/hw_random.</p>
 <blockquote>
 <p>crw——- root     root              u:object_r:hw_random_device:s0 hw_random</p>
@@ -125,11 +110,11 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/29/Security/SELinux/sepolicy_HWRNG/" data-id="ciq1nqiw80003t103e935zkgc" class="article-share-link" data-share="baidu" data-title="SELinux: 如何为进程创建专有的数据目录？">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/06/30/Security/SELinux/sepolicy_HWRNG/" data-id="ciq1nqiw80003t103e935zkgc" class="article-share-link" data-share="baidu" data-title="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?">分享到</a>
       
 
       
-        <a href="http://blog.andjoin.com/2016/06/29/Security/SELinux/sepolicy_HWRNG/#ds-thread" class="article-comment-link">评论</a>
+        <a href="http://blog.andjoin.com/2016/06/30/Security/SELinux/sepolicy_HWRNG/#ds-thread" class="article-comment-link">评论</a>
       
 
       
@@ -141,19 +126,19 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
     
 <nav id="article-nav">
   
-    <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">下一篇</strong>
       <div class="article-nav-title">
         
-          SELinux: 如何为进程创建专有的数据目录？
+          (no title)
         
       </div>
     </a>
   
   
-    <a href="/2016/06/14/Security/introduction-information-security/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">信息安全管理介绍</div>
+      <div class="article-nav-title">SELinux: 如何为进程创建专有的数据目录？</div>
     </a>
   
 </nav>
@@ -163,7 +148,7 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
 
 
   <section id="comments">
-    <div id="ds-thread" class="ds-thread" data-thread-key="2016/06/29/Security/SELinux/sepolicy_HWRNG/" data-title="SELinux: 如何为进程创建专有的数据目录？" data-url="http://blog.andjoin.com/2016/06/29/Security/SELinux/sepolicy_HWRNG/"></div>
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/06/30/Security/SELinux/sepolicy_HWRNG/" data-title="为什么不容许应用访问HWRNG(硬件随机数产生器)设备?" data-url="http://blog.andjoin.com/2016/06/30/Security/SELinux/sepolicy_HWRNG/"></div>
   </section>
 </section>
       
@@ -216,11 +201,11 @@ crw——- root     root              u:object_r:hw_random_device:s0 hw_random
           </li>
         
           <li>
-            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+            <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</a>
           </li>
         
           <li>
-            <a href="/2016/06/29/Security/SELinux/sepolicy_HWRNG/">SELinux: 如何为进程创建专有的数据目录？</a>
+            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
           <li>
