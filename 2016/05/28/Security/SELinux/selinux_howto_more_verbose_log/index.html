@@ -16,7 +16,7 @@
 <meta property="og:description" content="avc内核日志是编写SELinux 安全策略的重要参考，其主要信息由进程号、source contexts、target context、class、permission等等，参见下文。不过，有时候我们还希望有着更详尽的信息。
 
 [   12.496008] type=1400 audit(1422757038.179:12): avc: denied { open } for pid=628 c">
-<meta property="og:updated_time" content="2016-06-15T09:27:20.000Z">
+<meta property="og:updated_time" content="2016-06-30T03:16:54.240Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SELinux: 如何输出更详尽的日志？">
 <meta name="twitter:description" content="avc内核日志是编写SELinux 安全策略的重要参考，其主要信息由进程号、source contexts、target context、class、permission等等，参见下文。不过，有时候我们还希望有着更详尽的信息。
@@ -104,26 +104,30 @@
 <blockquote>
 <p><38>[   12.496008] type=1400 audit(1422757038.179:12): avc: denied { open } for pid=628 comm=”mtrild_dual” path=”/newplus_temp/SoftSupport/TG3SMEM_X_TG3DLL_DataArea” dev=”tmpfs” ino=366 scontext=u:r:tios_radio:s0 tcontext=u:object_r:tios_unconfined_tmpfs:s0 tclass=file permissive=1</38></p>
 </blockquote>
-<p>如何输出更详尽的avc日志呢？<br>在内核配置文件中， <strong>CONFIG_AUDIT_SYSCALL</strong> 选项用来打开selinux audit日志系统中的 SYSCALL记录。<br> 默认的selinux错误日志类型为AVC记录，配置该选项后，其日志更为详细：</p>
+<h1 id="如何输出更详尽的avc日志呢？"><a href="#如何输出更详尽的avc日志呢？" class="headerlink" title="如何输出更详尽的avc日志呢？"></a>如何输出更详尽的avc日志呢？</h1><p>我们可以启用syscall auditing 机制，</p>
+<h2 id="CONFIG-AUDITSYSCALL"><a href="#CONFIG-AUDITSYSCALL" class="headerlink" title="CONFIG_AUDITSYSCALL"></a>CONFIG_AUDITSYSCALL</h2><p>在内核配置文件中， <strong>CONFIG_AUDITSYSCALL</strong> 选项用来打开selinux audit日志系统中的 SYSCALL记录。<br> 默认的selinux错误日志类型为AVC记录，配置该选项后，其日志更为详细：</p>
 <blockquote>
 <p>node=holycross.devel.redhat.com type=AVC msg=audit(12/13/2006 11:28:14.395:952) : avc: denied { getattr } for pid=7236 comm=vsftpd name=public_html dev=dm-0 ino=9601649 scontext=system_u:system_r:ftpd_t:s0 tcontext=system_u:object_r:httpd_sys_content_t:s0 tclass=dir</p>
 <p>node=holycross.devel.redhat.com type=SYSCALL msg=audit(12/13/2006 11:28:14.395:952) : arch=i386 syscall=lstat64 success=no exit=0 a0=8495230 a1=849c830 a2=874ff4 a3=328d28 items=0 ppid=7234 pid=7236 auid=dwalsh uid=dwalsh gid=dwalsh euid=dwalsh suid=dwalsh fsuid=dwalsh egid=dwalsh sgid=dwalsh fsgid=dwalsh tty=(none) comm=vsftpd exe=/usr/sbin/vsftpd subj=system_u:system_r:ftpd_t:s0 key=(null)</p>
 </blockquote>
-<p>在使能CONFIG_AUDIT_SYSCALL后，如果发生访问为例，内核将同时输出<strong>AVC记录和SYSCALL记录</strong>。 在SYSCALL日志记录中，我们可以发现主体的DAC详细信息。</p>
+<p>在使能CONFIG_AUDITSYSCALL后，如果发生访问为例，内核将同时输出<strong>AVC记录和SYSCALL记录</strong>。 在SYSCALL日志记录中，我们可以发现主体的DAC详细信息。</p>
+<h2 id="内核命令行参数audit-1"><a href="#内核命令行参数audit-1" class="headerlink" title="内核命令行参数audit=1"></a>内核命令行参数audit=1</h2><p>在内核命令行参数中，增加audit=1，否则，audit默认为0，将不启用syscall auditing机制。<br>当然，你也可以直接修改 kernel/audit/audit.c，将audit_default 设置为1。</p>
 <p>参考资料：</p>
 <ul>
 <li><a href="https://danwalsh.livejournal.com/34903.html" target="_blank" rel="external">Why doen’t SELinux give me the full path in an error message?</a></li>
+<li><a href="https://www.mail-archive.com/seandroid-list%40tycho.nsa.gov/msg02286.html" target="_blank" rel="external">https://www.mail-archive.com/seandroid-list%40tycho.nsa.gov/msg02286.html</a></li>
+<li><a href="https://github.com/linux-audit/audit-documentation/wiki" target="_blank" rel="external">the Linux Audit Documentation Project</a></li>
 </ul>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/" data-id="ciq1nqiw70002t103yv4vdn11" class="article-share-link" data-share="baidu" data-title="SELinux: 如何输出更详尽的日志？">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/" data-id="ciq1sgt54001l8203hmnjh6k6" class="article-share-link" data-share="baidu" data-title="SELinux: 如何输出更详尽的日志？">Share</a>
       
 
       
-        <a href="http://blog.andjoin.com/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/#ds-thread" class="article-comment-link">评论</a>
+        <a href="http://blog.andjoin.com/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/#ds-thread" class="article-comment-link">Comments</a>
       
 
       
@@ -136,7 +140,7 @@
 <nav id="article-nav">
   
     <a href="/2016/06/12/mylog/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">下一篇</strong>
+      <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
           mylog
@@ -146,7 +150,7 @@
   
   
     <a href="/2016/05/27/Security/sercurity_outline/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">上一篇</strong>
+      <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">安全杂记</div>
     </a>
   
@@ -165,7 +169,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">分类</h3>
+    <h3 class="widget-title">Categories</h3>
     <div class="widget">
       <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">13</span></li></ul>
     </div>
@@ -174,7 +178,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">标签</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/capabilities/">capabilities</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
     </div>
@@ -183,7 +187,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">标签云</h3>
+    <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
       <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/capabilities/" style="font-size: 10px;">capabilities</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
     </div>
@@ -192,16 +196,16 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">归档</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">June 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">近期文章</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -214,15 +218,15 @@
           </li>
         
           <li>
-            <a href="/2016/06/14/Security/introduction-information-security/">信息安全管理介绍</a>
+            <a href="/2016/06/23/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
           </li>
         
           <li>
-            <a href="/2016/06/14/Bigdata/introduction_bigdata/">大数据的十个技术前沿</a>
+            <a href="/2016/06/23/Program/algorithm_name_match/">人名匹配问题</a>
           </li>
         
           <li>
-            <a href="/2016/06/14/Program/algorithm_name_match/">人名匹配问题</a>
+            <a href="/2016/06/23/Security/introduction-information-security/">信息安全管理介绍</a>
           </li>
         
       </ul>
@@ -232,7 +236,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">友情链接</h3>
+    <h3 class="widget-title">Links</h3>
     <div class="widget">
       <ul>
         
@@ -269,7 +273,7 @@
 </nav>
   <!-- totop start -->
 <div id="totop">
-<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+<a title="totop"><img src="/img/scrollup.png"/></a>
 </div>
 
 <!-- totop end -->
