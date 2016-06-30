@@ -69,68 +69,6 @@
     <div class="outer">
       <section id="main">
   
-    <article id="post-Security/SELinux/selinux_howto_more_verbose_log" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/" class="article-date">
-  <time datetime="2016-05-28T03:22:33.000Z" itemprop="datePublished">2016-05-28</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/">SELinux: 如何输出更详尽的日志？</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>avc内核日志是编写SELinux 安全策略的重要参考，其主要信息由进程号、source contexts、target context、class、permission等等，参见下文。不过，有时候我们还希望有着更详尽的信息。</p>
-<blockquote>
-<p><38>[   12.496008] type=1400 audit(1422757038.179:12): avc: denied { open } for pid=628 comm=”mtrild_dual” path=”/newplus_temp/SoftSupport/TG3SMEM_X_TG3DLL_DataArea” dev=”tmpfs” ino=366 scontext=u:r:tios_radio:s0 tcontext=u:object_r:tios_unconfined_tmpfs:s0 tclass=file permissive=1</38></p>
-</blockquote>
-<p>如何输出更详尽的avc日志呢？<br>在内核配置文件中， <strong>CONFIG_AUDIT_SYSCALL</strong> 选项用来打开selinux audit日志系统中的 SYSCALL记录。<br> 默认的selinux错误日志类型为AVC记录，配置该选项后，其日志更为详细：</p>
-<blockquote>
-<p>node=holycross.devel.redhat.com type=AVC msg=audit(12/13/2006 11:28:14.395:952) : avc: denied { getattr } for pid=7236 comm=vsftpd name=public_html dev=dm-0 ino=9601649 scontext=system_u:system_r:ftpd_t:s0 tcontext=system_u:object_r:httpd_sys_content_t:s0 tclass=dir</p>
-<p>node=holycross.devel.redhat.com type=SYSCALL msg=audit(12/13/2006 11:28:14.395:952) : arch=i386 syscall=lstat64 success=no exit=0 a0=8495230 a1=849c830 a2=874ff4 a3=328d28 items=0 ppid=7234 pid=7236 auid=dwalsh uid=dwalsh gid=dwalsh euid=dwalsh suid=dwalsh fsuid=dwalsh egid=dwalsh sgid=dwalsh fsgid=dwalsh tty=(none) comm=vsftpd exe=/usr/sbin/vsftpd subj=system_u:system_r:ftpd_t:s0 key=(null)</p>
-</blockquote>
-<p>在使能CONFIG_AUDIT_SYSCALL后，如果发生访问为例，内核将同时输出<strong>AVC记录和SYSCALL记录</strong>。 在SYSCALL日志记录中，我们可以发现主体的DAC详细信息。</p>
-<p>参考资料：</p>
-<ul>
-<li><a href="https://danwalsh.livejournal.com/34903.html" target="_blank" rel="external">Why doen’t SELinux give me the full path in an error message?</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/" data-id="ciq1nqiw70002t103yv4vdn11" class="article-share-link" data-share="baidu" data-title="SELinux: 如何输出更详尽的日志？">分享到</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/05/28/Security/SELinux/selinux_howto_more_verbose_log/#ds-thread" class="article-comment-link">评论</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Log/">Log</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/howto/">howto</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-Security/sercurity_outline" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/05/27/Security/sercurity_outline/" class="article-date">
@@ -283,6 +221,60 @@
 
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Security/SELinux/selinux_capabilities {dac_override}" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" class="article-date">
+  <time datetime="2016-05-19T03:21:49.000Z" itemprop="datePublished">2016-05-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/">capabilities {dac_override}</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。<br>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
+<p>而dac_override ，则用来容许进程旁路的所有DAC权限：uid，gid，ACL 等等。<br>
+        
+          <p class="article-more-link">
+            <a href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" data-id="ciq1nqiw50001t103lhsw5pd4" class="article-share-link" data-share="baidu" data-title="capabilities {dac_override}">分享到</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/capabilities/">capabilities</a></li></ul>
 
     </footer>
   </div>
@@ -651,7 +643,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">12</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">13</span></li></ul>
     </div>
   </div>
 
@@ -660,7 +652,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/capabilities/">capabilities</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -669,7 +661,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/capabilities/" style="font-size: 10px;">capabilities</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
     </div>
   </div>
 
@@ -678,7 +670,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -688,10 +680,6 @@
     <h3 class="widget-title">近期文章</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/">(no title)</a>
-          </li>
         
           <li>
             <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</a>
@@ -707,6 +695,10 @@
         
           <li>
             <a href="/2016/06/14/Bigdata/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Program/algorithm_name_match/">人名匹配问题</a>
           </li>
         
       </ul>

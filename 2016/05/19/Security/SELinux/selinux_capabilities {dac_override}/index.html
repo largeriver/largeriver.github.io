@@ -4,48 +4,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>牧云人</title>
+  <title>capabilities {dac_override} | 牧云人</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="capabilities {dac_override}title: “capabilities {dac_override}”date: 2016-05-19 11:21:49categories:
-
-security
-
-tags:
-
-SELinux
-capabilities
-
-
-Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿p">
+  <meta name="description" content="Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃">
 <meta property="og:type" content="article">
-<meta property="og:title" content="牧云人">
-<meta property="og:url" content="http://blog.andjoin.com/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/index.html">
+<meta property="og:title" content="capabilities {dac_override}">
+<meta property="og:url" content="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/index.html">
 <meta property="og:site_name" content="牧云人">
-<meta property="og:description" content="capabilities {dac_override}title: “capabilities {dac_override}”date: 2016-05-19 11:21:49categories:
-
-security
-
-tags:
-
-SELinux
-capabilities
-
-
-Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿p">
-<meta property="og:updated_time" content="2016-06-30T02:39:56.370Z">
+<meta property="og:description" content="Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃">
+<meta property="og:updated_time" content="2016-06-30T02:41:51.696Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="牧云人">
-<meta name="twitter:description" content="capabilities {dac_override}title: “capabilities {dac_override}”date: 2016-05-19 11:21:49categories:
-
-security
-
-tags:
-
-SELinux
-capabilities
-
-
-Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿p">
+<meta name="twitter:title" content="capabilities {dac_override}">
+<meta name="twitter:description" content="Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃">
   
     <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
   
@@ -100,27 +70,31 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
     <div class="outer">
       <section id="main"><article id="post-Security/SELinux/selinux_capabilities {dac_override}" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" class="article-date">
-  <time datetime="2016-06-30T02:39:56.364Z" itemprop="datePublished">2016-06-30</time>
+    <a href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" class="article-date">
+  <time datetime="2016-05-19T03:21:49.000Z" itemprop="datePublished">2016-05-19</time>
 </a>
     
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
   </div>
   <div class="article-inner">
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      capabilities {dac_override}
+    </h1>
+  
+
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="capabilities-dac-override"><a href="#capabilities-dac-override" class="headerlink" title="capabilities {dac_override}"></a>capabilities {dac_override}</h2><p>title: “capabilities {dac_override}”<br>date: 2016-05-19 11:21:49<br>categories:</p>
-<ul>
-<li>security</li>
-</ul>
-<p>tags:</p>
-<ul>
-<li>SELinux</li>
-<li>capabilities</li>
-</ul>
-<hr>
-<p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。<br>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
+        <p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。<br>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
 <p>而dac_override ，则用来容许进程旁路的所有DAC权限：uid，gid，ACL 等等。<br><a id="more"></a></p>
 <blockquote>
 <p>注意：capabilities 和 ACL （access control lists） 实际上是非常对称的两种权限控制模型：在capabilities，授权信息 绑定到主体，基于行（row）；在ACL中，授权信息绑定到客体，基于列（column）。</p>
@@ -179,24 +153,35 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.andjoin.com/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" data-id="ciq1nqiw50001t103lhsw5pd4" class="article-share-link" data-share="baidu" data-title="">分享到</a>
+        <a data-url="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" data-id="ciq1nqiw50001t103lhsw5pd4" class="article-share-link" data-share="baidu" data-title="capabilities {dac_override}">分享到</a>
       
 
       
-        <a href="http://blog.andjoin.com/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/#ds-thread" class="article-comment-link">评论</a>
+        <a href="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/#ds-thread" class="article-comment-link">评论</a>
       
 
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/capabilities/">capabilities</a></li></ul>
+
     </footer>
   </div>
   
     
 <nav id="article-nav">
   
+    <a href="/2016/05/24/Security/SELinux/selinux_status_android_LM/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          【译】AndroidL和AndroidM的SEAndroid状态与展望
+        
+      </div>
+    </a>
   
-    <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/" id="article-nav-older" class="article-nav-link-wrap">
+  
+    <a href="/2016/03/25/Security/byod_ultimate_guide_CN/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</div>
+      <div class="article-nav-title">【译】BYOD终极指南</div>
     </a>
   
 </nav>
@@ -206,7 +191,7 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
 
 
   <section id="comments">
-    <div id="ds-thread" class="ds-thread" data-thread-key="2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/" data-title="" data-url="http://blog.andjoin.com/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/"></div>
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" data-title="capabilities {dac_override}" data-url="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/"></div>
   </section>
 </section>
       
@@ -216,7 +201,7 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">12</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">13</span></li></ul>
     </div>
   </div>
 
@@ -225,7 +210,7 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/capabilities/">capabilities</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -234,7 +219,7 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/capabilities/" style="font-size: 10px;">capabilities</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
     </div>
   </div>
 
@@ -243,7 +228,7 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">五月 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -253,10 +238,6 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
     <h3 class="widget-title">近期文章</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2016/06/30/Security/SELinux/selinux_capabilities {dac_override}/">(no title)</a>
-          </li>
         
           <li>
             <a href="/2016/06/30/Security/SELinux/sepolicy_HWRNG/">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</a>
@@ -272,6 +253,10 @@ Linux支持Capability的主要目的是细化root的特权，使一个进程能�
         
           <li>
             <a href="/2016/06/14/Bigdata/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/14/Program/algorithm_name_match/">人名匹配问题</a>
           </li>
         
       </ul>
