@@ -69,167 +69,6 @@
     <div class="outer">
       <section id="main">
   
-    <article id="post-Security/SELinux/selinux_Resources" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/26/Security/SELinux/selinux_Resources/" class="article-date">
-  <time datetime="2016-05-26T03:21:49.000Z" itemprop="datePublished">2016-05-26</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/26/Security/SELinux/selinux_Resources/">SELinux 资源索引</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文列出了SEAndroid的常用资源。<br>
-        
-          <p class="article-more-link">
-            <a href="/2016/05/26/Security/SELinux/selinux_Resources/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/05/26/Security/SELinux/selinux_Resources/" data-id="ciqd33shu001cl803ymnkhc1r" class="article-share-link" data-share="baidu" data-title="SELinux 资源索引">Share</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/05/26/Security/SELinux/selinux_Resources/#ds-thread" class="article-comment-link">Comments</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Security/SELinux/selinux_status_android_LM" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/24/Security/SELinux/selinux_status_android_LM/" class="article-date">
-  <time datetime="2016-05-24T03:21:49.000Z" itemprop="datePublished">2016-05-24</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/24/Security/SELinux/selinux_status_android_LM/">【译】AndroidL和AndroidM的SEAndroid状态与展望</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>原文是在Linux Sercurity Submit 2015 会议中的PPT<a href="http://kernsec.org/files/lss2015/lss2015_selinuxinandroidlollipopandm_smalley.pdf">SELinux in Android Lollipop and Marshmallow</a>。</p>
-<p>从Android4.4开始，SELinux被应用于保护Android的可信计算基(TCB).<br>
-        
-          <p class="article-more-link">
-            <a href="/2016/05/24/Security/SELinux/selinux_status_android_LM/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/05/24/Security/SELinux/selinux_status_android_LM/" data-id="ciqd33sij001kl803503ipzp6" class="article-share-link" data-share="baidu" data-title="【译】AndroidL和AndroidM的SEAndroid状态与展望">Share</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/05/24/Security/SELinux/selinux_status_android_LM/#ds-thread" class="article-comment-link">Comments</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Security/SELinux/selinux_capabilities {dac_override}" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" class="article-date">
-  <time datetime="2016-05-19T03:21:49.000Z" itemprop="datePublished">2016-05-19</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/security/">security</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/">capabilities {dac_override}</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Linux支持Capability的主要目的是细化root的特权，使一个进程能够以“最小权限原则”去执行任务。比如拿ping程序来说，它需要使用原始套接字(raw_sockets)，如果没有Capability，那么它就需要使用root特权才能运行；如果有了Capability机制，由于该程序只需要一个CAP_NET_RAW的Capability即可运行，那么根据最小权限原则，该程序运行时可以丢弃所有多余的Capability，以防止被误用或被攻击。所以，Capability机制可以将root特权进行很好的细分，当前kernel(2.6.18)已支持30多种不同的Capability。注意在之前的kernel实现中，Capability只能由root进程持有，非root进程是不能保持任何Capability的。但是在2.6.24及以上的kernel版本中一个普通用户进程也将可以持有capability。<br>capabilities安全模型用来管理 root进程的权限集，防止root用户的任意妄为。而现在的capabilities 实际上是基于selinux LSM。因此，selinux 中class capability对应于Linux中的capabilities。</p>
-<p>而dac_override ，则用来容许进程旁路的所有DAC权限：uid，gid，ACL 等等。<br>
-        
-          <p class="article-more-link">
-            <a href="/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/" data-id="ciqd33si1001dl803to0gbjci" class="article-share-link" data-share="baidu" data-title="capabilities {dac_override}">Share</a>
-      
-
-      
-        <a href="http://blog.andjoin.com/2016/05/19/Security/SELinux/selinux_capabilities {dac_override}/#ds-thread" class="article-comment-link">Comments</a>
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/capabilities/">capabilities</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-Security/byod_ultimate_guide_CN" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/03/25/Security/byod_ultimate_guide_CN/" class="article-date">
@@ -293,6 +132,61 @@
 
 
   
+    <article id="post-Security/introduction-information-security" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/23/Security/introduction-information-security/" class="article-date">
+  <time datetime="2016-03-23T03:52:33.000Z" itemprop="datePublished">2016-03-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/OpenCourse/">OpenCourse</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/23/Security/introduction-information-security/">信息安全管理介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概要介绍"><a href="#概要介绍" class="headerlink" title="概要介绍"></a>概要介绍</h1><p>本文是在线公开课 <a href="http://www.open.edu/openlearn/science-maths-technology/computing-and-ict/introduction-information-security/content-section-2.1">《introduction-information-security》</a>的笔记。</p>
+<p>本课程定义了信息的价值的来源，提出信息安全管理是一个过程，如何通过该过程对一个组织的每项信息进行价值评估和持续保护。</p>
+<p>ISMS：an information security management system<br>
+        
+          <p class="article-more-link">
+            <a href="/2016/03/23/Security/introduction-information-security/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/03/23/Security/introduction-information-security/" data-id="ciqd33sf20007l803sc1otwav" class="article-share-link" data-share="baidu" data-title="信息安全管理介绍">Share</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/03/23/Security/introduction-information-security/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/security/">security</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Security/SETools/setools4_sedta" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/02/26/Security/SETools/setools4_sedta/" class="article-date">
@@ -340,6 +234,60 @@
 
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/setools4/">setools4</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Security/SELinux/selinux_implement_as_LSM" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/06/Security/SELinux/selinux_implement_as_LSM/" class="article-date">
+  <time datetime="2015-08-06T07:22:33.000Z" itemprop="datePublished">2015-08-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/security/">security</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/08/06/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>[TOC]</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>原文档为2009年最后修订，基于kernel2.6,这与目前(201508)最新的kernel3.6中的接口差异较多，但是主要的思想应该是一致的。<br>
+        
+          <p class="article-more-link">
+            <a href="/2015/08/06/Security/SELinux/selinux_implement_as_LSM/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2015/08/06/Security/SELinux/selinux_implement_as_LSM/" data-id="ciqd33sk0001zl803wedlsdwf" class="article-share-link" data-share="baidu" data-title="SELinux 基于LSM的实现">Share</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2015/08/06/Security/SELinux/selinux_implement_as_LSM/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LSM/">LSM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Security-SELinux/">SELinux</a></li></ul>
 
     </footer>
   </div>
@@ -577,6 +525,55 @@
 
 
   
+    <article id="post-Program/algorithm_name_match" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/05/08/Program/algorithm_name_match/" class="article-date">
+  <time datetime="2015-05-08T07:22:33.000Z" itemprop="datePublished">2015-05-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/05/08/Program/algorithm_name_match/">人名匹配问题</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>腾讯的现场招聘会题目：在一篇英文文章中查找指定的人名，人名使用二十六个英文字母（可以是大写或小写）、空格以及两个通配符组成（<em>、?），通配符“</em>”表示零个或多个任意字母，通配符“?”表示一个任意字母。如：“J<em> Smi??” 可以匹配“John Smith” .<br>void scan(const char</em> pszText, const char* pszName);<br>注：pszText为整个文章字符，pszName为要求匹配的英文名。<br>请完成函数实现输出所有匹配的英文名，除了printf外，不能用第三方的库函数等。<br>
+        
+          <p class="article-more-link">
+            <a href="/2015/05/08/Program/algorithm_name_match/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2015/05/08/Program/algorithm_name_match/" data-id="ciqd33sfv000hl803ea3y80qr" class="article-share-link" data-share="baidu" data-title="人名匹配问题">Share</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2015/05/08/Program/algorithm_name_match/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/">c++</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2014/06/12/hello-world/" class="article-date">
@@ -664,7 +661,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">June 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">June 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -676,23 +673,23 @@
       <ul>
         
           <li>
-            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/23/Security/introduction-information-security/">信息安全管理介绍</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/23/Program/algorithm_name_match/">人名匹配问题</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/23/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
-          </li>
-        
-          <li>
             <a href="/2016/06/23/Bigdata/introduction_bigdata/">大数据的十个技术前沿</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/">如何在ubuntu16.04 LTS 上安装setools4 ？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/12/Security/introduction_dm_crypt/">dm-crypt简介</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/29/Security/SETools/sepolicy_HWRNG/">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/28/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
           </li>
         
       </ul>
