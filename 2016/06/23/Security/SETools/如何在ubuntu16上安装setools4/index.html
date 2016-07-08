@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>如何在ubuntu16.04 LTS 上安装setools4 ？ | 牧云人</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本文描述了如何在ubuntu16.04 LTS编译selinux用户库和setools4工具。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在ubuntu16.04 LTS 上安装setools4 ？">
+<meta property="og:url" content="http://blog.andjoin.com/2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/index.html">
+<meta property="og:site_name" content="牧云人">
+<meta property="og:description" content="本文描述了如何在ubuntu16.04 LTS编译selinux用户库和setools4工具。">
+<meta property="og:updated_time" content="2016-07-08T01:47:50.192Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何在ubuntu16.04 LTS 上安装setools4 ？">
+<meta name="twitter:description" content="本文描述了如何在ubuntu16.04 LTS编译selinux用户库和setools4工具。">
+  
+    <link rel="alternative" href="/atom.xml" title="牧云人" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">牧云人</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.andjoin.com">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-Security/SETools/如何在ubuntu16上安装setools4" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/" class="article-date">
+  <time datetime="2016-06-23T01:20:00.000Z" itemprop="datePublished">2016-06-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      如何在ubuntu16.04 LTS 上安装setools4 ？
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文描述了如何在ubuntu16.04 LTS编译selinux用户库和setools4工具。<br><a id="more"></a></p>
+<p>#安装说明</p>
+<ul>
+<li>项目：<a href="https://github.com/TresysTechnology/setools" target="_blank" rel="external">https://github.com/TresysTechnology/setools</a></li>
+<li>环境 hyper-v ubuntu16.04 LTS</li>
+<li>NetworkX is a Python language software package for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks.&lt;&lt;&lt; [python: networkX]</li>
+<li>PyQt5 qt5的python封装</li>
+<li>SWIG 可以将C代码包装为共享库，供python等脚本语言调用。<a href="http://blog.csdn.net/lcz_ptr/article/details/7824414" target="_blank" rel="external">http://blog.csdn.net/lcz_ptr/article/details/7824414</a><h2 id="工作区结构"><a href="#工作区结构" class="headerlink" title="工作区结构"></a>工作区结构</h2>准备工作区</li>
+<li>mkdir -p WorkDir &amp;&amp; cd Workdir</li>
+<li>export WORKDIR=<code>pwd</code></li>
+</ul>
+<p>目录结构<br>\<workdir><br>|- selinux<br>|- setools</workdir></p>
+<h1 id="编译selinux"><a href="#编译selinux" class="headerlink" title="编译selinux"></a>编译selinux</h1><p>最新的setool4已经不支持ubuntu自带的libsepol2.3, 因此需要获取最新的sepol源码树来编译。</p>
+<h2 id="安装依赖软件包"><a href="#安装依赖软件包" class="headerlink" title="安装依赖软件包"></a>安装依赖软件包</h2><blockquote>
+<p>apt-get install -y libglib2.0-0 libglib2.0-dev libustr-dev libaudit-dev xmlto libapol-dev libcap-dev  libcap-ng-dev libpam0g-dev  flex libpcre3-dev libpcre3 libdbus-1-dev libdbus-glib-1-dev swig</p>
+</blockquote>
+<h2 id="准备源码"><a href="#准备源码" class="headerlink" title="准备源码"></a>准备源码</h2><ul>
+<li>cd $WORKDIR</li>
+<li>git clone <a href="https://github.com/SELinuxProject/selinux.git" target="_blank" rel="external">https://github.com/SELinuxProject/selinux.git</a></li>
+<li>cd selinux</li>
+<li><p>编辑 libsepol/src/Makefile: </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CFLAGS += -Wno-sign-compare</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编辑libselinux/utils/Makefile</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#override CFLAGS += -I../include -D_GNU_SOURCE $(EMFLAGS)</span></span><br><span class="line">override CFLAGS += -I../include -I$(DESTDIR)/usr/include -D_GNU_SOURCE $(EMFLAGS)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编辑 policycoreutils/newrole/Makefile，解决找不到crypt函数的问题</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#LDLIBS += -lpam -lpam_misc #line30</span></span><br><span class="line">LDLIBS += -lpam -lpam_misc -lcrypt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编辑 policycoreutils/restorecond/Makefile, 以解决找不到glibconfig.h和dbus/dbus-arch-deps.h的问题</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CFLAGS ?= -g -Werror -Wall -W -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>make DESTDIR=<code>pwd</code>/output install install-pywrap </p>
+</li>
+<li>编译结束，得到output/usr/lib/libsepol.a</li>
+</ul>
+<h1 id="编译setools-for-python2-7"><a href="#编译setools-for-python2-7" class="headerlink" title="编译setools for python2.7"></a>编译setools for python2.7</h1><h2 id="安装依赖软件包-1"><a href="#安装依赖软件包-1" class="headerlink" title="安装依赖软件包"></a>安装依赖软件包</h2><ul>
+<li>apt-get install -y bison flex  swig gcc libbz2-dev mock tox  git subversion</li>
+<li>apt-get install -y libpcre3-dev libustr-dev #selinux</li>
+<li>apt-get install -y python-pyqt5 python-mock python-pip python2.7-dev</li>
+<li>apt-get install -y libsepol1-dev sepol-utils libselinux1-dev selinux-utils libselinux1</li>
+<li>apt-get install -y python-selinux python-setools </li>
+<li>pip install networkx </li>
+</ul>
+<h2 id="准备源码-1"><a href="#准备源码-1" class="headerlink" title="准备源码"></a>准备源码</h2><ul>
+<li>cd $WORKDIR </li>
+<li>git clone <a href="https://github.com/TresysTechnology/setools.git" target="_blank" rel="external">https://github.com/TresysTechnology/setools.git</a></li>
+<li>修改setup.py  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">selinux_inc_path=os.getenv(<span class="string">'SEPOLINC'</span>)</span><br><span class="line">include_dirs=[<span class="string">'libqpol'</span>, <span class="string">'libqpol/include'</span>,selinux_inc_path],</span><br><span class="line"> libraries=[<span class="string">'bz2'</span>, <span class="string">'selinux'</span>, <span class="string">'sepol'</span>],</span><br><span class="line"> extra_compile_args=[<span class="string">'-Werror'</span>, <span class="string">'-Wextra'</span>,</span><br><span class="line">                     <span class="string">'-Waggregate-return'</span>,</span><br><span class="line">                     <span class="string">'-Wcast-align'</span>,</span><br><span class="line">                     <span class="string">'-Wfloat-equal'</span>,</span><br><span class="line">                     <span class="string">'-Wformat'</span>, <span class="string">'-Wformat=2'</span>,</span><br><span class="line">                     <span class="string">'-Winit-self'</span>, <span class="string">'-Winline'</span>,</span><br><span class="line">                     <span class="string">'-Wmissing-format-attribute'</span>,</span><br><span class="line">                     <span class="string">'-Wmissing-include-dirs'</span>,</span><br><span class="line">                     <span class="string">'-Wnested-externs'</span>,</span><br><span class="line">                     <span class="string">'-Wold-style-definition'</span>,</span><br><span class="line">                     <span class="string">'-Wpointer-arith'</span>,</span><br><span class="line">                     <span class="string">'-Wredundant-decls'</span>,</span><br><span class="line">                     <span class="string">'-Wstrict-prototypes'</span>,</span><br><span class="line">                     <span class="string">'-Wunknown-pragmas'</span>,</span><br><span class="line">                     <span class="string">'-Wwrite-strings'</span>,</span><br><span class="line">                     <span class="string">'-Wno-missing-field-initializers'</span>, <span class="comment"># SWIG 3.0.2 generates partially-initialized structs</span></span><br><span class="line">                     <span class="string">'-Wno-unused-parameter'</span>, <span class="comment"># SWIG generates functions with unused parameters</span></span><br><span class="line">                     <span class="string">'-Wno-cast-qual'</span>, <span class="comment"># libsepol/libselinux uses const-to-nonconst casts</span></span><br><span class="line">                     <span class="string">'-Wno-shadow'</span>, <span class="comment"># SWIG generates shadow variables</span></span><br><span class="line">                     <span class="string">'-Wno-unreachable-code'</span>, <span class="comment"># Bison generates unreachable code</span></span><br><span class="line">                     <span class="string">'-Wno-sign-compare'</span>,<span class="comment">#added in ubuntu16</span></span><br><span class="line">                     <span class="string">'-fno-exceptions'</span>],</span><br><span class="line"> extra_objects=[static_sepol],</span><br><span class="line"> extra_link_args=[<span class="string">'-Wl,--version-script=libqpol/libqpol.map'</span>],</span><br><span class="line"> swig_opts=[<span class="string">'-Ilibqpol/include'</span>, <span class="string">'-I'</span>+selinux_inc_path])]</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="build"><a href="#build" class="headerlink" title="build"></a>build</h2><blockquote>
+<p>export SEPOL=$WORKDIR/selinux/output/usr/lib/libsepol.a<br>export SEPOLINC=$WORKDIR/selinux/output/usr/include<br>python3 setup.py build_ext -i  #本地安装</p>
+</blockquote>
+<h1 id="编译setools-for-python3"><a href="#编译setools-for-python3" class="headerlink" title="编译setools for python3"></a>编译setools for python3</h1><h2 id="安装依赖软件包-2"><a href="#安装依赖软件包-2" class="headerlink" title="安装依赖软件包"></a>安装依赖软件包</h2><ul>
+<li>apt-get install -y bison flex  swig gcc libbz2-dev tox libustr-dev git subversion</li>
+<li>apt-get install -y  libpcre3-dev libustr-dev libpcre++0v5 libaudit-dev xmlto libapol-dev libcap-ng-dev #selinux</li>
+<li>apt-get install -y  python3-pyqt5 python3-mock python3-pip  python3-dev  python-dev</li>
+<li>apt-get install -y python3-selinux </li>
+<li>pip3 install networkx</li>
+</ul>
+<h2 id="准备源码-2"><a href="#准备源码-2" class="headerlink" title="准备源码"></a>准备源码</h2><p>This step is as same as python2.7.</p>
+<h2 id="build-1"><a href="#build-1" class="headerlink" title="build"></a>build</h2><blockquote>
+<p>export SEPOL=<your workdir="">/selinux/output/usr/lib/libsepol.a<br>patch -p1 &lt; patches/explicit-python3.diff<br>python3 setup.py build_ext -i  #本地安装</your></p>
+</blockquote>
+<h1 id="在其他ubuntu版本上编译setools"><a href="#在其他ubuntu版本上编译setools" class="headerlink" title="在其他ubuntu版本上编译setools"></a>在其他ubuntu版本上编译setools</h1><h2 id="ubuntu14-04-LTS"><a href="#ubuntu14-04-LTS" class="headerlink" title="ubuntu14.04 LTS"></a>ubuntu14.04 LTS</h2><ul>
+<li>需要删除setools/setup.py中的编译选项: ‘-Wredundant-decls’</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.andjoin.com/2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/" data-id="ciqd33sjp001sl8034m8woo0i" class="article-share-link" data-share="baidu" data-title="如何在ubuntu16.04 LTS 上安装setools4 ？">Share</a>
+      
+
+      
+        <a href="http://blog.andjoin.com/2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/selinux/">selinux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/setools/">setools</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/06/23/Bigdata/introduction_bigdata/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          大数据的十个技术前沿
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/06/12/Security/introduction_dm_crypt/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">dm-crypt简介</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/" data-title="如何在ubuntu16.04 LTS 上安装setools4 ？" data-url="http://blog.andjoin.com/2016/06/23/Security/SETools/如何在ubuntu16上安装setools4/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/OpenCourse/">OpenCourse</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BYOD/">BYOD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BigData/">BigData</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSM/">LSM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Log/">Log</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Security-SELinux/">SELinux</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/capabilities/">capabilities</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypt/">crypt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/framework/">framework</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphic/">graphic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/howto/">howto</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iptable/">iptable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/security/">security</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/selinux/">selinux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sepolicy/">sepolicy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools/">setools</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setools4/">setools4</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BYOD/" style="font-size: 10px;">BYOD</a> <a href="/tags/BigData/" style="font-size: 10px;">BigData</a> <a href="/tags/LSM/" style="font-size: 10px;">LSM</a> <a href="/tags/Log/" style="font-size: 10px;">Log</a> <a href="/tags/Security-SELinux/" style="font-size: 20px;">SELinux</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/capabilities/" style="font-size: 10px;">capabilities</a> <a href="/tags/crypt/" style="font-size: 10px;">crypt</a> <a href="/tags/framework/" style="font-size: 10px;">framework</a> <a href="/tags/graphic/" style="font-size: 10px;">graphic</a> <a href="/tags/howto/" style="font-size: 13.33px;">howto</a> <a href="/tags/iptable/" style="font-size: 10px;">iptable</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/security/" style="font-size: 16.67px;">security</a> <a href="/tags/selinux/" style="font-size: 10px;">selinux</a> <a href="/tags/sepolicy/" style="font-size: 10px;">sepolicy</a> <a href="/tags/setools/" style="font-size: 10px;">setools</a> <a href="/tags/setools4/" style="font-size: 10px;">setools4</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">June 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/07/08/Security/SETools/sepolicy_HWRNG/">为什么不容许应用访问HWRNG(硬件随机数产生器)设备?</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/29/Security/SELinux/selinux_howto_create_data_dir_for_app/">SELinux: 如何为进程创建专有的数据目录？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/23/Security/introduction-information-security/">信息安全管理介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/23/Security/SELinux/selinux_implement_as_LSM/">SELinux 基于LSM的实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/23/Program/algorithm_name_match/">人名匹配问题</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Links</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://github.com" target="_blank">github</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LargeRiver<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="totop"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"largeriver"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>
